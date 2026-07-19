@@ -1,0 +1,2324 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MEMENTO · Design Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#050506;
+    --panel:#0d0d10;
+    --panel-2:#141418;
+    --line:#1c1c22;
+    --line-2:#2a2a32;
+    --txt:#e8e6e3;
+    --txt-2:#9d9aa4;
+    --txt-3:#5c5a63;
+    --accent:#ff7950;
+    --accent-dim:#a34c31;
+    --radius:10px;
+    --mono:"JetBrains Mono","SFMono-Regular",ui-monospace,monospace;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box}
+  html{overflow-x:hidden}
+  body{margin:0;background:var(--void);color:var(--txt);
+    font-family:"Inter",system-ui,sans-serif;-webkit-font-smoothing:antialiased;
+    overflow-x:hidden}
+  img,svg,canvas{max-width:100%}
+  button{font-family:inherit}
+
+  .app{display:grid;min-height:100dvh;width:100%;max-width:100%;
+    grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr;
+    grid-template-areas:"top" "main"}
+  .app>*{min-width:0}
+
+  /* ---------- Topbar ---------- */
+  .top{grid-area:top;display:flex;flex-direction:column;align-items:stretch;gap:13px;
+    padding:16px 22px 13px;border-bottom:1px solid var(--line);background:var(--void);
+    position:sticky;top:0;z-index:40}
+  .toprow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brand{display:flex;align-items:center;flex:none}
+  .brand svg{height:13px;width:auto;display:block;fill:var(--txt)}
+  .langsel{display:flex;gap:2px;flex:none;background:var(--panel);
+    border:1px solid var(--line);border-radius:8px;padding:2px}
+  .langsel button{appearance:none;border:0;background:transparent;cursor:pointer;
+    padding:6px 10px;border-radius:6px;font-family:inherit;
+    font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--txt-3);
+    transition:color .16s var(--ease),background .16s var(--ease)}
+  .langsel button:hover{color:var(--txt-2)}
+  .langsel button[aria-pressed="true"]{background:var(--panel-2);color:var(--accent)}
+
+  /* nav pill — centred, compact, never full-width */
+  .modeswitch{display:flex;gap:2px;align-self:center;background:var(--panel);
+    border:1px solid var(--line);border-radius:10px;padding:3px}
+  .modeswitch button{appearance:none;border:0;background:transparent;cursor:pointer;
+    padding:8px 16px;border-radius:7px;font-size:11px;font-weight:700;
+    letter-spacing:.2em;text-transform:uppercase;color:var(--txt-3);
+    transition:color .16s var(--ease),background .16s var(--ease)}
+  .modeswitch button:hover{color:var(--txt-2)}
+  .modeswitch button[aria-pressed="true"]{background:var(--panel-2);color:var(--accent)}
+
+  /* ---------- Main ---------- */
+  .main{grid-area:main;min-width:0;display:flex;flex-direction:column;
+    padding:22px;max-width:1500px;margin:0 auto;width:100%}
+  .view{display:none;flex:1;min-height:0}
+  .view.on{display:flex;flex-direction:column}
+
+  .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--txt-3);margin:0 0 6px}
+  .vhead{margin:0 0 20px}
+  .vhead h1{font-family:"Fraunces",serif;font-weight:500;font-size:26px;
+    letter-spacing:-.01em;margin:0;color:var(--txt)}
+  .vhead p{margin:8px 0 0;color:var(--txt-2);font-size:14px;line-height:1.6;max-width:640px}
+
+  /* ============================================================
+     LIVE
+     ============================================================ */
+  .live-wrap{display:grid;grid-template-columns:210px minmax(0,1fr);gap:0;
+    border:1px solid var(--line);border-radius:12px;background:var(--panel);
+    overflow:hidden;flex:1;min-height:0}
+  .live-cats{border-right:1px solid var(--line);display:flex;flex-direction:column;
+    overflow-y:auto;background:var(--panel)}
+  .lcat{padding:11px 15px 5px;font-family:var(--mono);font-size:9px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--txt-3)}
+  .lpat{appearance:none;border:0;border-left:2px solid transparent;background:transparent;
+    color:var(--txt-2);text-align:left;padding:8px 15px;cursor:pointer;display:block;width:100%;
+    font-size:13px;line-height:1.3;transition:color .15s var(--ease),border-color .15s var(--ease),background .15s var(--ease)}
+  .lpat:hover{color:var(--txt);background:var(--panel-2)}
+  .lpat[aria-current="true"]{color:var(--accent);border-left-color:var(--accent);background:#140f0b}
+
+  .live-main{display:flex;flex-direction:column;min-width:0}
+  .live-stage-wrap{padding:20px;border-bottom:1px solid var(--line);background:
+    radial-gradient(130% 150% at 60% 30%,#0a0a0c 0%,#050505 75%)}
+  .live-stage{background:#f4f2ee;border:1px solid var(--line);border-radius:12px;
+    min-height:300px;display:flex;align-items:center;justify-content:center;overflow:hidden;
+    position:relative;transition:background .3s var(--ease)}
+  .live-stage[data-bg="dark"]{background:#16161a}
+  .live-name{position:absolute;top:10px;left:12px;font-family:var(--mono);font-size:9px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--txt-3);z-index:2}
+  .live-stage[data-bg="dark"] .live-name{color:#6a6a72}
+
+  .live-lower{display:grid;grid-template-columns:1fr 300px;gap:0;min-height:0}
+  @media(max-width:900px){.live-lower{grid-template-columns:1fr}}
+  .live-read{padding:18px 20px;border-right:1px solid var(--line);min-width:0}
+  .live-read .row{margin-bottom:15px}
+  .live-read .row:last-child{margin-bottom:0}
+  .live-read .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--accent);margin-bottom:5px}
+  .live-read .val{font-size:13.5px;line-height:1.62;color:var(--txt)}
+  .live-read .val.prod{color:var(--txt-2)}
+
+  .live-ctrls{padding:18px 20px;display:flex;flex-direction:column;gap:16px;background:var(--panel-2)}
+  .live-ctrls .cttl{font-family:var(--mono);font-size:9px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--txt-3);margin-bottom:-4px}
+  .ctrl label{display:block;font-size:11px;color:var(--txt-2);margin-bottom:7px;
+    display:flex;justify-content:space-between}
+  .ctrl label b{color:var(--accent);font-family:var(--mono);font-weight:500;font-size:11px}
+  .ctrl input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:3px;
+    background:var(--line-2);border-radius:2px;outline:none}
+  .ctrl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;
+    border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--void)}
+  .ctrl input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;
+    background:var(--accent);cursor:pointer;border:2px solid var(--void)}
+  .seg{display:flex;gap:0;border:1px solid var(--line-2);border-radius:7px;overflow:hidden}
+  .seg button{flex:1;appearance:none;border:0;border-right:1px solid var(--line-2);
+    background:transparent;color:var(--txt-3);padding:7px 4px;font-size:11px;cursor:pointer;
+    transition:color .15s,background .15s}
+  .seg button:last-child{border-right:0}
+  .seg button:hover{color:var(--txt-2)}
+  .seg button[aria-pressed="true"]{background:#17130f;color:var(--accent)}
+  .togg{display:flex;align-items:center;justify-content:space-between}
+  .togg span{font-size:11px;color:var(--txt-2)}
+  .switch{appearance:none;width:38px;height:21px;border-radius:11px;background:var(--line-2);
+    position:relative;cursor:pointer;border:0;transition:background .2s var(--ease)}
+  .switch::after{content:"";position:absolute;top:2px;left:2px;width:17px;height:17px;
+    border-radius:50%;background:var(--txt);transition:transform .2s var(--ease)}
+  .switch[aria-pressed="true"]{background:var(--accent-dim)}
+  .switch[aria-pressed="true"]::after{transform:translateX(17px);background:var(--accent)}
+
+  .code-panel{border-top:1px solid var(--line)}
+  .code-tabs{display:flex;gap:0;border-bottom:1px solid var(--line);align-items:center}
+  .code-tabs button{appearance:none;border:0;border-right:1px solid var(--line);background:transparent;
+    color:var(--txt-3);padding:9px 16px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;cursor:pointer;transition:color .15s,background .15s}
+  .code-tabs button:hover{color:var(--txt-2);background:var(--panel-2)}
+  .code-tabs button[aria-current="true"]{color:var(--accent);background:#140f0b}
+  .code-copy{margin-left:auto;margin-right:8px;border:1px solid var(--line-2)!important;
+    border-radius:6px;padding:5px 11px!important;color:var(--txt-2)!important}
+  .code-copy:hover{border-color:var(--accent-dim)!important;color:var(--accent)!important}
+  .code-body{margin:0;padding:16px 20px;overflow-x:auto;font-family:var(--mono);
+    font-size:12px;line-height:1.7;color:var(--txt-2);white-space:pre;max-height:280px}
+  .code-body .k{color:var(--accent)}
+  .code-body .c{color:var(--txt-3);font-style:italic}
+
+  /* ============================================================
+     DEF — glossary (identical mechanics to visualref)
+     ============================================================ */
+  .gbar{display:flex;flex-wrap:wrap;gap:11px;align-items:center;margin-bottom:20px}
+  .gsearch-wrap{position:relative;flex:1;min-width:220px;max-width:440px}
+  .gsearch-wrap svg{position:absolute;left:13px;top:50%;translate:0 -50%;width:15px;height:15px;color:var(--txt-3);pointer-events:none}
+  #gsearch{width:100%;background:var(--panel);border:1px solid var(--line-2);border-radius:9px;color:var(--txt);
+    padding:11px 14px 11px 38px;font-family:inherit;font-size:13.5px;outline:none;transition:border-color .16s}
+  #gsearch::placeholder{color:var(--txt-3)}
+  #gsearch:focus{border-color:var(--accent-dim)}
+  #gsearch::-webkit-search-cancel-button{filter:invert(.5)}
+  .gcount{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt-3);margin-left:auto}
+  .gchips{display:flex;flex-wrap:wrap;gap:6px;width:100%;order:3}
+  .gchips button{appearance:none;border:1px solid var(--line-2);background:transparent;color:var(--txt-2);
+    padding:6px 12px;border-radius:20px;font-size:11.5px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+  .gchips button:hover{color:var(--txt);border-color:var(--txt-3)}
+  .gchips button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:#17130f}
+  .gscroll{overflow-y:auto;flex:1;min-height:0}
+  .gdom{margin-bottom:26px}
+  .gdom-h{font-family:"Fraunces",serif;font-weight:500;font-size:17px;color:var(--txt);margin:0 0 3px}
+  .gdom-d{font-size:12.5px;color:var(--txt-2);line-height:1.55;margin:0 0 14px;max-width:620px}
+  .gsub{margin-bottom:16px}
+  .gsub-h{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--txt-3);margin:0 0 9px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  .gcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:9px}
+  .gcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;
+    display:flex;gap:12px;transition:border-color .15s var(--ease),transform .15s var(--ease)}
+  .gcard:hover{border-color:var(--line-2);transform:translateY(-1px)}
+  .gcard .txt{min-width:0;flex:1}
+  .gterm{font-size:13.5px;font-weight:600;color:var(--txt);margin-bottom:2px}
+  .galias{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.04em;margin-bottom:5px}
+  .gdef{font-size:12.5px;line-height:1.55;color:var(--txt-2)}
+  .gdom.hide,.gsub.hide,.gcard.hide{display:none}
+  .gempty{color:var(--txt-3);font-size:13px;padding:30px 0;text-align:center}
+
+  /* ============================================================
+     BUILD — the Lego compositor
+     ============================================================ */
+  .build-wrap{display:grid;grid-template-columns:186px minmax(0,1fr) 232px;gap:0;
+    border:1px solid var(--line);border-radius:12px;background:var(--panel);
+    overflow:hidden;flex:1;min-height:0}
+  @media(max-width:1080px){.build-wrap{grid-template-columns:1fr}}
+
+  .build-lib{border-right:1px solid var(--line);overflow-y:auto;background:var(--panel)}
+  .build-lib .libh{padding:12px 14px 7px;font-family:var(--mono);font-size:9px;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--txt-3);position:sticky;top:0;
+    background:var(--panel);z-index:1}
+  .libcat{padding:11px 14px 4px;font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--accent-dim)}
+  .libitem{margin:0 8px 4px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);
+    cursor:grab;overflow:hidden;transition:border-color .15s var(--ease),transform .12s var(--ease)}
+  .libitem:hover{border-color:var(--line-2)}
+  .libitem:active{cursor:grabbing}
+  .libitem .lthumb{height:44px;background:#f4f2ee;position:relative;overflow:hidden;
+    border-bottom:1px solid var(--line)}
+  .libitem .lname{padding:6px 9px;font-size:11px;color:var(--txt-2);display:flex;
+    justify-content:space-between;align-items:center;gap:6px}
+  .libitem .ladd{opacity:0;font-size:15px;color:var(--accent);line-height:1;transition:opacity .15s}
+  .libitem:hover .ladd{opacity:1}
+
+  .build-center{display:flex;flex-direction:column;min-width:0;background:
+    radial-gradient(140% 120% at 50% 0%,#0a0a0c 0%,#050505 80%)}
+  .build-toolbar{display:flex;align-items:center;gap:8px;padding:11px 14px;
+    border-bottom:1px solid var(--line);flex-wrap:wrap;background:var(--panel)}
+  .vp-toggle{display:flex;gap:0;border:1px solid var(--line-2);border-radius:7px;overflow:hidden}
+  .vp-toggle button{appearance:none;border:0;border-right:1px solid var(--line-2);background:transparent;
+    color:var(--txt-3);padding:6px 11px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px}
+  .vp-toggle button:last-child{border-right:0}
+  .vp-toggle button:hover{color:var(--txt-2)}
+  .vp-toggle button[aria-pressed="true"]{background:#17130f;color:var(--accent)}
+  .tbtn{appearance:none;border:1px solid var(--line-2);border-radius:7px;background:transparent;
+    color:var(--txt-2);padding:6px 12px;font-size:11px;cursor:pointer;
+    transition:color .15s,border-color .15s,background .15s}
+  .tbtn:hover{color:var(--accent);border-color:var(--accent-dim)}
+  .tbtn.pri{border-color:var(--accent-dim);color:var(--accent)}
+  .tbtn.pri:hover{background:#17130f}
+  .tbtn.ghost{margin-left:auto}
+
+  .build-scroll{flex:1;overflow:auto;padding:22px;display:flex;justify-content:center;align-items:flex-start}
+  .device{background:#fff;box-shadow:0 20px 60px rgba(0,0,0,.5);transform-origin:top center;
+    transition:width .3s var(--ease);overflow:hidden;border-radius:2px}
+  .device.empty{display:flex;align-items:center;justify-content:center;min-height:400px;
+    background:var(--panel);border:1px dashed var(--line-2);box-shadow:none;border-radius:12px}
+  .device.empty .ph{color:var(--txt-3);font-size:13px;text-align:center;padding:40px;max-width:280px;line-height:1.6}
+  #pageFrame{width:100%;border:0;display:block;background:#fff}
+
+  .build-recipe{padding:9px 14px;border-top:1px solid var(--line);background:var(--panel);
+    font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--txt-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .build-recipe b{color:var(--txt-2)}
+
+  .build-props{border-left:1px solid var(--line);overflow-y:auto;background:var(--panel);
+    display:flex;flex-direction:column}
+  .props-sec{padding:14px;border-bottom:1px solid var(--line)}
+  .props-sec .psh{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--txt-3);margin-bottom:12px}
+  .axis{margin-bottom:14px}
+  .axis:last-child{margin-bottom:0}
+  .axis .alabel{font-size:11px;color:var(--txt-2);margin-bottom:6px}
+  .token-row{margin-bottom:15px}
+  .token-row:last-child{margin-bottom:0}
+  .token-row .alabel{font-size:11px;color:var(--txt-2);margin-bottom:6px;display:flex;justify-content:space-between}
+  .token-row .alabel b{color:var(--accent);font-family:var(--mono);font-weight:500}
+  .pairsel{width:100%;background:var(--panel-2);border:1px solid var(--line-2);border-radius:7px;
+    color:var(--txt);padding:8px 10px;font-family:inherit;font-size:12px;cursor:pointer;outline:none}
+  .pairsel:focus{border-color:var(--accent-dim)}
+  .accent-row{display:flex;gap:6px;flex-wrap:wrap}
+  .swatch{width:26px;height:26px;border-radius:6px;border:2px solid transparent;cursor:pointer;
+    transition:border-color .15s,transform .12s}
+  .swatch:hover{transform:scale(1.08)}
+  .swatch[aria-pressed="true"]{border-color:var(--txt)}
+  .props-empty{padding:30px 18px;color:var(--txt-3);font-size:12.5px;line-height:1.6;text-align:center}
+  .sel-name{font-family:"Fraunces",serif;font-size:15px;color:var(--txt);margin-bottom:2px}
+  .sel-desc{font-size:11.5px;color:var(--txt-2);line-height:1.5;margin-bottom:14px}
+  .del-sec{border:0;background:transparent;color:var(--accent-dim);font-size:11px;cursor:pointer;
+    padding:6px 0;display:flex;align-items:center;gap:6px}
+  .del-sec:hover{color:var(--accent)}
+
+  /* section list drop indicators on the iframe wrapper */
+  .drop-hint{position:absolute;inset:0;pointer-events:none;border:2px dashed var(--accent-dim);
+    border-radius:8px;opacity:0;transition:opacity .15s}
+  .device.dragover .drop-hint{opacity:.6}
+
+  /* ============================================================
+     TOKENS — A/B scrubber
+     ============================================================ */
+  .tok-wrap{display:flex;flex-direction:column;flex:1;min-height:0;
+    border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+  .tok-bar{display:flex;gap:10px;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line);
+    flex-wrap:wrap;background:var(--panel)}
+  .tok-ab{display:flex;gap:6px}
+  .tok-ab button{appearance:none;border:1px solid var(--line-2);border-radius:7px;background:transparent;
+    color:var(--txt-2);padding:6px 14px;font-family:var(--mono);font-size:11px;cursor:pointer;letter-spacing:.1em}
+  .tok-ab button:hover{color:var(--txt)}
+  .tok-ab button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:#17130f}
+  .tok-preview{flex:1;overflow:auto;padding:22px;display:flex;justify-content:center;align-items:flex-start;
+    background:radial-gradient(140% 120% at 50% 0%,#0a0a0c 0%,#050505 80%)}
+  .tok-scrub{padding:16px 20px;border-top:1px solid var(--line);background:var(--panel)}
+  .tok-scrub .srow{display:flex;align-items:center;gap:14px}
+  .tok-scrub .send{font-family:var(--mono);font-size:11px;color:var(--txt-3);letter-spacing:.1em}
+  .tok-scrub .send b{color:var(--accent)}
+  #tokScrub{-webkit-appearance:none;appearance:none;flex:1;height:4px;border-radius:2px;
+    background:linear-gradient(90deg,var(--accent-dim),var(--line-2));outline:none}
+  #tokScrub::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;
+    background:var(--accent);cursor:pointer;border:3px solid var(--void)}
+  #tokScrub::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--accent);
+    cursor:pointer;border:3px solid var(--void)}
+  .tok-hint{font-size:11.5px;color:var(--txt-2);margin-top:10px;line-height:1.5}
+
+  /* ---------- responsive ---------- */
+  @media(max-width:900px){
+    .main{padding:16px}
+    .live-wrap{grid-template-columns:1fr}
+    .live-cats{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line)}
+    .lcat{display:none}
+    .lpat{border-left:0;border-bottom:2px solid transparent;white-space:nowrap;padding:10px 13px}
+    .lpat[aria-current="true"]{border-left-color:transparent;border-bottom-color:var(--accent)}
+    .live-lower{grid-template-columns:1fr}
+    .live-read{border-right:0;border-bottom:1px solid var(--line)}
+    .build-wrap{grid-template-columns:1fr}
+    .build-lib{display:flex;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);
+      max-height:130px}
+    .build-props{border-left:0;border-top:1px solid var(--line);max-height:240px}
+    .gsearch-wrap{max-width:none;min-width:0;flex:1 1 100%;order:1}
+    #gsearch{font-size:16px;padding:12px 14px 12px 38px}
+    .gcount{margin-left:0;order:2}
+    .gchips{order:3;flex-wrap:nowrap;overflow-x:auto;padding-bottom:3px;-webkit-overflow-scrolling:touch}
+    .gchips::-webkit-scrollbar{display:none}
+    .modeswitch button{padding:7px 12px;letter-spacing:.14em}
+    .vhead h1{font-size:22px}
+  }
+
+  @media(prefers-reduced-motion:reduce){
+    *{transition-duration:.01ms!important;animation-duration:.01ms!important}
+  }
+</style>
+</head>
+
+<body>
+<div class="app">
+  <header class="top">
+    <div class="toprow">
+      <div class="brand" aria-label="Memento Studio">
+        <svg viewBox="0 0 1600 100" role="img" aria-label="MEMENTO"><polygon points="109.14,10.45 109.14,89.55 101.23,81.64 101.23,28.91 69.58,60.55 37.94,28.91 37.94,81.64 30.03,89.55 30.03,10.45 69.58,50"/><polygon points="596.08,10.45 596.08,89.55 588.17,81.64 588.17,28.91 556.52,60.55 524.88,28.91 524.88,81.64 516.97,89.55 516.97,10.45 556.52,50"/><polygon points="1077.74,10.45 1077.74,89.55 1017.09,28.91 1017.09,81.65 1009.18,89.55 1009.18,10.45 1069.84,71.09 1069.84,18.36"/><polygon points="344.7,81.64 352.61,89.55 273.5,89.55 281.41,81.64"/><rect x="297.23" y="46.05" width="31.64" height="7.91"/><polygon points="352.61,10.45 344.7,18.36 281.41,18.36 273.5,10.45"/><polygon points="831.64,81.64 839.55,89.55 760.44,89.55 768.35,81.64"/><rect x="784.17" y="46.05" width="31.64" height="7.91"/><polygon points="839.55,10.45 831.64,18.36 768.35,18.36 760.44,10.45"/><polygon points="1247.38,10.45 1326.49,10.45 1318.57,18.36 1290.88,18.36 1290.88,89.55 1282.98,81.64 1282.98,18.36 1255.29,18.36"/><path d="M1530.42,10.45L1530.42,10.45c-21.85,0-39.56,17.71-39.56,39.55c0,21.85,17.71,39.55,39.55,39.55h0 c21.85,0,39.55-17.7,39.55-39.55C1569.97,28.16,1552.27,10.45,1530.42,10.45z M1530.42,81.65L1530.42,81.65 c-17.47,0-31.64-14.17-31.64-31.65c0-17.47,14.17-31.64,31.64-31.64h0c17.48,0,31.64,14.17,31.64,31.64 C1562.06,67.48,1547.9,81.64,1530.42,81.65z"/></svg>
+      </div>
+      <div class="langsel" role="group" aria-label="Lingua / Language">
+        <button id="langIT" aria-pressed="true">IT</button>
+        <button id="langEN" aria-pressed="false">EN</button>
+      </div>
+    </div>
+    <nav class="modeswitch" role="tablist" aria-label="Vista">
+      <button id="mLive"   role="tab" aria-pressed="true">Live</button>
+      <button id="mDef"    role="tab" aria-pressed="false">Def</button>
+      <button id="mBuild"  role="tab" aria-pressed="false">Build</button>
+      <button id="mTokens" role="tab" aria-pressed="false">Tokens</button>
+    </nav>
+  </header>
+
+  <main class="main">
+
+    <!-- ===================== LIVE ===================== -->
+    <section class="view on" id="vLive">
+      <div class="vhead">
+        <p class="eyebrow">Live · pattern in azione</p>
+        <h1>Pattern di interazione</h1>
+        <p>Ogni pattern gira davvero nel foglio chiaro: passa il mouse, clicca, scrolla. I controlli riscrivono le custom property in tempo reale — è il banco ottico del web design.</p>
+      </div>
+      <div class="live-wrap">
+        <aside class="live-cats" id="liveCats" role="tablist" aria-label="Pattern"></aside>
+        <div class="live-main">
+          <div class="live-stage-wrap">
+            <div class="live-stage" id="liveStage">
+              <span class="live-name" id="liveName"></span>
+            </div>
+          </div>
+          <div class="live-lower">
+            <div class="live-read">
+              <div class="row">
+                <div class="lbl">Cosa fa?</div>
+                <div class="val" id="liveCosa"></div>
+              </div>
+              <div class="row">
+                <div class="lbl">In produzione</div>
+                <div class="val prod" id="liveProd"></div>
+              </div>
+            </div>
+            <div class="live-ctrls" id="liveCtrls">
+              <div class="cttl">Controlli live</div>
+            </div>
+          </div>
+          <div class="code-panel">
+            <div class="code-tabs" id="codeTabs"></div>
+            <pre class="code-body" id="codeBody"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== DEF ===================== -->
+    <section class="view" id="vDef">
+      <div class="vhead">
+        <p class="eyebrow">Def · glossario del design</p>
+        <h1>Vocabolario condiviso</h1>
+        <p>Le stesse parole per studio e cliente — dalla tipografia all'accessibilità. Cerca in italiano o in inglese, filtra per dominio.</p>
+      </div>
+      <div class="gbar">
+        <div class="gsearch-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="search" id="gsearch" placeholder="Cerca un termine — italiano o inglese…" autocomplete="off" aria-label="Cerca un termine">
+        </div>
+        <span class="gcount" id="gcount">0 termini</span>
+        <div class="gchips" id="gchips"></div>
+      </div>
+      <div class="gscroll" id="gscroll"></div>
+    </section>
+
+    <!-- ===================== BUILD ===================== -->
+    <section class="view" id="vBuild">
+      <div class="vhead">
+        <p class="eyebrow">Build · il compositore</p>
+        <h1>Bozza di pagina, come i Lego</h1>
+        <p>Impila sezioni, cambia le loro varianti, muovi i token globali e guarda tutta la pagina ridisegnarsi. Il link è il salvataggio; l'HTML esportato è l'artefatto.</p>
+      </div>
+      <div class="build-wrap">
+        <aside class="build-lib" id="buildLib">
+          <div class="libh">Libreria — trascina o clicca</div>
+        </aside>
+        <div class="build-center">
+          <div class="build-toolbar">
+            <div class="vp-toggle" role="group" aria-label="Viewport">
+              <button id="vpDesk" aria-pressed="true" title="Desktop 1280px">▭ Desktop</button>
+              <button id="vpTab" aria-pressed="false" title="Tablet 768px">▯ Tablet</button>
+              <button id="vpMob" aria-pressed="false" title="Mobile 390px">▮ Mobile</button>
+            </div>
+            <button class="tbtn" id="btnShare" title="Copia link della bozza">↗ Condividi</button>
+            <button class="tbtn" id="btnHTML" title="Esporta HTML autosufficiente">↓ HTML</button>
+            <button class="tbtn" id="btnPDF" title="Stampa / PDF">↓ PDF</button>
+            <button class="tbtn ghost" id="btnClear" title="Svuota la bozza">Svuota</button>
+          </div>
+          <div class="build-scroll" id="buildScroll">
+            <div class="device empty" id="device">
+              <div class="ph" id="devicePh">La bozza compare qui. Trascina una sezione dalla libreria, oppure cliccala per aggiungerla in fondo.</div>
+              <iframe id="pageFrame" title="Anteprima bozza" style="display:none"></iframe>
+              <div class="drop-hint"></div>
+            </div>
+          </div>
+          <div class="build-recipe" id="buildRecipe">Bozza vuota</div>
+        </div>
+        <aside class="build-props" id="buildProps">
+          <div class="props-sec">
+            <div class="psh">Token globali</div>
+            <div class="token-row">
+              <div class="alabel">Coppia tipografica</div>
+              <select class="pairsel" id="tokPair"></select>
+            </div>
+            <div class="token-row">
+              <div class="alabel">Accent</div>
+              <div class="accent-row" id="tokAccent"></div>
+            </div>
+            <div class="token-row">
+              <div class="alabel">Radius <b id="tokRadiusV">8px</b></div>
+              <div class="seg" id="tokRadius" role="group"></div>
+            </div>
+            <div class="token-row">
+              <div class="alabel">Spaziatura <b id="tokSpaceV">1.0×</b></div>
+              <input type="range" id="tokSpace" min="0.7" max="1.5" step="0.05" value="1" style="width:100%">
+            </div>
+          </div>
+          <div class="props-sec" id="propsSection" style="flex:1">
+            <div class="psh">Sezione selezionata</div>
+            <div class="props-empty" id="propsEmpty">Seleziona una sezione nell'anteprima per modificarne le varianti.</div>
+            <div id="propsAxes" style="display:none"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ===================== TOKENS ===================== -->
+    <section class="view" id="vTokens">
+      <div class="vhead">
+        <p class="eyebrow">Tokens · confronto A ⇄ B</p>
+        <h1>Due direzioni, uno scrubber</h1>
+        <p>Fissa due set di token sulla stessa bozza e interpola gradualmente tra loro. I numeri si interpolano, i font fanno crossfade — niente scatti a metà corsa. Il momento "wow" per il cliente indeciso.</p>
+      </div>
+      <div class="tok-wrap">
+        <div class="tok-bar">
+          <div class="tok-ab" role="group" aria-label="Stato">
+            <button id="tokA" aria-pressed="true">Stato A</button>
+            <button id="tokB" aria-pressed="false">Stato B</button>
+          </div>
+          <span style="font-size:12px;color:var(--txt-2)">Modifica i token qui sotto per lo stato attivo, poi trascina lo scrubber.</span>
+          <div class="props-sec" style="border:0;padding:0;margin-left:auto;display:flex;gap:10px;align-items:center">
+            <select class="pairsel" id="tokPairAB" style="width:auto"></select>
+            <div class="accent-row" id="tokAccentAB"></div>
+            <div class="seg" id="tokRadiusAB" role="group" style="width:150px"></div>
+          </div>
+        </div>
+        <div class="tok-preview" id="tokPreview">
+          <div class="device" style="width:1000px;transform:scale(.8);transform-origin:top center">
+            <iframe id="tokFrame" title="Anteprima token" style="width:100%;border:0;display:block;background:#fff"></iframe>
+          </div>
+        </div>
+        <div class="tok-scrub">
+          <div class="srow">
+            <span class="send">STATO <b>A</b></span>
+            <input type="range" id="tokScrub" min="0" max="1" step="0.01" value="0">
+            <span class="send">STATO <b>B</b></span>
+          </div>
+          <p class="tok-hint" id="tokHint">Lo scrubber interpola tutto in modo graduale su tutta la corsa: radius e spaziatura numericamente, i font con un crossfade.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+
+<script id="data">
+/* ===================================================================
+   DEF · glossario del design — G rows: [dominio, gruppo, Termine, aliasEN, Definizione]
+   Domini, in ordine, dal §4.2 dello SPEC.
+   =================================================================== */
+const DOMAINS=[
+ ["typo","Tipografia","Le forme delle lettere e come si dispongono nello spazio: la disciplina più antica del design applicata allo schermo. Metà della leggibilità di una pagina si decide qui."],
+ ["color","Colore","Non decora: gerarchizza, segnala stato, costruisce marca. Sullo schermo il colore è luce, quindi si ragiona in HSL e si verifica in contrasto, non a occhio."],
+ ["layout","Layout & griglie","La struttura invisibile che tiene tutto allineato. La griglia non si vede ma si sente: è ciò che separa una pagina composta da una impaginata a caso."],
+ ["ui","UI pattern","Le soluzioni ricorrenti che l'utente già conosce: hero, card, modale, accordion. Riusare un pattern noto è rispetto per chi legge, non pigrizia."],
+ ["motion","Interazione & motion","Come gli elementi rispondono e si muovono nel tempo. Il movimento non è decorazione: è feedback, è gerarchia, è la differenza tra vivo e meccanico."],
+ ["ux","UX & ricerca","Progettare per come le persone pensano davvero, non per come vorremmo. Si misura, non si indovina: flussi, test, prototipi."],
+ ["a11y","Accessibilità","Non un extra: il pavimento. Contrasto, focus, semantica, reduced motion. Una pagina accessibile è semplicemente una pagina fatta bene."],
+ ["fe","Front-end","Come il design diventa codice che gira nel browser. Le regole del mezzo — cascata, specificità, performance di rendering — governano cosa è davvero possibile."],
+ ["ds","Design system","Il linguaggio condiviso che rende il design scalabile e coerente: token, componenti, varianti. Si progetta una volta, si usa mille."],
+ ["flow","Workflow & consegna","Come il lavoro attraversa brief, revisioni e go-live. Il dominio meno affascinante e il primo che salta quando si va di fretta."],
+];
+
+const G=[
+/* ===== 1 · TIPOGRAFIA ===== */
+["typo","Anatomia","Kerning","kerning",`Lo spazio tra due lettere specifiche. Si corregge a coppie: il difetto salta all'occhio solo quando è fatto male.`],
+["typo","Anatomia","Tracking","letter-spacing",`La spaziatura uniforme di un intero blocco. In maiuscoletto va aperto, nei titoli grandi va chiuso.`],
+["typo","Anatomia","Interlinea","leading",`Lo spazio verticale tra le righe. Regola d'oro: più lunga è la riga, più aria serve tra le righe.`],
+["typo","Anatomia","Altezza-x","x-height",`L'altezza delle minuscole senza aste. Alta = leggibile a corpo piccolo; bassa = elegante ma faticosa.`],
+["typo","Anatomia","Occhiello","counter",`Lo spazio chiuso dentro lettere come o, e, a. La sua ampiezza definisce il colore del testo in pagina.`],
+["typo","Anatomia","Asta / Grazia","stem / serif",`L'asta è il tratto verticale principale; la grazia è il piedino terminale che distingue serif da sans.`],
+["typo","Scala","Scala modulare","modular scale",`Corpi legati da un rapporto costante (1.25, 1.333…): la gerarchia diventa matematica invece che casuale.`],
+["typo","Scala","Fluid type","clamp()",`Il corpo cresce col viewport tra un minimo e un massimo, senza breakpoint: un solo clamp() copre tutti gli schermi.`],
+["typo","Scala","Gerarchia tipografica","type hierarchy",`Quanti livelli di testo e come si distinguono: corpo, peso, colore. Tre livelli bastano quasi sempre.`],
+["typo","Scala","Corpo / Punto","font-size / pt",`La dimensione del carattere. Sullo schermo si ragiona in px o rem; il punto resta per la stampa.`],
+["typo","Impaginato","Vedova / Orfana","widow / orphan",`Una riga isolata a fine paragrafo (vedova) o una parola sola su una riga (orfana): rompono il grigio del testo.`],
+["typo","Impaginato","Sbandieratura","rag",`Il profilo irregolare del testo allineato a sinistra. Un buon rag è morbido, senza rientri o sporgenze brusche.`],
+["typo","Impaginato","Giustificato","justified",`Testo allineato su entrambi i lati. Bello ma pericoloso sul web: senza sillabazione crea fiumi di spazio.`],
+["typo","Impaginato","Fiume","river",`Spazi bianchi che si allineano verticalmente tra le righe. Difetto tipico del giustificato stretto.`],
+["typo","Impaginato","Misura","measure",`I caratteri per riga. La zona comoda è 45–75: sotto si spezza, sopra l'occhio perde la riga successiva.`],
+["typo","Tecnologia","Variable font","variable font",`Un solo file che contiene infiniti pesi e larghezze lungo un asse. Peso ridotto, controllo continuo.`],
+["typo","Tecnologia","Font di sistema","system font stack",`Usare i font già presenti nell'OS: zero download, rendering nativo, un pizzico di incoerenza cross-platform.`],
+["typo","Tecnologia","Web font","@font-face",`Font caricato via CSS. Attenzione al FOUT/FOIT: il testo che lampeggia o sparisce mentre carica.`],
+["typo","Tecnologia","Feature OpenType","OpenType features",`Legature, cifre allineate, maiuscoletto veri: dettagli che separano un font impaginato da uno solo installato.`],
+["typo","Scelta","Pairing","font pairing",`Accostare due font che dialogano senza competere: di solito uno con grazie per i titoli, un sans per il corpo.`],
+["typo","Scelta","Superfamiglia","superfamily",`Serif e sans progettati insieme, con la stessa struttura: il pairing più sicuro perché è già armonico.`],
+["typo","Scelta","Display vs Testo","display vs text",`I font display vivono grandi (titoli); i text sono disegnati per reggere il corpo piccolo. Non si scambiano.`],
+
+/* ===== 2 · COLORE ===== */
+["color","Modelli","HSL","hue-sat-lightness",`Tonalità, saturazione, luminosità: il modo più umano di ragionare sul colore nel CSS. Ruota la tonalità, tieni il resto.`],
+["color","Modelli","RGB / HEX","#rrggbb",`Come lo schermo compone il colore da rosso, verde, blu. Preciso ma poco intuitivo da regolare a mano.`],
+["color","Modelli","OKLCH","oklch()",`Spazio percettivamente uniforme: variare la luminosità cambia davvero la luce percepita. Il futuro dei color token.`],
+["color","Modelli","Gamut","gamut",`L'insieme dei colori che un dispositivo può mostrare. sRGB è lo standard; P3 è più ampio e ormai comune.`],
+["color","Sistema","Palette 60-30-10","60-30-10",`Una regola di dosaggio: 60% dominante, 30% secondario, 10% accento. Evita pagine dove urla tutto.`],
+["color","Sistema","Scala di colore","color ramp",`Dal più chiaro al più scuro di una stessa tinta (50→900): la base per stati, bordi e sfondi coerenti.`],
+["color","Sistema","Colore semantico","semantic color",`Assegnare un ruolo, non una tinta: 'success', 'danger', 'surface'. Il tema cambia, il ruolo resta.`],
+["color","Sistema","Tinta / Tono / Ombra","tint / tone / shade",`Un colore + bianco (tinta), + grigio (tono), + nero (ombra): il modo classico per costruire una scala armonica.`],
+["color","Percezione","Contrasto WCAG","contrast ratio",`Il rapporto di luminanza tra testo e sfondo. 4.5:1 per il corpo, 3:1 per il testo grande: è legge, non gusto.`],
+["color","Percezione","Temperatura","warm / cool",`Caldi che avanzano, freddi che arretrano: la temperatura crea profondità anche in un'interfaccia piatta.`],
+["color","Percezione","Colore accessibile","color blindness",`Non affidare mai un'informazione al solo colore: l'8% degli uomini non distingue rosso e verde.`],
+["color","Percezione","Vibrazione","chromatic vibration",`Due colori saturi complementari a contatto tremolano. Si smorza desaturando o inserendo un bordo neutro.`],
+["color","Applicazione","Dark mode","dark theme",`Non è invertire: i neri puri stancano, meglio grigi molto scuri; i colori vanno desaturati per non bruciare.`],
+["color","Applicazione","Gradiente","gradient",`Transizione tra colori. Interpolare in OKLCH evita le zone fangose grigie a metà che il RGB produce.`],
+["color","Applicazione","Duotone","duotone",`Un'immagine mappata su due soli colori: un modo forte e riconoscibile di unificare foto eterogenee.`],
+["color","Applicazione","Overlay","overlay / scrim",`Un velo scuro o colorato sopra un'immagine per far respirare il testo. Il modo più rapido di garantire contrasto.`],
+
+/* ===== 3 · LAYOUT & GRIGLIE ===== */
+["layout","Griglia","Griglia a colonne","column grid",`Colonne verticali con gutter fissi (spesso 12): la struttura che allinea tutto orizzontalmente.`],
+["layout","Griglia","Baseline grid","baseline grid",`Una griglia orizzontale invisibile su cui poggiano tutte le righe di testo: dà ritmo verticale alla pagina.`],
+["layout","Griglia","Gutter","gutter",`Lo spazio tra due colonne. Costante in tutta la pagina, definisce quanto la griglia respira.`],
+["layout","Griglia","Modulo","module",`La cella base che nasce dall'incrocio tra colonne e righe. Comporre per moduli tiene tutto proporzionato.`],
+["layout","Griglia","Griglia rotta","broken grid",`Violare la griglia di proposito per creare tensione: funziona solo se prima la griglia esiste ed è solida.`],
+["layout","Spazio","Spazio bianco","white space",`Il vuoto non è tempo perso: è ciò che dà gerarchia e respiro. Il principiante lo teme, il progettista lo usa.`],
+["layout","Spazio","Scala di spaziatura","spacing scale",`Margini e padding presi da una scala fissa (4, 8, 16, 24…): la coerenza spaziale nasce da qui.`],
+["layout","Spazio","Densità","density",`Quanta informazione per schermata. Una dashboard vuole densità alta; una landing, aria. È una scelta, non un caso.`],
+["layout","Spazio","Prossimità","proximity",`Elementi vicini si leggono come gruppo. Lo spazio raggruppa più di qualsiasi bordo o riquadro.`],
+["layout","Struttura","Above the fold","above the fold",`Ciò che si vede senza scrollare. Non deve contenere tutto, ma deve dare una ragione per continuare.`],
+["layout","Struttura","Gerarchia visiva","visual hierarchy",`L'ordine in cui l'occhio incontra gli elementi: si progetta con dimensione, peso, colore e posizione.`],
+["layout","Struttura","Sezione aurea","golden ratio",`Proporzione 1:1.618 che ricorre in natura. Utile come punto di partenza, non come dogma da inseguire.`],
+["layout","Struttura","Regola dei terzi","rule of thirds",`Dividere in tre e posizionare gli elementi chiave sulle linee: composizione dinamica invece che centrata.`],
+["layout","Responsive","Breakpoint","breakpoint",`La larghezza a cui il layout cambia struttura. Meglio guidati dal contenuto che dai modelli di telefono.`],
+["layout","Responsive","Mobile-first","mobile-first",`Progettare prima il piccolo e poi aggiungere: costringe a decidere cosa conta davvero.`],
+["layout","Responsive","Container query","container query",`Un componente reagisce alla larghezza del suo contenitore, non del viewport: il vero responsive per componenti.`],
+["layout","Responsive","Fluid layout","fluid layout",`Larghezze in percentuale e clamp() invece di valori fissi: la pagina si adatta senza scatti tra breakpoint.`],
+
+/* ===== 4 · UI PATTERN ===== */
+["ui","Ingresso","Hero","hero section",`La prima grande sezione: promessa, contesto e una sola azione. Non è un contenitore per tutto, è un amo.`],
+["ui","Ingresso","Navbar","nav bar",`La barra di navigazione. Poche voci, gerarchia chiara, una sola CTA: se contiene tutto non guida più.`],
+["ui","Ingresso","Breadcrumb","breadcrumb",`La scia 'sei qui': dice dove ti trovi nella gerarchia e come tornare indietro. Prezioso nei siti profondi.`],
+["ui","Contenuto","Card","card",`Un contenitore autonomo che raggruppa immagine, titolo e azione. Il mattone più usato del web moderno.`],
+["ui","Contenuto","Accordion","accordion",`Sezioni che si aprono una per volta. Ottimo per le FAQ, pessimo per contenuto che va letto tutto.`],
+["ui","Contenuto","Tab","tabs",`Viste alternative nello stesso spazio. Funzionano se le opzioni sono poche e paritarie.`],
+["ui","Contenuto","Carosello","carousel",`Contenuti che scorrono a rotazione. Bello da mostrare, poco visto in pratica: oltre la prima slide, quasi nessuno guarda.`],
+["ui","Sovrapposti","Modale","modal / dialog",`Una finestra che blocca il resto finché non rispondi. Usala per decisioni, mai per contenuto che si poteva mostrare in pagina.`],
+["ui","Sovrapposti","Drawer","drawer",`Un pannello che entra da un lato. Perfetto per navigazione mobile o filtri, senza abbandonare la pagina.`],
+["ui","Sovrapposti","Tooltip","tooltip",`Un suggerimento al passaggio del mouse. Mai essenziale: sul touch non esiste il hover.`],
+["ui","Sovrapposti","Popover","popover",`Come il tooltip ma cliccabile e ricco: può contenere azioni. Si chiude fuori fuoco o con Esc.`],
+["ui","Liste","Paginazione","pagination",`Dividere risultati in pagine numerate: dà controllo e senso di quantità, a costo di un click in più.`],
+["ui","Liste","Scroll infinito","infinite scroll",`Il contenuto si carica scrollando. Immersivo per i feed, frustrante quando cerchi il footer o un elemento preciso.`],
+["ui","Liste","Empty state","empty state",`Cosa mostri quando non c'è nulla. Il momento più trascurato e più formativo: guida il primo passo.`],
+["ui","Liste","Skeleton","skeleton screen",`Sagome grigie al posto del contenuto che carica: la pagina sembra più veloce di quanto sia.`],
+["ui","Form","Campo & Label","input field",`La label sta sopra il campo, sempre visibile: il placeholder come etichetta è un'insidia che sparisce mentre digiti.`],
+["ui","Form","Stato di validazione","validation state",`Errore, successo, attesa: comunicati inline, vicino al campo, nel momento giusto — non solo al submit.`],
+["ui","Form","CTA","call to action",`Il pulsante che chiede l'azione. Verbo chiaro, una sola primaria per schermata, contrasto che la stacca.`],
+
+/* ===== 5 · INTERAZIONE & MOTION ===== */
+["motion","Principi","Affordance","affordance",`L'indizio visivo che un elemento è cliccabile, trascinabile, digitabile. Se sembra un bottone, deve esserlo.`],
+["motion","Principi","Feedback","feedback",`Ogni azione deve avere una risposta immediata: hover, press, caricamento. Il silenzio genera dubbio e doppio-click.`],
+["motion","Principi","Optimistic UI","optimistic UI",`Mostrare subito il risultato prima della conferma dal server: l'app sembra istantanea, si corregge solo se fallisce.`],
+["motion","Principi","Microcopy","microcopy",`Le parole minime dell'interfaccia: label, errori, stati vuoti. Piccole, ma decidono il tono e tolgono attrito.`],
+["motion","Curve","Easing","easing",`Come un'animazione accelera e rallenta. Il lineare è meccanico; ease-out è il default naturale per gli ingressi.`],
+["motion","Curve","Spring","spring / physics",`Animazione guidata dalla fisica (massa, tensione) invece che dalla durata: dà un rimbalzo vivo e organico.`],
+["motion","Curve","Durata","duration",`Quanto dura un movimento. 150–300ms per le micro-interazioni: sotto sparisce, sopra rallenta l'utente.`],
+["motion","Curve","Cubic-bezier","cubic-bezier",`I quattro numeri che disegnano la curva di easing. È la firma del movimento di un brand.`],
+["motion","Tecniche","Stagger","stagger",`Elementi che entrano sfalsati invece che insieme: trasforma una lista che appare in una cascata leggibile.`],
+["motion","Tecniche","FLIP","FLIP technique",`First-Last-Invert-Play: animare un riordino misurando prima e dopo. Il trucco dietro le transizioni di layout fluide.`],
+["motion","Tecniche","Transizione di stato","state transition",`Il ponte animato tra due stati (chiuso→aperto). Rende visibile la causa: l'utente capisce cosa è successo.`],
+["motion","Tecniche","Parallax","parallax",`Livelli che scorrono a velocità diverse: crea profondità. Potente in dose omeopatica, nauseante in eccesso.`],
+["motion","Scroll","Reveal on scroll","scroll reveal",`Gli elementi appaiono entrando nel viewport, spesso via IntersectionObserver. Guida il ritmo della lettura.`],
+["motion","Scroll","Sticky","position: sticky",`Un elemento che si aggancia scrollando: header che si riduce, indice che segue. Orientamento senza costo.`],
+["motion","Scroll","Scroll snap","scroll-snap",`Lo scroll si aggancia a punti precisi: perfetto per gallery a schermo pieno e sezioni orizzontali.`],
+["motion","Scroll","Scroll-driven","scroll animation",`L'animazione è legata alla posizione dello scroll, non al tempo: torni indietro, torna indietro anche lei.`],
+
+/* ===== 6 · UX & RICERCA ===== */
+["ux","Struttura","User flow","user flow",`Il percorso passo-passo verso un obiettivo. Disegnarlo rivela i vicoli ciechi prima di costruire una schermata.`],
+["ux","Struttura","Architettura informativa","information architecture",`Come i contenuti sono organizzati e nominati. Se le persone non trovano una cosa, per loro non esiste.`],
+["ux","Struttura","Jobs to be done","JTBD",`Le persone 'assumono' un prodotto per un compito. Progetta per il lavoro da fare, non per la funzione in sé.`],
+["ux","Artefatti","Wireframe","wireframe",`Lo scheletro senza estetica: struttura e priorità prima di colori e font. Serve a discutere il cosa, non il come.`],
+["ux","Artefatti","Prototipo","prototype",`Una versione cliccabile ma finta, per testare un flusso prima di scrivere codice. Fedeltà variabile secondo la domanda.`],
+["ux","Artefatti","Persona","persona",`Un archetipo di utente costruito dalla ricerca. Utile se basato su dati reali, dannoso se inventato per comodità.`],
+["ux","Artefatti","Journey map","journey map",`Il viaggio dell'utente nel tempo, con emozioni e punti di attrito. Mostra dove il prodotto delude o sorprende.`],
+["ux","Metodo","Test di usabilità","usability testing",`Guardare persone vere usare il prodotto. Cinque utenti scovano la maggior parte dei problemi gravi.`],
+["ux","Metodo","Valutazione euristica","heuristic evaluation",`Un esperto controlla l'interfaccia contro principi noti (le euristiche di Nielsen): veloce, economica, senza utenti.`],
+["ux","Metodo","A/B test","A/B testing",`Due varianti mostrate a gruppi diversi per misurare quale converte. Risponde al 'quale', non al 'perché'.`],
+["ux","Metodo","Card sorting","card sorting",`Chiedere agli utenti di raggruppare i contenuti: costruisce un'architettura informativa basata sul loro modello, non sul nostro.`],
+["ux","Metodo","Ricerca generativa","generative research",`Interviste ed osservazione per scoprire bisogni prima di avere una soluzione: definisce il problema giusto.`],
+
+/* ===== 7 · ACCESSIBILITÀ ===== */
+["a11y","Standard","WCAG","WCAG",`Le linee guida internazionali per l'accessibilità web. Il livello AA è lo standard richiesto quasi ovunque.`],
+["a11y","Standard","POUR","POUR",`I quattro principi WCAG: percepibile, utilizzabile, comprensibile, robusto. Ogni criterio ricade sotto uno di questi.`],
+["a11y","Standard","Contrasto minimo","min contrast",`4.5:1 per il testo normale, 3:1 per quello grande e per gli elementi UI. Non negoziabile, verificabile in un click.`],
+["a11y","Tastiera","Focus visibile","focus ring",`L'indicatore di dove sei navigando da tastiera. Toglierlo per estetica taglia fuori chi non usa il mouse.`],
+["a11y","Tastiera","Ordine di tabulazione","tab order",`La sequenza con cui il focus attraversa la pagina. Deve seguire l'ordine logico, non quello del codice.`],
+["a11y","Tastiera","Skip link","skip to content",`Un link nascosto che salta la navigazione e va al contenuto: la prima cortesia verso chi usa la tastiera.`],
+["a11y","Tastiera","Focus trap","focus trap",`Dentro una modale il focus deve restare intrappolato lì, non scappare dietro. Aprire e chiudere vanno gestiti.`],
+["a11y","Semantica","ARIA","ARIA",`Attributi che danno ruolo e stato agli screen reader quando l'HTML non basta. La prima regola: non usare ARIA se esiste l'elemento nativo.`],
+["a11y","Semantica","HTML semantico","semantic HTML",`Usare button per i bottoni, nav per la navigazione: metà dell'accessibilità è gratis se il markup è corretto.`],
+["a11y","Semantica","Testo alternativo","alt text",`La descrizione di un'immagine per chi non la vede. Vuoto se decorativa, descrittivo se informativa: mai 'immagine'.`],
+["a11y","Semantica","Landmark","landmark",`Le regioni della pagina (header, main, footer) che permettono di saltarci dentro con lo screen reader.`],
+["a11y","Movimento","Reduced motion","prefers-reduced-motion",`La preferenza di sistema di chi soffre con le animazioni. Rispettarla è una riga di CSS e un dovere.`],
+["a11y","Movimento","Target size","touch target",`L'area toccabile minima, circa 44×44px. Bersagli piccoli e vicini sono la frustrazione numero uno sul mobile.`],
+["a11y","Movimento","Screen reader","screen reader",`Il software che legge la pagina ad alta voce. Progettare per l'orecchio, non solo per l'occhio.`],
+
+/* ===== 8 · FRONT-END ===== */
+["fe","CSS","Custom property","CSS variable",`Variabili native del CSS (--x). Cambiarne una a runtime ridisegna tutto ciò che la usa: il cuore del theming.`],
+["fe","CSS","Specificità","specificity",`Il punteggio che decide quale regola vince. Combatterla con !important è un sintomo, non una soluzione.`],
+["fe","CSS","Cascata","cascade",`L'ordine con cui le regole si sovrappongono. Capirla è la differenza tra guidare il CSS e litigarci.`],
+["fe","CSS","Box model","box model",`Contenuto, padding, bordo, margine: come si calcola la dimensione di un elemento. box-sizing:border-box salva la vita.`],
+["fe","Layout","Flexbox","flexbox",`Disposizione in una dimensione, riga o colonna. Lo strumento giusto per allineare e distribuire lungo un asse.`],
+["fe","Layout","Grid","CSS grid",`Layout bidimensionale a righe e colonne. Struttura vera, senza wrapper inutili: la griglia entra nel CSS.`],
+["fe","Layout","Subgrid","subgrid",`Un elemento annidato eredita la griglia del genitore: allinea contenuti dentro card diverse sulla stessa linea.`],
+["fe","Performance","Core Web Vitals","CWV",`Le tre metriche di Google: LCP (velocità), INP (reattività), CLS (stabilità). Contano per l'utente e per il ranking.`],
+["fe","Performance","CLS","layout shift",`Cumulative Layout Shift: quanto la pagina 'salta' mentre carica. La causa numero uno: immagini senza dimensioni.`],
+["fe","Performance","Lazy loading","lazy load",`Caricare immagini e componenti solo quando servono. Meno peso all'avvio, pagina utile prima.`],
+["fe","Performance","Critical CSS","critical CSS",`Il CSS minimo per rendere visibile la prima schermata, messo inline: elimina l'attesa del foglio di stile esterno.`],
+["fe","Rendering","DOM","DOM",`La rappresentazione ad albero della pagina che il browser costruisce e il JS manipola. Toccarlo troppo costa frame.`],
+["fe","Rendering","Reflow / Repaint","reflow",`Ricalcolo del layout (reflow) o solo dei pixel (repaint). Animare transform e opacity li evita entrambi.`],
+["fe","Rendering","Shadow DOM","shadow DOM",`Un albero incapsulato con stili isolati dal resto della pagina: zero conflitti CSS, la base dei web component.`],
+
+/* ===== 9 · DESIGN SYSTEM ===== */
+["ds","Fondamenta","Token","design token",`Il valore di design astratto in un nome: --color-accent, --space-4. Cambi la sorgente, cambia tutto il prodotto.`],
+["ds","Fondamenta","Token primitivo vs semantico","primitive vs semantic",`Il primitivo è il valore grezzo (blue-500); il semantico è il ruolo (color-primary) che lo usa. Il tema vive nel secondo.`],
+["ds","Fondamenta","Primitive","primitive",`I mattoni indivisibili — colori, spaziature, corpi — da cui tutto il resto è costruito. La radice del sistema.`],
+["ds","Componenti","Componente","component",`Un elemento riusabile con comportamento definito: bottone, card, campo. Progettato una volta, coerente ovunque.`],
+["ds","Componenti","Variante","variant",`Le versioni di un componente (primary/ghost, sm/lg). Un asse di scelta, non un componente nuovo da zero.`],
+["ds","Componenti","Slot","slot",`Il punto in cui un componente accetta contenuto arbitrario dall'esterno: flessibilità senza rompere la struttura.`],
+["ds","Componenti","Stato","state",`Come un componente appare in hover, focus, disabled, loading. Un componente senza stati è metà componente.`],
+["ds","Gestione","Handoff","handoff",`Il passaggio da design a sviluppo: specifiche, token, comportamento. Meno interpretazione serve, migliore è l'handoff.`],
+["ds","Gestione","Libreria","component library",`La raccolta viva dei componenti, in Figma e in codice. Devono restare in sync o il sistema si sdoppia.`],
+["ds","Gestione","Versioning","versioning",`Tracciare le modifiche al sistema con numeri di versione: chi lo usa sa cosa è cambiato e cosa si romperà.`],
+["ds","Gestione","Documentazione","documentation",`Le regole d'uso di ogni componente. Un design system senza doc è solo una cartella di file che nessuno sa usare.`],
+["ds","Gestione","Deprecazione","deprecation",`Segnare qualcosa come da non usare più, dando tempo per migrare: si toglie con grazia, non di colpo.`],
+
+/* ===== 10 · WORKFLOW & CONSEGNA ===== */
+["flow","Avvio","Brief","brief",`Il documento che fissa obiettivi, vincoli e pubblico prima di iniziare. Un brief debole è la causa di metà dei problemi.`],
+["flow","Avvio","Moodboard","moodboard",`Una raccolta di riferimenti visivi che allinea il tono prima di produrre. Fa discutere la direzione, non i dettagli.`],
+["flow","Avvio","Scope","scope",`Cosa è dentro e cosa è fuori dal progetto. Scriverlo evita lo scope creep: il lavoro che cresce senza che il budget lo faccia.`],
+["flow","Revisione","Design review","design review",`Un momento strutturato di critica del lavoro. Funziona con obiettivi chiari; degenera in raccolta di opinioni senza.`],
+["flow","Revisione","Redline","redline",`Le annotazioni con misure e spaziature esatte sopra il design, per lo sviluppo. Oggi spesso sostituite dall'inspect automatico.`],
+["flow","Revisione","QA visivo","visual QA",`Confrontare l'implementato col progettato, pixel per pixel. L'ultimo miglio dove i dettagli si vincono o si perdono.`],
+["flow","Revisione","Round di revisione","review round",`Un ciclo completo di feedback e correzioni. Vanno contati e messi a contratto, o si moltiplicano all'infinito.`],
+["flow","Consegna","Naming","naming convention",`Regole fisse per i nomi di file e livelli. Noioso finché non cerchi qualcosa tra mille asset a mezzanotte.`],
+["flow","Consegna","Staging","staging",`Un ambiente identico alla produzione dove provare prima di pubblicare. L'ultima rete prima del pubblico.`],
+["flow","Consegna","Go-live","go-live",`Il momento della pubblicazione. Mai di venerdì: se qualcosa si rompe, vuoi qualcuno sveglio per aggiustarlo.`],
+["flow","Consegna","Handover","handover",`Il passaggio di consegne del progetto finito a chi lo manterrà: documenti, accessi, contesto. Dove si perde la memoria.`],
+
+/* ===== supplemento — verso 200+ ===== */
+/* Tipografia */
+["typo","Anatomia","Legatura","ligature",`Due lettere fuse in un unico segno (fi, fl) per evitare collisioni tra le forme. Segno di un font curato.`],
+["typo","Anatomia","Cifre","oldstyle / lining",`Le cifre 'a testo' scendono sotto la linea come le minuscole; quelle 'allineate' hanno tutte la stessa altezza. Ognuna il suo contesto.`],
+["typo","Scelta","Grottesco","grotesque",`I sans neutri e senza personalità evidente (Helvetica, Inter): scompaiono, e per il corpo è un pregio.`],
+["typo","Scelta","Umanista","humanist",`Sans con la memoria del pennino: aperture calde e proporzioni calligrafiche. Più leggibili nei testi lunghi.`],
+["typo","Impaginato","Capolettera","drop cap",`La lettera iniziale ingrandita che àncora un paragrafo. Eredità editoriale che dà tono a un articolo.`],
+/* Colore */
+["color","Applicazione","Mesh gradient","mesh gradient",`Un gradiente a più punti che sfuma in tutte le direzioni: sfondi organici, morbidi, difficili da rendere piatti.`],
+["color","Sistema","Accessibilità del tema","theming contrast",`Ogni coppia testo/sfondo del tema va verificata in contrasto: un dark mode bello ma illeggibile non è un tema.`],
+["color","Percezione","Simultaneità","simultaneous contrast",`Lo stesso grigio appare più scuro su bianco e più chiaro su nero: il contesto altera il colore percepito.`],
+/* Layout */
+["layout","Struttura","Ritmo","rhythm",`La ripetizione regolare di spazi e dimensioni che dà musicalità alla pagina. Si sente prima di vederlo.`],
+["layout","Struttura","Punto focale","focal point",`Il luogo dove l'occhio atterra per primo. Se ce ne sono tre, non ce n'è nessuno.`],
+["layout","Responsive","Aspect-ratio","aspect-ratio",`Bloccare le proporzioni di un box (16:9) così non collassa mentre carica: cura preventiva contro il layout shift.`],
+["layout","Griglia","Bento","bento grid",`Una griglia di riquadri di dimensioni diverse, come una scatola bento: molto in voga per le landing di prodotto.`],
+/* UI */
+["ui","Ingresso","Mega menu","mega menu",`Un menù a tendina ampio che mostra intere sezioni. Utile per siti vasti, dispersivo se non è organizzato bene.`],
+["ui","Contenuto","Timeline","timeline",`Eventi disposti lungo un asse temporale. Racconta un processo o una storia meglio di un elenco puntato.`],
+["ui","Contenuto","Logo wall","logo wall",`La parete di loghi dei clienti. Prova sociale immediata, a patto di non trasformarla in un cimitero di marchi.`],
+["ui","Feedback","Toast","toast / snackbar",`Una notifica breve che appare e sparisce da sola. Per conferme non bloccanti: 'salvato', 'copiato'.`],
+["ui","Feedback","Badge","badge",`Un piccolo indicatore numerico o di stato agganciato a un elemento: notifiche non lette, 'nuovo', conteggi.`],
+["ui","Form","Segmented control","segmented control",`Un gruppo di opzioni mutuamente esclusive in linea: come dei tab, ma per scegliere un valore, non una vista.`],
+/* Motion */
+["motion","Principi","Anticipazione","anticipation",`Un micro-movimento contrario prima dell'azione la prepara e la rende leggibile: principio ereditato dall'animazione.`],
+["motion","Tecniche","Morphing","morph",`Una forma si trasforma con continuità in un'altra, senza stacco: il bottone che diventa il pannello che ha aperto.`],
+["motion","Tecniche","View transition","view transitions",`L'API che anima il passaggio tra due stati di pagina interi. Con fallback, perché non tutti i browser la reggono.`],
+["motion","Scroll","Progress bar","scroll progress",`La barra che riempie mentre scrolli: dice quanto manca. Piccola cortesia sugli articoli lunghi.`],
+/* UX */
+["ux","Metodo","North star metric","north star",`L'unica metrica che cattura il valore centrale del prodotto. Allinea il team meglio di dieci KPI slegati.`],
+["ux","Struttura","Modello mentale","mental model",`Come l'utente immagina che funzioni il sistema. Progettare contro il suo modello genera errori 'suoi' che sono nostri.`],
+["ux","Metodo","Dogfooding","dogfooding",`Usare in prima persona il prodotto che si costruisce: il modo più rapido per sentire gli attriti che i test non mostrano.`],
+/* A11y */
+["a11y","Semantica","Live region","aria-live",`Una zona che annuncia agli screen reader i cambiamenti dinamici (un toast, un errore) senza spostare il focus.`],
+["a11y","Tastiera","Ordine di lettura","reading order",`La sequenza con cui lo screen reader percorre la pagina. Deve combaciare con l'ordine visivo, o è confusione.`],
+/* Front-end */
+["fe","CSS","Cascade layer","@layer",`Livelli di cascata che ordinano le regole per priorità esplicita: si domina la specificità invece di subirla.`],
+["fe","CSS","Logical properties","logical properties",`margin-inline invece di margin-left: proprietà che si adattano da sole alle lingue da destra a sinistra.`],
+["fe","Rendering","will-change","will-change",`Suggerisce al browser cosa animerà, così prepara un layer. Potente e da usare con parsimonia: costa memoria.`],
+["fe","Performance","Debounce / Throttle","debounce",`Limitare quante volte una funzione gira su eventi frequenti (scroll, resize): meno lavoro, più fluidità.`],
+/* Design system */
+["ds","Fondamenta","Elevation","elevation",`La scala di profondità resa con ombre: dice cosa galleggia sopra cosa. Un token come gli altri.`],
+["ds","Componenti","Composizione","composition",`Costruire l'interfaccia mettendo insieme componenti piccoli invece di crearne di enormi e specifici. Meno codice, più coerenza.`],
+/* Workflow */
+["flow","Avvio","Kickoff","kickoff",`L'incontro che avvia il progetto: si allineano obiettivi, ruoli e tempi. Saltarlo si paga a metà strada.`],
+["flow","Consegna","Style guide","style guide",`Il documento con le regole visive del brand: colori, font, spaziature, tono. Il riferimento quando in dubbio.`],
+["typo","Tecnologia","Font subsetting","subsetting",`Spedire solo i glifi che servono davvero: un web font che pesa un terzo carica prima e non blocca il testo.`],
+["color","Modelli","Alpha","opacity / alpha",`Il canale di trasparenza di un colore. Un accent al 10% di alpha diventa lo sfondo del suo stato hover, gratis.`],
+["layout","Spazio","Optical alignment","optical alignment",`Allineare a occhio, non al bordo del box: un cerchio o una virgola vanno spinti oltre la riga per sembrare a posto.`],
+["ui","Sovrapposti","Bottom sheet","bottom sheet",`Il drawer che sale dal basso, nativo del mobile: raggiungibile col pollice, si chiude trascinandolo giù.`],
+["motion","Curve","Choreography","choreography",`L'orchestrazione di più animazioni perché entrino in ordine e non tutte insieme: dà una regia al movimento.`],
+["a11y","Standard","Zoom 200%","reflow / zoom",`La pagina deve restare usabile ingrandita al 200% senza scroll orizzontale: un requisito WCAG spesso dimenticato.`],
+["fe","Layout","Intrinsic sizing","min/max-content",`Dimensionare in base al contenuto stesso invece che a valori fissi: layout che non si rompono con testi imprevisti.`],
+["ds","Gestione","Token pipeline","style dictionary",`Lo strumento che trasforma i token in CSS, iOS, Android da un'unica sorgente: una verità, molte piattaforme.`],
+["ux","Artefatti","Storyboard","storyboard",`La sequenza disegnata di come l'utente incontra il prodotto nel contesto reale: mette lo scenario prima dello schermo.`],
+["flow","Revisione","Critique","design critique",`La critica strutturata e non difensiva del lavoro altrui: si critica la scelta, non la persona. Una competenza da allenare.`],
+];
+
+/* ===================================================================
+   LIVE · pattern di interazione — demo in Shadow DOM + controlli live
+   Ogni pattern: {id,cat,name,cosa,prod,code:{html,css,js},mount(host,ctrl),ctrl:[...]}
+   =================================================================== */
+const LIVE_CATS=[
+ ["micro","Micro-interazioni"],
+ ["motion","Motion"],
+ ["scroll","Scroll"],
+ ["layout","Layout & tipografia"],
+ ["feedback","Feedback"],
+];
+
+/* helper: build a shadow root with a <style> + markup, return {root,el} */
+function shadow(host,css,html){
+  const root=host.attachShadow?host.shadowRoot||host.attachShadow({mode:"open"}):host;
+  root.innerHTML="<style>"+css+"</style>"+html;
+  return root;
+}
+/* set a css var on the shadow host wrapper */
+function sv(root,k,v){ const w=root.querySelector(".stage-el"); if(w) w.style.setProperty(k,v); }
+
+const PATTERNS=[
+/* ---------- MICRO ---------- */
+{ id:"btn-hover", cat:"micro", name:"Button — stati hover",
+  cosa:"La risposta più elementare: il bottone reagisce al passaggio del mouse. Senza questa conferma, l'utente dubita che sia cliccabile.",
+  prod:"Costo quasi nullo. Attenzione al touch, dove il hover non esiste: lo stato :active deve reggere da solo. Anima transform e color, mai width.",
+  ctrl:[
+    {id:"dur",label:"Durata",min:60,max:500,step:10,def:180,unit:"ms"},
+    {id:"lift",label:"Sollevamento",min:0,max:8,step:1,def:2,unit:"px"},
+    {id:"ease",label:"Easing",opts:["out","spring","linear"],def:"out"},
+  ],
+  code:{css:`.btn{
+  padding:12px 24px;border-radius:var(--r,8px);
+  background:var(--accent,#ff7950);color:#fff;
+  transition:transform var(--dur,.18s) var(--ease),
+             box-shadow var(--dur,.18s) var(--ease);
+}
+.btn:hover{ transform:translateY(calc(var(--lift,2px)*-1));
+  box-shadow:0 6px 20px rgba(0,0,0,.18); }
+.btn:active{ transform:translateY(0); }`},
+  mount(host,ctrl){
+    const root=shadow(host,
+     `.stage-el{--dur:.18s;--ease:cubic-bezier(.22,.61,.36,1);--lift:2px;display:flex;gap:14px;align-items:center;font-family:Inter,sans-serif}
+      .btn{padding:13px 26px;border-radius:9px;border:0;cursor:pointer;font-size:14px;font-weight:600;
+        transition:transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease)}
+      .btn.p{background:#ff7950;color:#fff}
+      .btn.p:hover{transform:translateY(calc(var(--lift)*-1));box-shadow:0 8px 22px rgba(255,121,80,.35)}
+      .btn.p:active{transform:translateY(0)}
+      .btn.g{background:transparent;color:#16161a;border:1.5px solid #d5d3cd}
+      .btn.g:hover{transform:translateY(calc(var(--lift)*-1));border-color:#16161a}`,
+     `<div class="stage-el"><button class="btn p">Continua</button><button class="btn g">Annulla</button></div>`);
+    ctrl.on=(id,v)=>{
+      if(id==="dur") sv(root,"--dur",v/1000+"s");
+      if(id==="lift") sv(root,"--lift",v+"px");
+      if(id==="ease") sv(root,"--ease",v==="spring"?"cubic-bezier(.34,1.56,.64,1)":v==="linear"?"linear":"cubic-bezier(.22,.61,.36,1)");
+    };
+  }},
+
+{ id:"magnetic", cat:"micro", name:"Bottone magnetico",
+  cosa:"Il bottone insegue leggermente il cursore quando gli passi vicino: sembra attratto. Dà un tocco di gioco e premialità.",
+  prod:"Effetto costoso in attenzione: usalo su UNA CTA, mai ovunque. Va disattivato sul touch e sotto prefers-reduced-motion. Il movimento è solo transform, quindi resta fluido.",
+  ctrl:[
+    {id:"strength",label:"Forza",min:0,max:.6,step:.05,def:.3},
+    {id:"radius",label:"Raggio d'azione",min:40,max:160,step:10,def:90,unit:"px"},
+  ],
+  mount(host,ctrl){
+    const root=shadow(host,
+     `.stage-el{display:flex;align-items:center;justify-content:center;min-height:180px;font-family:Inter,sans-serif}
+      .mag{padding:16px 34px;border-radius:40px;border:0;background:#16161a;color:#fff;font-size:14px;
+        font-weight:600;cursor:pointer;transition:transform .25s cubic-bezier(.22,.61,.36,1)}`,
+     `<div class="stage-el"><button class="mag">Scopri</button></div>`);
+    const btn=root.querySelector(".mag"); const wrap=root.querySelector(".stage-el");
+    let S=.3,R=90;
+    const move=e=>{
+      const r=btn.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2;
+      const dx=e.clientX-cx, dy=e.clientY-cy, dist=Math.hypot(dx,dy);
+      if(dist<R+r.width/2){ btn.style.transform=`translate(${dx*S}px,${dy*S}px)`; }
+      else btn.style.transform="translate(0,0)";
+    };
+    wrap.addEventListener("pointermove",move);
+    wrap.addEventListener("pointerleave",()=>btn.style.transform="translate(0,0)");
+    ctrl.on=(id,v)=>{ if(id==="strength")S=v; if(id==="radius")R=v; };
+  }},
+
+{ id:"ripple", cat:"micro", name:"Ripple al click",
+  cosa:"Un'onda parte dal punto esatto in cui hai cliccato: conferma dove e quando. Linguaggio del material design, ormai universale.",
+  prod:"Va ancorata alle coordinate reali del click, non al centro. overflow:hidden sul bottone. Ripple multipli vanno ripuliti a fine animazione o si accumulano nel DOM.",
+  ctrl:[
+    {id:"dur",label:"Durata",min:300,max:1200,step:50,def:600,unit:"ms"},
+    {id:"opacity",label:"Opacità",min:.1,max:.6,step:.05,def:.35},
+  ],
+  mount(host,ctrl){
+    const root=shadow(host,
+     `.stage-el{display:flex;align-items:center;justify-content:center;min-height:180px;font-family:Inter,sans-serif}
+      .rip{position:relative;overflow:hidden;padding:15px 32px;border-radius:10px;border:0;
+        background:#ff7950;color:#fff;font-size:14px;font-weight:600;cursor:pointer;isolation:isolate}
+      .wave{position:absolute;border-radius:50%;background:#fff;pointer-events:none;
+        transform:scale(0);animation:rp var(--d,.6s) ease-out forwards}
+      @keyframes rp{to{transform:scale(4);opacity:0}}`,
+     `<div class="stage-el"><button class="rip">Clicca qui</button></div>`);
+    const btn=root.querySelector(".rip"); let D=600,O=.35;
+    btn.addEventListener("pointerdown",e=>{
+      const r=btn.getBoundingClientRect(), sz=Math.max(r.width,r.height);
+      const w=document.createElement("span"); w.className="wave";
+      w.style.width=w.style.height=sz+"px";
+      w.style.left=(e.clientX-r.left-sz/2)+"px"; w.style.top=(e.clientY-r.top-sz/2)+"px";
+      w.style.opacity=O; w.style.setProperty("--d",D/1000+"s");
+      btn.appendChild(w); setTimeout(()=>w.remove(),D+50);
+    });
+    ctrl.on=(id,v)=>{ if(id==="dur")D=v; if(id==="opacity")O=v; };
+  }},
+
+{ id:"switch", cat:"micro", name:"Toggle animato",
+  cosa:"L'interruttore che scivola con un piccolo rimbalzo: lo stato on/off si legge a colpo d'occhio e il cambio è soddisfacente.",
+  prod:"Deve essere un vero input o avere role=switch + aria-checked. Il pallino si anima con transform, il colore con transition. Rispetta reduced-motion togliendo il rimbalzo.",
+  ctrl:[
+    {id:"bounce",label:"Rimbalzo",opts:["nessuno","morbido","marcato"],def:"morbido"},
+    {id:"size",label:"Dimensione",min:.8,max:1.4,step:.1,def:1},
+  ],
+  mount(host,ctrl){
+    const root=shadow(host,
+     `.stage-el{display:flex;gap:18px;align-items:center;justify-content:center;min-height:180px;font-family:Inter,sans-serif;--s:1;--e:cubic-bezier(.34,1.4,.64,1)}
+      .sw{width:calc(52px*var(--s));height:calc(30px*var(--s));border-radius:999px;background:#d5d3cd;
+        border:0;cursor:pointer;position:relative;transition:background .25s ease;padding:0}
+      .sw[aria-checked="true"]{background:#ff7950}
+      .dot{position:absolute;top:calc(3px*var(--s));left:calc(3px*var(--s));
+        width:calc(24px*var(--s));height:calc(24px*var(--s));border-radius:50%;background:#fff;
+        transition:transform .3s var(--e);box-shadow:0 2px 5px rgba(0,0,0,.2)}
+      .sw[aria-checked="true"] .dot{transform:translateX(calc(22px*var(--s)))}`,
+     `<div class="stage-el"><button class="sw" role="switch" aria-checked="false"><span class="dot"></span></button>
+       <button class="sw" role="switch" aria-checked="true"><span class="dot"></span></button></div>`);
+    root.querySelectorAll(".sw").forEach(sw=>sw.addEventListener("click",()=>{
+      sw.setAttribute("aria-checked", sw.getAttribute("aria-checked")==="true"?"false":"true");
+    }));
+    ctrl.on=(id,v)=>{
+      if(id==="size") sv(root,"--s",v);
+      if(id==="bounce") sv(root,"--e",v==="nessuno"?"ease":v==="marcato"?"cubic-bezier(.34,1.8,.5,1)":"cubic-bezier(.34,1.4,.64,1)");
+    };
+  }},
+
+{ id:"focusring", cat:"micro", name:"Input — focus ring",
+  cosa:"Il campo segnala chiaramente di aver ricevuto il focus: bordo che si accende e label che sale. Orientamento immediato in un form.",
+  prod:"Il focus visibile è un requisito d'accessibilità, non un vezzo: mai toglierlo. La label che sale (float) non deve mai sostituire una label reale per lo screen reader.",
+  ctrl:[
+    {id:"ring",label:"Spessore anello",min:0,max:6,step:1,def:3,unit:"px"},
+    {id:"dur",label:"Durata",min:80,max:400,step:20,def:180,unit:"ms"},
+  ],
+  mount(host,ctrl){
+    const root=shadow(host,
+     `.stage-el{display:flex;align-items:center;justify-content:center;min-height:180px;font-family:Inter,sans-serif;--rw:3px;--d:.18s}
+      .field{position:relative;width:260px}
+      .field input{width:100%;padding:16px 14px 10px;border:1.5px solid #d5d3cd;border-radius:9px;
+        font-size:14px;font-family:inherit;outline:none;background:#fff;color:#16161a;
+        transition:border-color var(--d) ease,box-shadow var(--d) ease}
+      .field input:focus{border-color:#ff7950;box-shadow:0 0 0 var(--rw) rgba(255,121,80,.22)}
+      .field label{position:absolute;left:14px;top:14px;color:#9a988f;font-size:14px;pointer-events:none;
+        transition:transform var(--d) ease,color var(--d) ease;transform-origin:left}
+      .field input:focus+label,.field input:not(:placeholder-shown)+label{
+        transform:translateY(-8px) scale(.75);color:#ff7950}`,
+     `<div class="stage-el"><div class="field"><input id="e" placeholder=" "><label for="e">Indirizzo email</label></div></div>`);
+    ctrl.on=(id,v)=>{ if(id==="ring")sv(root,"--rw",v+"px"); if(id==="dur")sv(root,"--d",v/1000+"s"); };
+  }},
+
+/* ---------- MOTION ---------- */
+{ id:"easing", cat:"motion", name:"Easing a confronto",
+  cosa:"Tre palline partono insieme con curve diverse: linear meccanico, ease-out naturale, spring vivo. Vedere la differenza vale più di mille parole.",
+  prod:"La scelta dell'easing è la firma del movimento di un prodotto. Regola pratica: ease-out per gli ingressi, ease-in per le uscite, spring per ciò che deve sembrare fisico.",
+  ctrl:[
+    {id:"dur",label:"Durata",min:400,max:2000,step:100,def:900,unit:"ms"},
+    {id:"dist",label:"Distanza",min:120,max:280,step:10,def:220,unit:"px"},
+  ],
+  mount(host,ctrl){
+    const root=shadow(host,
+     `.stage-el{padding:24px;font-family:Inter,sans-serif;--d:.9s;--dist:220px;min-height:180px;display:flex;flex-direction:column;justify-content:center;gap:16px}
+      .track{display:flex;align-items:center;gap:12px}
+      .track .lb{font-size:10px;font-family:monospace;color:#9a988f;width:64px;letter-spacing:.05em}
+      .rail{flex:1;height:2px;background:#e5e3dd;position:relative}
+      .ball{position:absolute;top:-7px;left:0;width:16px;height:16px;border-radius:50%;background:#ff7950}
+      .ball.go{animation:run var(--d) forwards}
+      .b1.go{animation-timing-function:linear}
+      .b2.go{animation-timing-function:cubic-bezier(.22,.61,.36,1)}
+      .b3.go{animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+      @keyframes run{to{left:var(--dist)}}
+      .rep{align-self:flex-start;margin-top:4px;border:1px solid #d5d3cd;background:#fff;color:#16161a;
+        border-radius:7px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:inherit}`,
+     `<div class="stage-el">
+        <div class="track"><span class="lb">linear</span><div class="rail"><span class="ball b1"></span></div></div>
+        <div class="track"><span class="lb">ease-out</span><div class="rail"><span class="ball b2"></span></div></div>
+        <div class="track"><span class="lb">spring</span><div class="rail"><span class="ball b3"></span></div></div>
+        <button class="rep">▶ Riproduci</button>
+      </div>`);
+    const balls=root.querySelectorAll(".ball");
+    const play=()=>{ balls.forEach(b=>{b.classList.remove("go");void b.offsetWidth;b.classList.add("go")}); };
+    root.querySelector(".rep").addEventListener("click",play); play();
+    ctrl.on=(id,v)=>{ if(id==="dur")sv(root,"--d",v/1000+"s"); if(id==="dist")sv(root,"--dist",v+"px"); setTimeout(play,10); };
+  }},
+
+{ id:"stagger", cat:"motion", name:"Stagger di lista",
+  cosa:"Gli elementi entrano sfalsati, uno dopo l'altro, invece che tutti insieme. Una lista che compare così si legge come una cascata, non come un lampo.",
+  prod:"Il ritardo per elemento (30–60ms) va calibrato: troppo poco non si nota, troppo annoia. Con liste lunghe si anima solo ciò che entra nel viewport, non tutto.",
+  ctrl:[
+    {id:"delay",label:"Ritardo/elem.",min:20,max:150,step:10,def:60,unit:"ms"},
+    {id:"shift",label:"Spostamento",min:0,max:40,step:4,def:16,unit:"px"},
+  ],
+  mount(host,ctrl){
+    const root=shadow(host,
+     `.stage-el{padding:20px;font-family:Inter,sans-serif;min-height:180px;--dl:60ms;--sh:16px;
+        display:flex;flex-direction:column;gap:9px;justify-content:center}
+      .it{padding:12px 15px;background:#fff;border:1px solid #e5e3dd;border-radius:9px;font-size:13px;color:#16161a;
+        opacity:0;transform:translateY(var(--sh))}
+      .it.go{animation:si .5s cubic-bezier(.22,.61,.36,1) forwards}
+      @keyframes si{to{opacity:1;transform:translateY(0)}}
+      .rep{align-self:flex-start;margin-top:4px;border:1px solid #d5d3cd;background:#fff;color:#16161a;
+        border-radius:7px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:inherit}`,
+     `<div class="stage-el">
+        <div class="it">Progetto · brand identity</div>
+        <div class="it">Progetto · sito e-commerce</div>
+        <div class="it">Progetto · motion reel</div>
+        <div class="it">Progetto · design system</div>
+        <button class="rep">▶ Rigioca</button>
+      </div>`);
+    let DL=60,SH=16;
+    const play=()=>{ root.querySelectorAll(".it").forEach((it,i)=>{
+      it.classList.remove("go"); it.style.setProperty("--sh",SH+"px");
+      void it.offsetWidth; it.style.animationDelay=(i*DL)+"ms"; it.classList.add("go");
+    }); };
+    root.querySelector(".rep").addEventListener("click",play); play();
+    ctrl.on=(id,v)=>{ if(id==="delay")DL=v; if(id==="shift")SH=v; setTimeout(play,10); };
+  }},
+
+{ id:"skeleton", cat:"motion", name:"Skeleton → contenuto",
+  cosa:"Sagome grigie che pulsano al posto del contenuto in arrivo, poi il vero contenuto prende il loro posto. La pagina sembra più veloce di quanto sia.",
+  prod:"Lo skeleton deve avere la forma reale del contenuto, o il salto finale stona. Sotto i 300ms non vale la pena mostrarlo. Lo shimmer è puro transform/opacity: costa poco.",
+  ctrl:[
+    {id:"speed",label:"Velocità shimmer",min:600,max:2400,step:100,def:1400,unit:"ms"},
+  ],
+  mount(host,ctrl){
+    const root=shadow(host,
+     `.stage-el{padding:20px;font-family:Inter,sans-serif;min-height:180px;--sp:1.4s;display:flex;flex-direction:column;gap:14px;justify-content:center}
+      .card{display:flex;gap:14px;align-items:center}
+      .sk{background:linear-gradient(100deg,#e8e6e0 30%,#f4f2ee 50%,#e8e6e0 70%);
+        background-size:200% 100%;border-radius:8px;animation:sh var(--sp) linear infinite}
+      @keyframes sh{to{background-position:-200% 0}}
+      .av{width:52px;height:52px;border-radius:50%;flex:none}
+      .lines{flex:1;display:flex;flex-direction:column;gap:8px}
+      .l1{height:12px;width:60%} .l2{height:10px;width:90%} .l3{height:10px;width:75%}
+      .real{opacity:0}
+      .real.on{opacity:1;transition:opacity .4s ease}
+      .real .av{background:#ff7950;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+      .real .nm{font-size:14px;font-weight:600;color:#16161a} .real .rl{font-size:12px;color:#9a988f}
+      .rep{align-self:flex-start;border:1px solid #d5d3cd;background:#fff;color:#16161a;border-radius:7px;
+        padding:7px 14px;font-size:12px;cursor:pointer;font-family:inherit}`,
+     `<div class="stage-el">
+        <div class="card ph"><div class="sk av"></div><div class="lines"><div class="sk l1"></div><div class="sk l2"></div><div class="sk l3"></div></div></div>
+        <div class="card real"><div class="av">M</div><div class="lines"><div class="nm">Memento Studio</div><div class="rl">CGI · motion · web design</div></div></div>
+        <button class="rep">▶ Ricarica</button>
+      </div>`);
+    const ph=root.querySelector(".ph"),real=root.querySelector(".real");
+    const play=()=>{ ph.style.display="flex"; real.classList.remove("on");
+      setTimeout(()=>{ph.style.display="none";real.classList.add("on")},1300); };
+    root.querySelector(".rep").addEventListener("click",play); play();
+    ctrl.on=(id,v)=>{ if(id==="speed")sv(root,"--sp",v/1000+"s"); };
+  }},
+
+/* ---------- SCROLL ---------- */
+{ id:"reveal", cat:"scroll", name:"Reveal on scroll",
+  cosa:"Gli elementi appaiono nel momento in cui entrano nel viewport. Guida il ritmo della lettura e premia lo scroll con un piccolo evento.",
+  prod:"Si fa con IntersectionObserver, non ascoltando ogni evento scroll: è la lezione di performance chiave. Anima una volta sola e disconnetti. Rispetta reduced-motion mostrando tutto subito.",
+  ctrl:[
+    {id:"shift",label:"Spostamento",min:10,max:60,step:5,def:30,unit:"px"},
+    {id:"dur",label:"Durata",min:300,max:1000,step:50,def:600,unit:"ms"},
+  ],
+  mount(host,ctrl){
+    const root=shadow(host,
+     `.stage-el{min-height:200px;--sh:30px;--d:.6s;font-family:Inter,sans-serif}
+      .scroller{height:200px;overflow-y:auto;border:1px solid #e5e3dd;border-radius:10px;padding:16px;background:#fff}
+      .scroller::-webkit-scrollbar{width:6px}
+      .scroller::-webkit-scrollbar-thumb{background:#d5d3cd;border-radius:3px}
+      .hint{font-size:11px;color:#9a988f;text-align:center;margin-bottom:14px}
+      .blk{margin-bottom:20px;padding:20px;border-radius:9px;background:#f4f2ee;
+        opacity:0;transform:translateY(var(--sh));transition:opacity var(--d) ease,transform var(--d) cubic-bezier(.22,.61,.36,1)}
+      .blk.in{opacity:1;transform:translateY(0)}
+      .blk h4{margin:0 0 6px;font-size:14px;color:#16161a}
+      .blk p{margin:0;font-size:12px;color:#6b6a63;line-height:1.5}
+      .spacer{height:120px}`,
+     `<div class="stage-el"><div class="scroller">
+        <div class="hint">↓ scrolla dentro il riquadro</div><div class="spacer"></div>
+        ${[["Hero","La prima impressione, above the fold."],["Feature grid","Tre colonne, un beneficio ciascuna."],["Testimonial","La prova sociale al momento giusto."],["CTA finale","Una sola azione, chiara."]]
+          .map(([h,p])=>`<div class="blk"><h4>${h}</h4><p>${p}</p></div>`).join("")}
+        <div class="spacer"></div></div></div>`);
+    const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting) e.target.classList.add("in"); }),
+      {root:root.querySelector(".scroller"),threshold:.4});
+    root.querySelectorAll(".blk").forEach(b=>io.observe(b));
+    ctrl.on=(id,v)=>{ if(id==="shift")sv(root,"--sh",v+"px"); if(id==="dur")sv(root,"--d",v/1000+"s"); };
+  }},
+
+{ id:"parallax", cat:"scroll", name:"Parallax a 2 livelli",
+  cosa:"Sfondo e primo piano scorrono a velocità diverse: nasce la profondità. L'indizio di terza dimensione più forte su una superficie piatta.",
+  prod:"In dose piccola aggiunge classe, in dose grande dà la nausea. Solo transform (mai top/margin) per restare a 60fps. Va spento sotto prefers-reduced-motion.",
+  ctrl:[
+    {id:"depth",label:"Profondità",min:.1,max:.6,step:.05,def:.3},
+  ],
+  mount(host,ctrl){
+    const root=shadow(host,
+     `.stage-el{font-family:Inter,sans-serif;--dp:.3}
+      .win{height:200px;overflow-y:auto;border-radius:10px;position:relative;background:#16161a}
+      .win::-webkit-scrollbar{width:6px}.win::-webkit-scrollbar-thumb{background:#3a3a42;border-radius:3px}
+      .inner{height:600px;position:relative}
+      .bg{position:sticky;top:0;height:200px;display:flex;align-items:center;justify-content:center;
+        background:radial-gradient(circle at 50% 30%,#ff7950 0%,#a34c31 40%,#16161a 75%);will-change:transform}
+      .bg span{font-family:Fraunces,serif;font-size:40px;color:rgba(255,255,255,.16);will-change:transform}
+      .fg{position:relative;margin-top:-140px;padding:0 24px 40px}
+      .fg .c{background:#fff;border-radius:12px;padding:20px;margin-bottom:14px;box-shadow:0 12px 30px rgba(0,0,0,.3)}
+      .fg h4{margin:0 0 6px;font-size:15px;color:#16161a}.fg p{margin:0;font-size:12px;color:#6b6a63;line-height:1.5}
+      .hint{position:absolute;top:8px;left:0;right:0;text-align:center;font-size:11px;color:rgba(255,255,255,.6);z-index:2}`,
+     `<div class="stage-el"><div class="win">
+        <div class="hint">↓ scrolla</div>
+        <div class="inner"><div class="bg"><span>MEMENTO</span></div>
+        <div class="fg"><div class="c"><h4>Il primo piano scorre normale</h4><p>Lo sfondo si muove più lento: la scena acquista strati.</p></div>
+        <div class="c"><h4>Due velocità</h4><p>La differenza tra i piani è tutta la magia.</p></div></div></div>
+      </div></div>`);
+    const win=root.querySelector(".win"),bgt=root.querySelector(".bg span");let DP=.3;
+    win.addEventListener("scroll",()=>{ bgt.style.transform=`translateY(${win.scrollTop*DP}px)`; });
+    ctrl.on=(id,v)=>{ if(id==="depth")DP=v; };
+  }},
+
+{ id:"sticky-shrink", cat:"scroll", name:"Header sticky shrink",
+  cosa:"L'header resta agganciato in alto e si rimpicciolisce quando scrolli: libera spazio senza perdere la navigazione. Orientamento costante.",
+  prod:"Il cambio va legato a una soglia di scroll con isteresi, o l'header 'sfarfalla' al limite. Anima altezza e padding con transition; occhio al layout shift del contenuto sotto.",
+  ctrl:[
+    {id:"thresh",label:"Soglia",min:20,max:120,step:10,def:60,unit:"px"},
+  ],
+  mount(host,ctrl){
+    const root=shadow(host,
+     `.stage-el{font-family:Inter,sans-serif}
+      .win{height:200px;overflow-y:auto;border:1px solid #e5e3dd;border-radius:10px;position:relative;background:#fff}
+      .win::-webkit-scrollbar{width:6px}.win::-webkit-scrollbar-thumb{background:#d5d3cd;border-radius:3px}
+      .hd{position:sticky;top:0;background:#16161a;color:#fff;display:flex;align-items:center;justify-content:space-between;
+        padding:0 18px;height:64px;transition:height .25s ease,font-size .25s ease;z-index:2}
+      .hd.small{height:42px}
+      .hd .lg{font-family:Fraunces,serif;font-size:20px;transition:font-size .25s ease}
+      .hd.small .lg{font-size:15px}
+      .hd .nv{font-size:12px;color:#c9c7c2}
+      .body{padding:18px}.body p{font-size:12px;color:#6b6a63;line-height:1.7;margin:0 0 14px}
+      .hint{font-size:11px;color:#9a988f;text-align:center;padding:8px}`,
+     `<div class="stage-el"><div class="win">
+        <div class="hd"><span class="lg">MEMENTO</span><span class="nv">Lavori · Studio · Contatti</span></div>
+        <div class="hint">↓ scrolla per rimpicciolire l'header</div>
+        <div class="body">${"<p>Lo studio si occupa di CGI, motion e web design. Scrolla e osserva l'header contrarsi mantenendo la navigazione a portata.</p>".repeat(5)}</div>
+      </div></div>`);
+    const win=root.querySelector(".win"),hd=root.querySelector(".hd");let T=60;
+    win.addEventListener("scroll",()=>{ hd.classList.toggle("small",win.scrollTop>T); });
+    ctrl.on=(id,v)=>{ if(id==="thresh")T=v; };
+  }},
+
+/* ---------- LAYOUT ---------- */
+{ id:"fluidtype", cat:"layout", name:"Fluid type — clamp()",
+  cosa:"Il corpo del titolo cresce con lo spazio disponibile tra un minimo e un massimo, senza breakpoint. Un solo clamp() copre tutti gli schermi.",
+  prod:"clamp(min, preferito, max): il valore centrale in vw guida la crescita. Verifica sempre gli estremi reali — su 320px e su 1600px — non solo il centro comodo.",
+  ctrl:[
+    {id:"min",label:"Minimo",min:16,max:32,step:1,def:22,unit:"px"},
+    {id:"max",label:"Massimo",min:36,max:80,step:2,def:56,unit:"px"},
+  ],
+  mount(host,ctrl){
+    const root=shadow(host,
+     `.stage-el{font-family:Inter,sans-serif;padding:20px;--mn:22px;--mx:56px;min-height:180px;display:flex;flex-direction:column;justify-content:center}
+      .box{border:1px dashed #d5d3cd;border-radius:10px;padding:20px;resize:horizontal;overflow:hidden;
+        width:100%;min-width:200px;max-width:100%;background:#fff}
+      .box h2{font-family:Fraunces,serif;font-weight:500;margin:0;color:#16161a;
+        font-size:clamp(var(--mn),8vw,var(--mx));line-height:1.05}
+      .hint{font-size:11px;color:#9a988f;margin-top:12px;text-align:center}
+      .code{font-family:monospace;font-size:11px;color:#ff7950;margin-top:6px;text-align:center;word-break:break-all}`,
+     `<div class="stage-el"><div class="box"><h2>Design che respira</h2></div>
+       <div class="hint">↔ trascina l'angolo in basso a destra del riquadro</div>
+       <div class="code" id="cc"></div></div>`);
+    let MN=22,MX=56; const cc=root.querySelector("#cc");
+    const upd=()=>{ cc.textContent=`clamp(${MN}px, 8vw, ${MX}px)`; };
+    ctrl.on=(id,v)=>{ if(id==="min"){MN=v;sv(root,"--mn",v+"px");} if(id==="max"){MX=v;sv(root,"--mx",v+"px");} upd(); };
+    upd();
+  }},
+
+{ id:"grid12", cat:"layout", name:"Griglia 12 colonne",
+  cosa:"La struttura invisibile resa visibile: 12 colonne con gutter. Vederla aiuta a capire perché gli elementi si allineano e dove appoggiano.",
+  prod:"12 si divide per 2, 3, 4, 6: da qui la sua fortuna. Nel codice è una sola CSS grid; le colonne colorate sono solo un overlay di debug da togliere in produzione.",
+  ctrl:[
+    {id:"cols",label:"Colonne",min:4,max:12,step:1,def:12},
+    {id:"gap",label:"Gutter",min:4,max:32,step:2,def:16,unit:"px"},
+  ],
+  mount(host,ctrl){
+    const root=shadow(host,
+     `.stage-el{font-family:Inter,sans-serif;padding:20px;--cols:12;--gap:16px;min-height:180px;display:flex;flex-direction:column;justify-content:center;gap:16px}
+      .grid{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:var(--gap)}
+      .col{height:60px;background:rgba(255,121,80,.14);border:1px solid rgba(255,121,80,.4);border-radius:4px}
+      .demo{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:var(--gap)}
+      .demo .a{grid-column:span calc(var(--cols)/2);background:#16161a;color:#fff;border-radius:8px;padding:14px;font-size:12px}
+      .demo .b{grid-column:span calc(var(--cols)/2);background:#f4f2ee;color:#16161a;border-radius:8px;padding:14px;font-size:12px}`,
+     `<div class="stage-el">
+        <div class="grid" id="g"></div>
+        <div class="demo"><div class="a">Contenuto su metà griglia</div><div class="b">L'altra metà</div></div>
+      </div>`);
+    const g=root.querySelector("#g");
+    const draw=n=>{ g.innerHTML=""; for(let i=0;i<n;i++){const c=document.createElement("div");c.className="col";g.appendChild(c);} };
+    let C=12; draw(12);
+    ctrl.on=(id,v)=>{ if(id==="cols"){C=v;sv(root,"--cols",v);draw(v);} if(id==="gap")sv(root,"--gap",v+"px"); };
+  }},
+
+{ id:"varfont", cat:"layout", name:"Variable font su hover",
+  cosa:"Il peso della lettera cambia con continuità al passaggio del mouse: un solo file, infiniti pesi lungo l'asse. Espressività senza scaricare venti font.",
+  prod:"Un variable font pesa poco più di un peso singolo e li contiene tutti. Anima font-weight con transition. Serve un font con l'asse wght: qui è simulato per la demo.",
+  ctrl:[
+    {id:"min",label:"Peso base",min:200,max:500,step:50,def:400},
+    {id:"max",label:"Peso hover",min:500,max:900,step:50,def:800},
+  ],
+  mount(host,ctrl){
+    const root=shadow(host,
+     `.stage-el{font-family:Inter,sans-serif;min-height:180px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:center;padding:24px;--mn:400;--mx:800}
+      .w{font-size:34px;color:#16161a;font-weight:var(--mn);cursor:default;transition:font-weight .3s ease,color .3s ease}
+      .w:hover{font-weight:var(--mx);color:#ff7950}`,
+     `<div class="stage-el">${["Forma","Peso","Ritmo","Voce","Tono"].map(w=>`<span class="w">${w}</span>`).join("")}</div>`);
+    ctrl.on=(id,v)=>{ if(id==="min")sv(root,"--mn",v); if(id==="max")sv(root,"--mx",v); };
+  }},
+
+/* ---------- FEEDBACK ---------- */
+{ id:"toast", cat:"feedback", name:"Toast",
+  cosa:"Una notifica breve che entra, conferma e sparisce da sola. Per messaggi non bloccanti: 'salvato', 'copiato', 'inviato'.",
+  prod:"Deve auto-scomparire ma restare se ci passi sopra il mouse. Va annunciato agli screen reader con aria-live. Impila con ordine se ne arrivano più d'uno.",
+  ctrl:[
+    {id:"dur",label:"Permanenza",min:1000,max:5000,step:500,def:2500,unit:"ms"},
+    {id:"pos",label:"Posizione",opts:["basso","alto"],def:"basso"},
+  ],
+  mount(host,ctrl){
+    const root=shadow(host,
+     `.stage-el{font-family:Inter,sans-serif;min-height:180px;position:relative;display:flex;align-items:center;justify-content:center}
+      .trig{padding:13px 26px;border-radius:9px;border:0;background:#16161a;color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+      .toast{position:absolute;left:50%;transform:translateX(-50%) translateY(20px);
+        background:#16161a;color:#fff;padding:13px 18px;border-radius:10px;font-size:13px;display:flex;
+        gap:10px;align-items:center;opacity:0;transition:opacity .3s ease,transform .3s cubic-bezier(.22,.61,.36,1);
+        box-shadow:0 10px 30px rgba(0,0,0,.3);white-space:nowrap}
+      .toast.bottom{bottom:20px} .toast.top{top:20px;transform:translateX(-50%) translateY(-20px)}
+      .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+      .toast .dot{width:8px;height:8px;border-radius:50%;background:#4ade80}`,
+     `<div class="stage-el"><button class="trig">Salva le modifiche</button>
+       <div class="toast bottom" role="status" aria-live="polite"><span class="dot"></span>Modifiche salvate</div></div>`);
+    const t=root.querySelector(".toast");let D=2500,tm;
+    root.querySelector(".trig").addEventListener("click",()=>{
+      clearTimeout(tm);t.classList.add("show");tm=setTimeout(()=>t.classList.remove("show"),D);
+    });
+    ctrl.on=(id,v)=>{ if(id==="dur")D=v; if(id==="pos"){t.classList.toggle("top",v==="alto");t.classList.toggle("bottom",v==="basso");} };
+  }},
+
+{ id:"loading", cat:"feedback", name:"Stati di caricamento",
+  cosa:"Tre modi di dire 'aspetta': spinner (non so quanto), progress (so quanto), skeleton (ecco cosa arriva). La scelta cambia la percezione dell'attesa.",
+  prod:"Regola pratica: spinner sotto 1s, progress se conosci la durata, skeleton per il contenuto strutturato. Uno spinner infinito senza contesto è la peggior attesa possibile.",
+  ctrl:[
+    {id:"which",label:"Tipo",opts:["spinner","progress","skeleton"],def:"progress"},
+  ],
+  mount(host,ctrl){
+    const root=shadow(host,
+     `.stage-el{font-family:Inter,sans-serif;min-height:180px;display:flex;align-items:center;justify-content:center;padding:24px}
+      .box{width:240px}
+      .spin{width:40px;height:40px;border:4px solid #e5e3dd;border-top-color:#ff7950;border-radius:50%;
+        animation:sp .8s linear infinite;margin:0 auto}
+      @keyframes sp{to{transform:rotate(360deg)}}
+      .bar{height:8px;background:#e5e3dd;border-radius:4px;overflow:hidden}
+      .bar i{display:block;height:100%;width:0;background:#ff7950;border-radius:4px;animation:pg 2.4s ease-in-out infinite}
+      @keyframes pg{0%{width:0}70%{width:88%}100%{width:100%}}
+      .pct{font-size:11px;color:#9a988f;text-align:center;margin-top:8px;font-family:monospace}
+      .sk{display:flex;gap:12px;align-items:center}
+      .sk .a{width:44px;height:44px;border-radius:50%;flex:none}
+      .sk .ln{flex:1;display:flex;flex-direction:column;gap:7px}
+      .sk .l{height:10px} .sk .l1{width:70%} .sk .l2{width:100%} .sk .l3{width:85%}
+      .g{background:linear-gradient(100deg,#e8e6e0 30%,#f4f2ee 50%,#e8e6e0 70%);background-size:200% 100%;
+        border-radius:6px;animation:shm 1.4s linear infinite}
+      @keyframes shm{to{background-position:-200% 0}}`,
+     `<div class="stage-el"><div class="box" id="box"></div></div>`);
+    const box=root.querySelector("#box");
+    const render=w=>{
+      if(w==="spinner") box.innerHTML=`<div class="spin"></div>`;
+      else if(w==="progress") box.innerHTML=`<div class="bar"><i></i></div><div class="pct">caricamento…</div>`;
+      else box.innerHTML=`<div class="sk"><div class="a g"></div><div class="ln"><div class="l l1 g"></div><div class="l l2 g"></div><div class="l l3 g"></div></div></div>`;
+    };
+    render("progress");
+    ctrl.on=(id,v)=>{ if(id==="which")render(v); };
+  }},
+
+{ id:"formvalid", cat:"feedback", name:"Validazione inline",
+  cosa:"Il campo dice subito se va bene o no, vicino al punto d'errore e nel momento giusto — non solo al submit. Meno frustrazione, meno tentativi.",
+  prod:"Valida al blur, non a ogni tasto (fa sentire osservati). L'errore va legato al campo con aria-describedby e non affidato al solo colore rosso: serve anche testo o icona.",
+  ctrl:[
+    {id:"when",label:"Quando valida",opts:["digitando","al blur"],def:"al blur"},
+  ],
+  mount(host,ctrl){
+    const root=shadow(host,
+     `.stage-el{font-family:Inter,sans-serif;min-height:180px;display:flex;align-items:center;justify-content:center;padding:24px}
+      .f{width:260px}
+      .f input{width:100%;padding:13px 14px;border:1.5px solid #d5d3cd;border-radius:9px;font-size:14px;
+        font-family:inherit;outline:none;transition:border-color .2s ease}
+      .f input:focus{border-color:#9a988f}
+      .f.ok input{border-color:#4ade80} .f.err input{border-color:#f87171}
+      .msg{font-size:12px;margin-top:7px;display:flex;gap:6px;align-items:center;min-height:16px}
+      .f.ok .msg{color:#3aa564} .f.err .msg{color:#e05252}
+      .hint{font-size:11px;color:#9a988f;margin-bottom:8px}`,
+     `<div class="stage-el"><div class="f"><div class="hint">Scrivi un'email (prova con e senza @)</div>
+       <input id="em" placeholder="nome@studio.it"><div class="msg" id="m"></div></div></div>`);
+    const f=root.querySelector(".f"),inp=root.querySelector("#em"),m=root.querySelector("#m");let WHEN="al blur";
+    const check=()=>{
+      const v=inp.value.trim(); if(!v){f.className="f";m.textContent="";return;}
+      const ok=/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
+      f.className="f "+(ok?"ok":"err"); m.textContent=ok?"✓ Email valida":"✕ Formato non valido";
+    };
+    inp.addEventListener("input",()=>{ if(WHEN==="digitando")check(); });
+    inp.addEventListener("blur",()=>{ if(WHEN==="al blur")check(); });
+    ctrl.on=(id,v)=>{ if(id==="when")WHEN=v; };
+  }},
+];
+
+/* ===================================================================
+   BUILD · libreria sezioni — ognuna: {id,cat,name,desc,axes,tpl(state,tokens)}
+   tpl restituisce HTML che vive dentro l'iframe anteprima.
+   Le varianti si applicano via attributi data-* sul nodo sezione.
+   =================================================================== */
+const BUILD_CATS=[
+ ["nav","Navigazione"],["hero","Hero"],["content","Contenuto"],
+ ["convert","Conversione"],["footer","Chiusura"],
+];
+
+/* token → font stacks */
+const PAIRS={
+ "inter-fraunces":{head:"'Fraunces',Georgia,serif",body:"'Inter',system-ui,sans-serif",label:"Inter / Fraunces"},
+ "space-inter":{head:"'Space Grotesk',sans-serif",body:"'Inter',system-ui,sans-serif",label:"Space Grotesk / Inter"},
+ "instrument-inter":{head:"'Instrument Serif',Georgia,serif",body:"'Inter',system-ui,sans-serif",label:"Instrument Serif / Inter"},
+ "inter-inter":{head:"'Inter',system-ui,sans-serif",body:"'Inter',system-ui,sans-serif",label:"Inter / Inter"},
+};
+const ACCENTS=["#ff7950","#3b82f6","#10b981","#8b5cf6","#f43f5e","#16161a"];
+
+/* palette helper — tone attr drives bg/fg */
+function tone(t){
+  if(t==="dark")   return {bg:"#16161a",fg:"#f4f2ee",mut:"#a3a1a8",card:"#1f1f24",line:"#2c2c33"};
+  if(t==="accent") return {bg:"var(--accent)",fg:"#fff",mut:"rgba(255,255,255,.82)",card:"rgba(255,255,255,.12)",line:"rgba(255,255,255,.24)"};
+  return {bg:"#ffffff",fg:"#16161a",mut:"#6b6a63",card:"#f4f2ee",line:"#e5e3dd"};
+}
+/* density → padding scale */
+function dens(d,base){ return d==="tight"?base*0.62:base; }
+/* neutral placeholder image block */
+function ph(h,c){ return `<div style="height:${h}px;border-radius:calc(var(--radius));background:${c};
+  display:flex;align-items:center;justify-content:center;color:rgba(128,128,128,.5);font-size:12px">img</div>`; }
+
+const SECTIONS=[
+/* ---------- NAV ---------- */
+{ id:"nav-min", cat:"nav", name:"Navbar minimale",
+  desc:"Logo a sinistra, poche voci a destra. Essenziale.",
+  axes:[{id:"tone",label:"Tono",opts:["light","dark","accent"],def:"light"}],
+  tpl(s,t){ const c=tone(s.tone);
+    return `<nav data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(20px*var(--sp)) calc(40px*var(--sp));display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid ${c.line}">
+      <span style="font-family:${t.head};font-size:22px;font-weight:600">Studio</span>
+      <span style="font-family:${t.body};font-size:14px;color:${c.mut};display:flex;gap:26px">
+        <span>Lavori</span><span>Info</span><span>Contatti</span></span></nav>`; }},
+
+{ id:"nav-cta", cat:"nav", name:"Navbar con CTA",
+  desc:"Come la minimale, con un pulsante d'azione a destra.",
+  axes:[{id:"tone",label:"Tono",opts:["light","dark","accent"],def:"dark"}],
+  tpl(s,t){ const c=tone(s.tone), btnBg=s.tone==="accent"?"#fff":"var(--accent)", btnFg=s.tone==="accent"?"var(--accent)":"#fff";
+    return `<nav data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(18px*var(--sp)) calc(40px*var(--sp));display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid ${c.line}">
+      <span style="font-family:${t.head};font-size:22px;font-weight:600">Studio</span>
+      <span style="display:flex;align-items:center;gap:26px;font-family:${t.body};font-size:14px;color:${c.mut}">
+        <span>Lavori</span><span>Servizi</span>
+        <a style="background:${btnBg};color:${btnFg};padding:9px 18px;border-radius:var(--radius);font-weight:600">Parliamone</a></span></nav>`; }},
+
+/* ---------- HERO ---------- */
+{ id:"hero-center", cat:"hero", name:"Hero testo + CTA",
+  desc:"Titolo grande centrato, sottotitolo, due pulsanti.",
+  axes:[
+    {id:"tone",label:"Tono",opts:["light","dark","accent"],def:"dark"},
+    {id:"dens",label:"Densità",opts:["air","tight"],def:"air"},
+  ],
+  tpl(s,t){ const c=tone(s.tone), p=dens(s.dens,110);
+    return `<section data-tone="${s.tone}" data-dens="${s.dens}" style="background:${c.bg};color:${c.fg};padding:calc(${p}px*var(--sp)) 40px;text-align:center">
+      <div style="max-width:680px;margin:0 auto">
+        <div style="font-family:${t.body};font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:18px">Memento Studio</div>
+        <h1 style="font-family:${t.head};font-weight:600;font-size:clamp(34px,6vw,60px);line-height:1.05;margin:0 0 20px">Diamo forma alle idee, dal 3D al web.</h1>
+        <p style="font-family:${t.body};font-size:17px;line-height:1.6;color:${c.mut};margin:0 0 32px">CGI, motion design ed esperienze interattive per marchi che vogliono distinguersi.</p>
+        <div style="display:flex;gap:12px;justify-content:center">
+          <a style="background:var(--accent);color:#fff;padding:14px 28px;border-radius:var(--radius);font-family:${t.body};font-weight:600;font-size:15px">Inizia un progetto</a>
+          <a style="border:1.5px solid ${c.line};color:${c.fg};padding:14px 28px;border-radius:var(--radius);font-family:${t.body};font-weight:600;font-size:15px">Guarda i lavori</a>
+        </div></div></section>`; }},
+
+{ id:"hero-split", cat:"hero", name:"Hero split",
+  desc:"Titolo e CTA a sinistra, media a destra.",
+  axes:[
+    {id:"tone",label:"Tono",opts:["light","dark","accent"],def:"light"},
+    {id:"align",label:"Media",opts:["destra","sinistra"],def:"destra"},
+    {id:"media",label:"Media",opts:["photo","illu","none"],def:"photo"},
+  ],
+  tpl(s,t){ const c=tone(s.tone);
+    const txt=`<div style="flex:1;min-width:0">
+        <div style="font-family:${t.body};font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:16px">Chi siamo</div>
+        <h1 style="font-family:${t.head};font-weight:600;font-size:clamp(30px,4.4vw,48px);line-height:1.08;margin:0 0 18px">Uno studio full-service, un solo interlocutore.</h1>
+        <p style="font-family:${t.body};font-size:16px;line-height:1.65;color:${c.mut};margin:0 0 26px">Dalla brand identity al 3D, dalla motion al codice: seguiamo l'intera filiera creativa.</p>
+        <a style="background:var(--accent);color:#fff;padding:13px 26px;border-radius:var(--radius);font-family:${t.body};font-weight:600;font-size:15px;display:inline-block">Scopri lo studio</a></div>`;
+    let media="";
+    if(s.media==="photo") media=`<div style="flex:1;min-width:0">${ph(320,c.card)}</div>`;
+    else if(s.media==="illu") media=`<div style="flex:1;min-width:0;border-radius:var(--radius);height:320px;background:radial-gradient(circle at 40% 30%,var(--accent),transparent 60%),${c.card}"></div>`;
+    const order = s.align==="sinistra" ? media+txt : txt+media;
+    return `<section data-tone="${s.tone}" data-media="${s.media}" style="background:${c.bg};color:${c.fg};padding:calc(80px*var(--sp)) 40px">
+      <div style="max-width:1080px;margin:0 auto;display:flex;gap:56px;align-items:center;flex-wrap:wrap">${s.media==="none"?txt:order}</div></section>`; }},
+
+{ id:"hero-3d", cat:"hero", name:"Hero prodotto 3D",
+  desc:"Placeholder per un prodotto 3D al centro, testo sopra.",
+  axes:[{id:"tone",label:"Tono",opts:["dark","light","accent"],def:"dark"}],
+  tpl(s,t){ const c=tone(s.tone);
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(70px*var(--sp)) 40px calc(30px*var(--sp));text-align:center;overflow:hidden">
+      <h1 style="font-family:${t.head};font-weight:600;font-size:clamp(30px,5vw,52px);margin:0 0 8px">Il prodotto, in scena.</h1>
+      <p style="font-family:${t.body};font-size:16px;color:${c.mut};margin:0 0 30px">Ruota, esplora, configura — direttamente nel browser.</p>
+      <div style="max-width:560px;margin:0 auto;height:300px;border-radius:calc(var(--radius)*2);
+        background:radial-gradient(circle at 50% 35%,var(--accent) 0%,transparent 55%),${c.card};
+        display:flex;align-items:center;justify-content:center;color:${c.mut};font-family:${t.body};font-size:13px">
+        viewport 3D</div></section>`; }},
+
+/* ---------- CONTENT ---------- */
+{ id:"feature-grid", cat:"content", name:"Feature grid 3-up",
+  desc:"Tre colonne, un beneficio ciascuna.",
+  axes:[
+    {id:"tone",label:"Tono",opts:["light","dark"],def:"light"},
+    {id:"media",label:"Icona",opts:["si","no"],def:"si"},
+  ],
+  tpl(s,t){ const c=tone(s.tone);
+    const items=[["Brand identity","Sistemi visivi che restano riconoscibili ovunque."],["3D & CGI","Prodotti fotorealistici senza set fisici."],["Web & motion","Siti ed esperienze che si muovono con te."]];
+    return `<section data-tone="${s.tone}" data-media="${s.media}" style="background:${c.bg};color:${c.fg};padding:calc(80px*var(--sp)) 40px">
+      <div style="max-width:1080px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:32px">
+        ${items.map(([h,p])=>`<div>
+          ${s.media==="si"?`<div style="width:46px;height:46px;border-radius:var(--radius);background:var(--accent);margin-bottom:18px"></div>`:""}
+          <h3 style="font-family:${t.head};font-weight:600;font-size:20px;margin:0 0 8px">${h}</h3>
+          <p style="font-family:${t.body};font-size:15px;line-height:1.6;color:${c.mut};margin:0">${p}</p></div>`).join("")}
+      </div></section>`; }},
+
+{ id:"feature-zig", cat:"content", name:"Feature alternata",
+  desc:"Testo e media che si alternano a zig-zag.",
+  axes:[{id:"tone",label:"Tono",opts:["light","dark"],def:"light"}],
+  tpl(s,t){ const c=tone(s.tone);
+    const row=(h,p,flip)=>`<div style="display:flex;gap:48px;align-items:center;flex-wrap:wrap;${flip?"flex-direction:row-reverse":""}">
+      <div style="flex:1;min-width:220px">${ph(240,c.card)}</div>
+      <div style="flex:1;min-width:220px">
+        <h3 style="font-family:${t.head};font-weight:600;font-size:26px;margin:0 0 12px">${h}</h3>
+        <p style="font-family:${t.body};font-size:15px;line-height:1.65;color:${c.mut};margin:0">${p}</p></div></div>`;
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(80px*var(--sp)) 40px">
+      <div style="max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:64px">
+        ${row("Dalla concept alla resa finale","Copriamo l'intera pipeline: modellazione, look-dev, animazione, post.",false)}
+        ${row("Interattivo, non solo guardato","Configuratori 3D ed esperienze web che l'utente tocca davvero.",true)}
+      </div></section>`; }},
+
+{ id:"stats", cat:"content", name:"Stats / numeri",
+  desc:"Quattro numeri che dicono la scala in un colpo.",
+  axes:[{id:"tone",label:"Tono",opts:["dark","light","accent"],def:"dark"}],
+  tpl(s,t){ const c=tone(s.tone);
+    const st=[["120+","progetti consegnati"],["8","anni di pipeline"],["30+","clienti in Italia"],["100%","in-house"]];
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(70px*var(--sp)) 40px">
+      <div style="max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:32px;text-align:center">
+        ${st.map(([n,l])=>`<div><div style="font-family:${t.head};font-weight:600;font-size:44px;color:var(--accent);line-height:1">${n}</div>
+          <div style="font-family:${t.body};font-size:14px;color:${c.mut};margin-top:8px">${l}</div></div>`).join("")}
+      </div></section>`; }},
+
+{ id:"logowall", cat:"content", name:"Logo wall",
+  desc:"La parete dei clienti: prova sociale immediata.",
+  axes:[{id:"tone",label:"Tono",opts:["light","dark"],def:"light"}],
+  tpl(s,t){ const c=tone(s.tone);
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(56px*var(--sp)) 40px">
+      <p style="text-align:center;font-family:${t.body};font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:${c.mut};margin:0 0 30px">Hanno lavorato con noi</p>
+      <div style="max-width:900px;margin:0 auto;display:flex;flex-wrap:wrap;justify-content:center;gap:40px;align-items:center;opacity:.7">
+        ${Array.from({length:6}).map(()=>`<div style="width:96px;height:28px;border-radius:6px;background:${c.mut};opacity:.4"></div>`).join("")}
+      </div></section>`; }},
+
+{ id:"gallery", cat:"content", name:"Gallery / masonry",
+  desc:"Griglia di lavori a moduli irregolari.",
+  axes:[{id:"tone",label:"Tono",opts:["light","dark"],def:"dark"}],
+  tpl(s,t){ const c=tone(s.tone);
+    const hs=[200,150,150,200,170,170];
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(70px*var(--sp)) 40px">
+      <h2 style="font-family:${t.head};font-weight:600;font-size:30px;text-align:center;margin:0 0 34px">Lavori selezionati</h2>
+      <div style="max-width:1000px;margin:0 auto;columns:3;column-gap:16px">
+        ${hs.map(h=>`<div style="break-inside:avoid;margin-bottom:16px">${ph(h,c.card)}</div>`).join("")}
+      </div></section>`; }},
+
+{ id:"editorial", cat:"content", name:"Testo editoriale",
+  desc:"Un blocco di testo lungo, ben impaginato.",
+  axes:[{id:"tone",label:"Tono",opts:["light","dark"],def:"light"}],
+  tpl(s,t){ const c=tone(s.tone);
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(80px*var(--sp)) 40px">
+      <div style="max-width:640px;margin:0 auto">
+        <h2 style="font-family:${t.head};font-weight:600;font-size:32px;line-height:1.15;margin:0 0 24px">Crediamo che il 3D non debba sembrare 3D.</h2>
+        <p style="font-family:${t.body};font-size:17px;line-height:1.75;color:${c.mut};margin:0 0 18px">Ogni progetto parte da una domanda semplice: cosa deve sentire chi guarda? Da lì costruiamo luce, materiali e movimento perché la tecnica sparisca e resti solo l'immagine.</p>
+        <p style="font-family:${t.body};font-size:17px;line-height:1.75;color:${c.mut};margin:0">La stessa cura vale per il web: interfacce che si tolgono di mezzo e lasciano parlare il contenuto.</p>
+      </div></section>`; }},
+
+/* ---------- CONVERT ---------- */
+{ id:"pricing", cat:"convert", name:"Pricing 3 colonne",
+  desc:"Tre piani affiancati, uno in evidenza.",
+  axes:[{id:"tone",label:"Tono",opts:["light","dark"],def:"light"}],
+  tpl(s,t){ const c=tone(s.tone);
+    const plans=[["Base","da 2k","Brand starter","3 concept · 1 revisione"],["Studio","da 6k","Il più scelto","Identity completa · 3D · web"],["Full","su misura","Progetto continuativo","Team dedicato · retainer"]];
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(80px*var(--sp)) 40px">
+      <h2 style="font-family:${t.head};font-weight:600;font-size:30px;text-align:center;margin:0 0 36px">Come lavoriamo insieme</h2>
+      <div style="max-width:960px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px">
+        ${plans.map((p,i)=>{const hi=i===1;return `<div style="border:1.5px solid ${hi?"var(--accent)":c.line};border-radius:calc(var(--radius)*1.4);padding:28px 24px;background:${hi?(s.tone==="dark"?"#1f1f24":"#fff"):"transparent"}">
+          <div style="font-family:${t.body};font-size:13px;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px">${p[2]}</div>
+          <div style="font-family:${t.head};font-weight:600;font-size:22px;margin-bottom:4px">${p[0]}</div>
+          <div style="font-family:${t.head};font-weight:600;font-size:34px;margin-bottom:16px">${p[1]}</div>
+          <p style="font-family:${t.body};font-size:14px;color:${c.mut};line-height:1.6;margin:0 0 20px">${p[3]}</p>
+          <a style="display:block;text-align:center;background:${hi?"var(--accent)":"transparent"};color:${hi?"#fff":c.fg};border:1.5px solid ${hi?"var(--accent)":c.line};padding:11px;border-radius:var(--radius);font-family:${t.body};font-weight:600;font-size:14px">Scegli</a></div>`;}).join("")}
+      </div></section>`; }},
+
+{ id:"testimonial", cat:"convert", name:"Testimonial",
+  desc:"Una citazione forte con nome e ruolo.",
+  axes:[{id:"tone",label:"Tono",opts:["accent","dark","light"],def:"accent"}],
+  tpl(s,t){ const c=tone(s.tone);
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(90px*var(--sp)) 40px;text-align:center">
+      <div style="max-width:720px;margin:0 auto">
+        <p style="font-family:${t.head};font-weight:500;font-size:clamp(22px,3.2vw,32px);line-height:1.4;margin:0 0 26px">"Hanno trasformato un brief confuso in un sistema visivo che usiamo ogni giorno. Un solo interlocutore per tutto."</p>
+        <div style="font-family:${t.body};font-size:15px;color:${c.mut}"><b style="color:${c.fg}">Giulia R.</b> · Marketing lead, azienda cliente</div>
+      </div></section>`; }},
+
+{ id:"faq", cat:"convert", name:"FAQ accordion",
+  desc:"Domande e risposte in lista aperta.",
+  axes:[{id:"tone",label:"Tono",opts:["light","dark"],def:"light"}],
+  tpl(s,t){ const c=tone(s.tone);
+    const qs=[["Quanto dura un progetto?","Da poche settimane per una singola resa a qualche mese per un sistema completo."],["Lavorate anche da remoto?","Sì. Seguiamo clienti in tutta Italia con revisioni condivise online."],["Fate anche il codice?","Sì: dal design allo sviluppo front-end, tutto in-house."]];
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(80px*var(--sp)) 40px">
+      <div style="max-width:680px;margin:0 auto">
+        <h2 style="font-family:${t.head};font-weight:600;font-size:28px;margin:0 0 28px">Domande frequenti</h2>
+        ${qs.map(([q,a])=>`<div style="border-top:1px solid ${c.line};padding:20px 0">
+          <div style="font-family:${t.body};font-weight:600;font-size:16px;display:flex;justify-content:space-between">${q}<span style="color:var(--accent)">+</span></div>
+          <p style="font-family:${t.body};font-size:14px;line-height:1.6;color:${c.mut};margin:10px 0 0">${a}</p></div>`).join("")}
+      </div></section>`; }},
+
+{ id:"cta-band", cat:"convert", name:"CTA band",
+  desc:"Una fascia con un'unica azione forte.",
+  axes:[{id:"tone",label:"Tono",opts:["accent","dark"],def:"accent"}],
+  tpl(s,t){ const c=tone(s.tone), btnBg=s.tone==="accent"?"#fff":"var(--accent)", btnFg=s.tone==="accent"?"var(--accent)":"#fff";
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(64px*var(--sp)) 40px;text-align:center">
+      <h2 style="font-family:${t.head};font-weight:600;font-size:clamp(26px,4vw,40px);margin:0 0 12px">Pronti a dare forma alla vostra idea?</h2>
+      <p style="font-family:${t.body};font-size:16px;color:${c.mut};margin:0 0 26px">Raccontateci il progetto: rispondiamo entro un giorno.</p>
+      <a style="background:${btnBg};color:${btnFg};padding:15px 34px;border-radius:var(--radius);font-family:${t.body};font-weight:700;font-size:16px;display:inline-block">Scrivici ora</a></section>`; }},
+
+{ id:"contact", cat:"convert", name:"Form contatti",
+  desc:"Campi essenziali per farsi contattare.",
+  axes:[{id:"tone",label:"Tono",opts:["light","dark"],def:"light"}],
+  tpl(s,t){ const c=tone(s.tone);
+    const inp=`background:${s.tone==="dark"?"#1f1f24":"#fff"};border:1.5px solid ${c.line};border-radius:var(--radius);padding:13px 14px;font-family:${t.body};font-size:14px;color:${c.fg};width:100%`;
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(80px*var(--sp)) 40px">
+      <div style="max-width:520px;margin:0 auto">
+        <h2 style="font-family:${t.head};font-weight:600;font-size:28px;margin:0 0 24px;text-align:center">Parliamo del progetto</h2>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="${inp}">Nome</div><div style="${inp}">Email</div>
+          <div style="${inp};height:90px;color:${c.mut}">Raccontaci in due righe…</div>
+          <a style="background:var(--accent);color:#fff;padding:14px;border-radius:var(--radius);text-align:center;font-family:${t.body};font-weight:600;font-size:15px">Invia</a>
+        </div></div></section>`; }},
+
+{ id:"newsletter", cat:"convert", name:"Newsletter",
+  desc:"Una riga: email + iscriviti.",
+  axes:[{id:"tone",label:"Tono",opts:["dark","light","accent"],def:"dark"}],
+  tpl(s,t){ const c=tone(s.tone);
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(60px*var(--sp)) 40px;text-align:center">
+      <h3 style="font-family:${t.head};font-weight:600;font-size:24px;margin:0 0 8px">Resta aggiornato</h3>
+      <p style="font-family:${t.body};font-size:15px;color:${c.mut};margin:0 0 22px">Un lavoro nuovo, una volta al mese. Niente spam.</p>
+      <div style="max-width:420px;margin:0 auto;display:flex;gap:10px">
+        <div style="flex:1;background:${s.tone==="dark"?"#1f1f24":"#fff"};border:1.5px solid ${c.line};border-radius:var(--radius);padding:12px 14px;font-family:${t.body};font-size:14px;color:${c.mut};text-align:left">tua@email.it</div>
+        <a style="background:var(--accent);color:#fff;padding:12px 22px;border-radius:var(--radius);font-family:${t.body};font-weight:600;font-size:14px">Iscriviti</a>
+      </div></section>`; }},
+
+/* ---------- FOOTER ---------- */
+{ id:"footer-min", cat:"footer", name:"Footer compatto",
+  desc:"Logo, copyright, poche voci.",
+  axes:[{id:"tone",label:"Tono",opts:["dark","light"],def:"dark"}],
+  tpl(s,t){ const c=tone(s.tone);
+    return `<footer data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(34px*var(--sp)) 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;border-top:1px solid ${c.line}">
+      <span style="font-family:${t.head};font-size:18px;font-weight:600">Studio</span>
+      <span style="font-family:${t.body};font-size:13px;color:${c.mut};display:flex;gap:22px"><span>Privacy</span><span>Instagram</span><span>© 2026</span></span></footer>`; }},
+
+{ id:"footer-big", cat:"footer", name:"Footer esteso",
+  desc:"Colonne di link, contatti, chiusura.",
+  axes:[{id:"tone",label:"Tono",opts:["dark","light"],def:"dark"}],
+  tpl(s,t){ const c=tone(s.tone);
+    const col=(h,items)=>`<div><div style="font-family:${t.body};font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:${c.mut};margin-bottom:14px">${h}</div>
+      ${items.map(i=>`<div style="font-family:${t.body};font-size:14px;margin-bottom:9px">${i}</div>`).join("")}</div>`;
+    return `<footer data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(64px*var(--sp)) 40px calc(34px*var(--sp))">
+      <div style="max-width:1000px;margin:0 auto;display:flex;flex-wrap:wrap;gap:48px;justify-content:space-between">
+        <div style="flex:1;min-width:200px"><div style="font-family:${t.head};font-size:24px;font-weight:600;margin-bottom:10px">Memento Studio</div>
+          <p style="font-family:${t.body};font-size:14px;color:${c.mut};line-height:1.6;max-width:260px;margin:0">CGI, motion e web design. Milano, per clienti in tutta Italia.</p></div>
+        ${col("Studio",["Lavori","Chi siamo","Contatti"])}
+        ${col("Servizi",["Brand","3D","Web"])}
+        ${col("Social",["Instagram","Behance","LinkedIn"])}
+      </div>
+      <div style="max-width:1000px;margin:40px auto 0;padding-top:20px;border-top:1px solid ${c.line};font-family:${t.body};font-size:13px;color:${c.mut}">© 2026 Memento Studio · P.IVA 00000000000</div></footer>`; }},
+];
+
+</script>
+<script id="app">
+/* ===================================================================
+   APP LOGIC
+   =================================================================== */
+"use strict";
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+
+/* ---------- routing ---------- */
+const VIEWS={mLive:"vLive",mDef:"vDef",mBuild:"vBuild",mTokens:"vTokens"};
+function showView(id){
+  Object.values(VIEWS).forEach(v=>$("#"+v).classList.remove("on"));
+  Object.keys(VIEWS).forEach(b=>$("#"+b).setAttribute("aria-pressed",String(VIEWS[b]===id)));
+  $("#"+id).classList.add("on");
+  if(id==="vBuild") buildRender();
+  if(id==="vTokens") tokRender();
+}
+Object.keys(VIEWS).forEach(b=>$("#"+b).addEventListener("click",()=>showView(VIEWS[b])));
+
+/* ===================================================================
+   LIVE
+   =================================================================== */
+let curPattern=null, curCodeLang="css";
+function liveInit(){
+  const cats=$("#liveCats");
+  LIVE_CATS.forEach(([id,label])=>{
+    const h=document.createElement("div"); h.className="lcat"; h.textContent=label; cats.appendChild(h);
+    PATTERNS.filter(p=>p.cat===id).forEach(p=>{
+      const b=document.createElement("button"); b.className="lpat"; b.textContent=p.name;
+      b.setAttribute("role","tab"); b.dataset.id=p.id;
+      b.addEventListener("click",()=>selectPattern(p.id));
+      cats.appendChild(b);
+    });
+  });
+  selectPattern(PATTERNS[0].id);
+}
+function selectPattern(id){
+  const p=PATTERNS.find(x=>x.id===id); if(!p) return; curPattern=p;
+  $$(".lpat").forEach(b=>b.setAttribute("aria-current",String(b.dataset.id===id)));
+  $("#liveName").textContent=p.name;
+  $("#liveCosa").textContent=p.cosa;
+  $("#liveProd").textContent=p.prod;
+  // stage
+  const stage=$("#liveStage");
+  stage.innerHTML='<span class="live-name">'+p.name+'</span>';
+  const holder=document.createElement("div"); holder.style.width="100%"; stage.appendChild(holder);
+  const ctrlApi={on:()=>{}};
+  p.mount(holder,ctrlApi);
+  // reflect bg (some demos are dark)
+  stage.setAttribute("data-bg", ["parallax"].includes(p.id)?"dark":"light");
+  // controls
+  buildControls(p,ctrlApi);
+  // code panel
+  buildCode(p);
+  if(window.__i18nApply) window.__i18nApply(stage.getRootNode? $("#vLive"):document.body);
+}
+function buildControls(p,api){
+  const box=$("#liveCtrls");
+  box.innerHTML='<div class="cttl">Controlli live</div>';
+  (p.ctrl||[]).forEach(c=>{
+    const wrap=document.createElement("div"); wrap.className="ctrl";
+    if(c.opts){
+      const lab=document.createElement("label"); lab.textContent=c.label; wrap.appendChild(lab);
+      const seg=document.createElement("div"); seg.className="seg";
+      c.opts.forEach(o=>{
+        const b=document.createElement("button"); b.textContent=o;
+        b.setAttribute("aria-pressed",String(o===c.def));
+        b.addEventListener("click",()=>{ $$("button",seg).forEach(x=>x.setAttribute("aria-pressed","false"));
+          b.setAttribute("aria-pressed","true"); api.on(c.id,o); });
+        seg.appendChild(b);
+      });
+      wrap.appendChild(seg);
+    }else{
+      const lab=document.createElement("label"); lab.innerHTML=c.label+' <b>'+c.def+(c.unit||"")+'</b>';
+      wrap.appendChild(lab);
+      const r=document.createElement("input"); r.type="range"; r.min=c.min; r.max=c.max; r.step=c.step; r.value=c.def;
+      r.addEventListener("input",()=>{ lab.querySelector("b").textContent=r.value+(c.unit||""); api.on(c.id,parseFloat(r.value)); });
+      wrap.appendChild(r);
+    }
+    box.appendChild(wrap);
+    // apply default immediately
+    setTimeout(()=>api.on(c.id, c.opts?c.def:parseFloat(c.def)),0);
+  });
+  if(!(p.ctrl||[]).length){
+    const e=document.createElement("div"); e.style.cssText="color:var(--txt-3);font-size:12px";
+    e.textContent="Nessun controllo — osserva il pattern.";
+    box.appendChild(e);
+  }
+}
+function buildCode(p){
+  const tabs=$("#codeTabs"), body=$("#codeBody");
+  tabs.innerHTML=""; const langs=Object.keys(p.code||{css:""});
+  langs.forEach((l,i)=>{
+    const b=document.createElement("button"); b.textContent=l.toUpperCase();
+    b.setAttribute("aria-current",String(i===0));
+    b.addEventListener("click",()=>{ curCodeLang=l; $$("button",tabs).forEach(x=>x.removeAttribute("aria-current"));
+      b.setAttribute("aria-current","true"); renderCode(p,l); });
+    tabs.appendChild(b);
+  });
+  const copy=document.createElement("button"); copy.className="code-copy"; copy.textContent="Copia";
+  copy.addEventListener("click",()=>{ navigator.clipboard&&navigator.clipboard.writeText(p.code[curCodeLang]||"");
+    copy.textContent="Copiato ✓"; setTimeout(()=>copy.textContent="Copia",1400); });
+  tabs.appendChild(copy);
+  curCodeLang=langs[0]; renderCode(p,langs[0]);
+}
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function renderCode(p,l){ $("#codeBody").textContent=(p.code&&p.code[l])||"/* — */"; }
+
+/* ===================================================================
+   DEF · glossario
+   =================================================================== */
+let gFilter="all", gQuery="";
+function defInit(){
+  // chips
+  const chips=$("#gchips");
+  const all=document.createElement("button"); all.textContent="Tutti"; all.dataset.d="all";
+  all.setAttribute("aria-pressed","true"); chips.appendChild(all);
+  DOMAINS.forEach(([id,label])=>{
+    const b=document.createElement("button"); b.textContent=label.split(" ")[0]===label?label:label; b.dataset.d=id;
+    b.setAttribute("aria-pressed","false"); chips.appendChild(b);
+  });
+  // relabel chips with proper short names
+  const short={typo:"Tipografia",color:"Colore",layout:"Layout",ui:"UI pattern",motion:"Motion",ux:"UX",a11y:"Accessibilità",fe:"Front-end",ds:"Design system",flow:"Workflow"};
+  $$("#gchips button").forEach(b=>{ if(b.dataset.d!=="all") b.textContent=short[b.dataset.d]||b.textContent; });
+  $$("#gchips button").forEach(b=>b.addEventListener("click",()=>{
+    gFilter=b.dataset.d; $$("#gchips button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+    defRender();
+  }));
+  $("#gsearch").addEventListener("input",e=>{ gQuery=e.target.value.trim().toLowerCase(); defRender(); });
+  defRender();
+}
+function defRender(){
+  const scroll=$("#gscroll"); scroll.innerHTML="";
+  let count=0;
+  DOMAINS.forEach(([did,dlabel])=>{
+    if(gFilter!=="all" && gFilter!==did) return;
+    const rows=G.filter(r=>r[0]===did).filter(r=>{
+      if(!gQuery) return true;
+      return (r[2]+" "+r[3]+" "+r[4]).toLowerCase().includes(gQuery);
+    });
+    if(!rows.length) return;
+    const dom=document.createElement("div"); dom.className="gdom";
+    const h=document.createElement("div"); h.className="gdom-h"; h.textContent=dlabel; dom.appendChild(h);
+    const d=document.createElement("div"); d.className="gdom-d";
+    d.textContent=DOMAINS.find(x=>x[0]===did)[2]; dom.appendChild(d);
+    // group by subgroup
+    const groups={};
+    rows.forEach(r=>{ (groups[r[1]]=groups[r[1]]||[]).push(r); });
+    Object.keys(groups).forEach(gk=>{
+      const sub=document.createElement("div"); sub.className="gsub";
+      const sh=document.createElement("div"); sh.className="gsub-h"; sh.textContent=gk; sub.appendChild(sh);
+      const cards=document.createElement("div"); cards.className="gcards";
+      groups[gk].forEach(r=>{
+        const card=document.createElement("div"); card.className="gcard";
+        const txt=document.createElement("div"); txt.className="txt";
+        let inner='<div class="gterm">'+r[2]+'</div>';
+        if(r[3]) inner+='<div class="galias">'+r[3]+'</div>';
+        inner+='<div class="gdef">'+r[4]+'</div>';
+        txt.innerHTML=inner; card.appendChild(txt); cards.appendChild(card); count++;
+      });
+      sub.appendChild(cards); dom.appendChild(sub);
+    });
+    scroll.appendChild(dom);
+  });
+  if(!count){ const e=document.createElement("div"); e.className="gempty"; e.textContent="Nessun termine trovato."; scroll.appendChild(e); }
+  $("#gcount").textContent=count+" termini";
+  if(window.__i18nApply) window.__i18nApply($("#vDef"));
+}
+
+/* ===================================================================
+   BUILD · compositore
+   =================================================================== */
+const DEFAULT_TOKENS={pair:"inter-fraunces",accent:"#ff7950",radius:8,space:1};
+let comp={v:1,tokens:{...DEFAULT_TOKENS},sections:[]};
+let selIdx=-1, viewport=1280;
+let hashTimer=null;
+
+function buildInit(){
+  // library
+  const lib=$("#buildLib");
+  BUILD_CATS.forEach(([cid,clabel])=>{
+    const h=document.createElement("div"); h.className="libcat"; h.textContent=clabel; lib.appendChild(h);
+    SECTIONS.filter(s=>s.cat===cid).forEach(s=>{
+      const it=document.createElement("div"); it.className="libitem"; it.draggable=true; it.dataset.id=s.id;
+      it.innerHTML='<div class="lthumb"></div><div class="lname">'+s.name+'<span class="ladd">+</span></div>';
+      renderThumb(it.querySelector(".lthumb"),s);
+      it.addEventListener("click",()=>addSection(s.id));
+      it.addEventListener("dragstart",e=>{ e.dataTransfer.setData("text/plain",s.id); e.dataTransfer.effectAllowed="copy"; });
+      lib.appendChild(it);
+    });
+  });
+  // token controls
+  const pairSel=$("#tokPair");
+  Object.keys(PAIRS).forEach(k=>{ const o=document.createElement("option"); o.value=k; o.textContent=PAIRS[k].label; pairSel.appendChild(o); });
+  pairSel.value=comp.tokens.pair;
+  pairSel.addEventListener("change",()=>{ comp.tokens.pair=pairSel.value; buildRender(); saveHash(); });
+  const acc=$("#tokAccent");
+  ACCENTS.forEach(col=>{ const sw=document.createElement("button"); sw.className="swatch"; sw.style.background=col;
+    sw.setAttribute("aria-pressed",String(col===comp.tokens.accent));
+    sw.addEventListener("click",()=>{ comp.tokens.accent=col; $$(".swatch",acc).forEach(x=>x.setAttribute("aria-pressed","false"));
+      sw.setAttribute("aria-pressed","true"); buildRender(); saveHash(); });
+    acc.appendChild(sw); });
+  const rad=$("#tokRadius");
+  [["0","0"],["8","8"],["16","16"],["pill","999"]].forEach(([lab,val])=>{
+    const b=document.createElement("button"); b.textContent=lab; b.dataset.v=val;
+    b.setAttribute("aria-pressed",String(parseInt(val)===comp.tokens.radius||(val==="999"&&comp.tokens.radius>=999)));
+    b.addEventListener("click",()=>{ comp.tokens.radius=parseInt(val); $("#tokRadiusV").textContent=(val==="999"?"pill":val+"px");
+      $$("button",rad).forEach(x=>x.setAttribute("aria-pressed","false")); b.setAttribute("aria-pressed","true");
+      buildRender(); saveHash(); });
+    rad.appendChild(b);
+  });
+  $("#tokSpace").addEventListener("input",e=>{ comp.tokens.space=parseFloat(e.target.value);
+    $("#tokSpaceV").textContent=parseFloat(e.target.value).toFixed(1)+"×"; buildRender(); saveHash(); });
+
+  // viewport toggle
+  $("#vpDesk").addEventListener("click",()=>setVp(1280,"vpDesk"));
+  $("#vpTab").addEventListener("click",()=>setVp(768,"vpTab"));
+  $("#vpMob").addEventListener("click",()=>setVp(390,"vpMob"));
+
+  // toolbar actions
+  $("#btnShare").addEventListener("click",shareLink);
+  $("#btnHTML").addEventListener("click",exportHTML);
+  $("#btnPDF").addEventListener("click",exportPDF);
+  $("#btnClear").addEventListener("click",()=>{ comp.sections=[]; selIdx=-1; buildRender(); saveHash(); });
+
+  // drop on device
+  const device=$("#device");
+  device.addEventListener("dragover",e=>{ e.preventDefault(); device.classList.add("dragover"); });
+  device.addEventListener("dragleave",()=>device.classList.remove("dragover"));
+  device.addEventListener("drop",e=>{ e.preventDefault(); device.classList.remove("dragover");
+    const id=e.dataTransfer.getData("text/plain"); if(id) addSection(id); });
+
+  loadHash();
+}
+
+function setVp(w,btn){ viewport=w; ["vpDesk","vpTab","vpMob"].forEach(b=>$("#"+b).setAttribute("aria-pressed",String(b===btn))); buildRender(); }
+
+function renderThumb(host,s){
+  // mini render of the section, scaled down, non-interactive
+  const st={}; s.axes.forEach(a=>st[a.id]=a.def);
+  const T=PAIRS[comp.tokens.pair];
+  const inner=s.tpl(st,T);
+  const scale=0.14;
+  host.innerHTML='<div style="width:'+(100/scale)+'%;transform:scale('+scale+');transform-origin:top left;--accent:'+comp.tokens.accent+';--radius:8px;--sp:1;pointer-events:none">'+inner+'</div>';
+}
+
+function addSection(id){
+  const s=SECTIONS.find(x=>x.id===id); if(!s) return;
+  const axes={}; s.axes.forEach(a=>axes[a.id]=a.def);
+  comp.sections.push({id,axes});
+  selIdx=comp.sections.length-1;
+  buildRender(); saveHash();
+}
+function removeSection(i){ comp.sections.splice(i,1); if(selIdx>=comp.sections.length) selIdx=comp.sections.length-1; buildRender(); saveHash(); }
+function moveSection(i,dir){ const j=i+dir; if(j<0||j>=comp.sections.length) return;
+  const t=comp.sections[i]; comp.sections[i]=comp.sections[j]; comp.sections[j]=t; selIdx=j; buildRender(); saveHash(); }
+
+/* translate the draft's visible text via the i18n dictionary when EN is active.
+   Only swaps text between > and < (never inside tags/attributes/styles), and
+   only whole exact matches — the same contract as the main-page walker. */
+function trDraft(html){
+  if(document.documentElement.lang!=="en" || !window.__i18nDict) return html;
+  const M=window.__i18nDict;
+  return html.replace(/>([^<]+)</g,(full,txt)=>{
+    const core=txt.trim(); if(!core) return full;
+    const t=M[core];
+    if(t!=null && t!==core) return ">"+txt.replace(core,t)+"<";
+    return full;
+  }).replace(/(placeholder|title|aria-label)="([^"]+)"/g,(full,attr,val)=>{
+    const t=M[val.trim()]; return t!=null?attr+'="'+t+'"':full;
+  });
+}
+function pageDoc(tokens,sections,forExport){
+  const T=PAIRS[tokens.pair]||PAIRS["inter-fraunces"];
+  const rad = tokens.radius>=999 ? "999px" : tokens.radius+"px";
+  const body=sections.map((sec,i)=>{
+    const s=SECTIONS.find(x=>x.id===sec.id); if(!s) return "";
+    let html=trDraft(s.tpl(sec.axes,T));
+    if(!forExport) html='<div class="sec-wrap" data-i="'+i+'">'+html+'</div>';
+    return html;
+  }).join("");
+  const fonts='<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">';
+  const selCss=forExport?"":`
+    .sec-wrap{position:relative;cursor:pointer}
+    .sec-wrap::after{content:"";position:absolute;inset:0;border:2px solid transparent;pointer-events:none;transition:border-color .12s}
+    .sec-wrap:hover::after{border-color:rgba(255,121,80,.4)}
+    .sec-wrap.sel::after{border-color:var(--accent)}
+    .sec-wrap .lbl{position:absolute;top:0;left:0;background:var(--accent);color:#fff;font:600 10px/1 Inter,sans-serif;
+      padding:4px 8px;border-radius:0 0 6px 0;opacity:0;transition:opacity .12s;z-index:5;letter-spacing:.04em}
+    .sec-wrap:hover .lbl,.sec-wrap.sel .lbl{opacity:1}`;
+  return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${fonts}
+    <style>
+      :root{--accent:${tokens.accent};--radius:${rad};--sp:${tokens.space};--head:${T.head};--body:${T.body}}
+      *{box-sizing:border-box;margin:0}
+      body{font-family:${T.body};color:#16161a;background:#fff;overflow-x:hidden}
+      section,nav,footer{transition:background .35s ease,color .35s ease}
+      @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+      ${selCss}
+    </style></head><body>${body}</body></html>`;
+}
+/* inject sel labels for the interactive frame */
+function labeledSections(sections){
+  return sections.map((sec,i)=>{
+    const s=SECTIONS.find(x=>x.id===sec.id);
+    return {...sec,_name:s?s.name:sec.id};
+  });
+}
+
+function buildRender(){
+  const device=$("#device"), frame=$("#pageFrame"), ph=$("#devicePh");
+  // token controls sync (in case loaded from hash)
+  $("#tokPair").value=comp.tokens.pair;
+  $("#tokSpace").value=comp.tokens.space; $("#tokSpaceV").textContent=comp.tokens.space.toFixed(1)+"×";
+  $("#tokRadiusV").textContent=comp.tokens.radius>=999?"pill":comp.tokens.radius+"px";
+  $$("#tokAccent .swatch").forEach(sw=>sw.setAttribute("aria-pressed",String(sw.style.background&&rgbToHex(sw.style.background)===comp.tokens.accent)));
+  // refresh thumbs to reflect token pair/accent
+  $$(".libitem").forEach(it=>{ const s=SECTIONS.find(x=>x.id===it.dataset.id); if(s) renderThumb(it.querySelector(".lthumb"),s); });
+
+  if(!comp.sections.length){
+    device.classList.add("empty"); ph.style.display=""; frame.style.display="none";
+    device.style.width=""; $("#buildRecipe").textContent="Bozza vuota";
+    renderProps(); return;
+  }
+  device.classList.remove("empty"); ph.style.display="none"; frame.style.display="block";
+  device.style.width=viewport+"px";
+  // scale device to fit
+  const scrollW=$("#buildScroll").clientWidth-44;
+  const scale=Math.min(1,scrollW/viewport);
+  device.style.transform="scale("+scale+")";
+  device.style.height="auto";
+
+  // build interactive doc with labels
+  const doc=pageDoc(comp.tokens,comp.sections,false);
+  frame.srcdoc=doc;
+  frame.onload=()=>{
+    const d=frame.contentDocument;
+    // add labels + click handlers
+    $$(".sec-wrap",d).forEach((w,i)=>{
+      const s=SECTIONS.find(x=>x.id===comp.sections[i].id);
+      const lbl=d.createElement("div"); lbl.className="lbl"; lbl.textContent=s?s.name:""; w.prepend(lbl);
+      if(i===selIdx) w.classList.add("sel");
+      w.addEventListener("click",()=>{ selIdx=i; buildRender(); });
+    });
+    // size the iframe to content
+    const h=d.body.scrollHeight;
+    frame.style.height=h+"px";
+    device.style.height=(h*scale)+"px";
+  };
+  // recipe
+  const toneCount={}; comp.sections.forEach(sec=>{ const tn=sec.axes.tone; if(tn) toneCount[tn]=(toneCount[tn]||0)+1; });
+  const domTone=Object.keys(toneCount).sort((a,b)=>toneCount[b]-toneCount[a])[0]||"—";
+  const toneLabel={light:"chiaro",dark:"scuro",accent:"accent"}[domTone]||domTone;
+  $("#buildRecipe").innerHTML="BOZZA · <b>"+comp.sections.length+"</b> sezioni · tono "+toneLabel+" · "+PAIRS[comp.tokens.pair].label;
+  renderProps();
+  saveHashDebounced();
+}
+
+function renderProps(){
+  const empty=$("#propsEmpty"), axesBox=$("#propsAxes");
+  if(selIdx<0||!comp.sections[selIdx]){ empty.style.display=""; axesBox.style.display="none"; return; }
+  empty.style.display="none"; axesBox.style.display="";
+  const sec=comp.sections[selIdx], s=SECTIONS.find(x=>x.id===sec.id);
+  let html='<div class="sel-name">'+s.name+'</div><div class="sel-desc">'+s.desc+'</div>';
+  s.axes.forEach(ax=>{
+    html+='<div class="axis"><div class="alabel">'+ax.label+'</div><div class="seg" data-ax="'+ax.id+'">';
+    ax.opts.forEach(o=>{ html+='<button data-v="'+o+'" aria-pressed="'+(sec.axes[ax.id]===o)+'">'+o+'</button>'; });
+    html+='</div></div>';
+  });
+  html+='<div style="display:flex;gap:8px;margin-top:14px">'+
+        '<button class="tbtn" data-mv="-1" title="Su">↑</button>'+
+        '<button class="tbtn" data-mv="1" title="Giù">↓</button></div>'+
+        '<button class="del-sec" style="margin-top:14px">✕ Rimuovi sezione</button>';
+  axesBox.innerHTML=html;
+  $$(".seg[data-ax] button",axesBox).forEach(b=>b.addEventListener("click",()=>{
+    const ax=b.parentNode.dataset.ax; comp.sections[selIdx].axes[ax]=b.dataset.v;
+    buildRender();
+  }));
+  $$("[data-mv]",axesBox).forEach(b=>b.addEventListener("click",()=>moveSection(selIdx,parseInt(b.dataset.mv))));
+  $(".del-sec",axesBox).addEventListener("click",()=>removeSection(selIdx));
+  if(window.__i18nApply) window.__i18nApply($("#buildProps"));
+}
+
+/* ---------- hash share & export ---------- */
+function saveHash(){ try{ location.hash="c="+btoa(unescape(encodeURIComponent(JSON.stringify(comp)))); }catch(e){} }
+function saveHashDebounced(){ clearTimeout(hashTimer); hashTimer=setTimeout(saveHash,400); }
+function loadHash(){
+  try{ const m=location.hash.match(/c=([^&]+)/);
+    if(m){ const obj=JSON.parse(decodeURIComponent(escape(atob(m[1]))));
+      if(obj&&obj.sections){ comp={v:1,tokens:{...DEFAULT_TOKENS,...obj.tokens},sections:obj.sections}; selIdx=comp.sections.length?0:-1; } }
+  }catch(e){}
+  buildRender();
+}
+function shareLink(){
+  saveHash();
+  const url=location.href;
+  if(navigator.clipboard) navigator.clipboard.writeText(url);
+  const b=$("#btnShare"); const o=b.textContent; b.textContent="Link copiato ✓"; setTimeout(()=>b.textContent=o,1600);
+}
+function exportHTML(){
+  if(!comp.sections.length){ flash($("#btnHTML"),"Bozza vuota"); return; }
+  const doc=pageDoc(comp.tokens,comp.sections,true);
+  const blob=new Blob([doc],{type:"text/html"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="bozza-memento.html";
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+  flash($("#btnHTML"),"Scaricato ✓");
+}
+function exportPDF(){
+  if(!comp.sections.length){ flash($("#btnPDF"),"Bozza vuota"); return; }
+  const doc=pageDoc(comp.tokens,comp.sections,true);
+  const w=window.open("","_blank");
+  if(!w){ flash($("#btnPDF"),"Popup bloccato"); return; }
+  w.document.write(doc); w.document.close();
+  // translate print sheet before printing if EN active
+  if(window.__i18nApply && document.documentElement.lang==="en"){ try{ w.__lang="en"; }catch(e){} }
+  setTimeout(()=>{ w.focus(); w.print(); },600);
+}
+function flash(btn,msg){ const o=btn.textContent; btn.textContent=msg; setTimeout(()=>btn.textContent=o,1500); }
+function rgbToHex(rgb){
+  if(rgb.startsWith("#")) return rgb;
+  const m=rgb.match(/\d+/g); if(!m) return rgb;
+  return "#"+m.slice(0,3).map(x=>(+x).toString(16).padStart(2,"0")).join("");
+}
+
+/* ===================================================================
+   TOKENS · A ⇄ B scrubber
+   =================================================================== */
+let tokState={A:{pair:"inter-fraunces",accent:"#ff7950",radius:8,space:1},
+              B:{pair:"instrument-inter",accent:"#3b82f6",radius:16,space:1.15}},
+    tokActive="A", tokPos=0;
+function tokInit(){
+  const sel=$("#tokPairAB");
+  Object.keys(PAIRS).forEach(k=>{ const o=document.createElement("option"); o.value=k; o.textContent=PAIRS[k].label; sel.appendChild(o); });
+  const acc=$("#tokAccentAB");
+  ACCENTS.forEach(col=>{ const sw=document.createElement("button"); sw.className="swatch"; sw.style.background=col;
+    sw.addEventListener("click",()=>{ tokState[tokActive].accent=col; syncTokControls(); tokRender(); });
+    acc.appendChild(sw); });
+  const rad=$("#tokRadiusAB");
+  [["0","0"],["8","8"],["16","16"],["pill","999"]].forEach(([lab,val])=>{
+    const b=document.createElement("button"); b.textContent=lab; b.dataset.v=val;
+    b.addEventListener("click",()=>{ tokState[tokActive].radius=parseInt(val); syncTokControls(); tokRender(); });
+    rad.appendChild(b);
+  });
+  sel.addEventListener("change",()=>{ tokState[tokActive].pair=sel.value; tokRender(); });
+  $("#tokA").addEventListener("click",()=>{ tokActive="A"; setTokAB(); });
+  $("#tokB").addEventListener("click",()=>{ tokActive="B"; setTokAB(); });
+  $("#tokScrub").addEventListener("input",e=>{ tokPos=parseFloat(e.target.value); tokRender(); });
+  setTokAB();
+}
+function setTokAB(){
+  $("#tokA").setAttribute("aria-pressed",String(tokActive==="A"));
+  $("#tokB").setAttribute("aria-pressed",String(tokActive==="B"));
+  syncTokControls();
+}
+function syncTokControls(){
+  const s=tokState[tokActive];
+  $("#tokPairAB").value=s.pair;
+  $$("#tokAccentAB .swatch").forEach(sw=>sw.setAttribute("aria-pressed",String(rgbToHex(sw.style.background)===s.accent)));
+  $$("#tokRadiusAB button").forEach(b=>b.setAttribute("aria-pressed",String(parseInt(b.dataset.v)===s.radius)));
+}
+/* OKLCH-ish interpolation done simply in RGB for the demo (graceful, gradual) */
+function lerp(a,b,t){ return a+(b-a)*t; }
+function hexRGB(h){ h=rgbToHex(h).replace("#",""); return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; }
+function mixHex(a,b,t){ const A=hexRGB(a),B=hexRGB(b);
+  return "#"+A.map((v,i)=>Math.round(lerp(v,B[i],t)).toString(16).padStart(2,"0")).join(""); }
+function tokRender(){
+  // interpolated tokens
+  const A=tokState.A,B=tokState.B,t=tokPos;
+  const tokens={
+    pair: t<0.5?A.pair:B.pair,               // discrete → crossfade approximated by switch at 50 + opacity
+    accent: mixHex(A.accent,B.accent,t),
+    radius: Math.round(lerp(A.radius>=999?40:A.radius, B.radius>=999?40:B.radius, t)),
+    space: lerp(A.space,B.space,t),
+  };
+  // sample bozza: reuse current BUILD comp if it has sections, else a default 4-section demo
+  const sections = comp.sections.length ? comp.sections : DEMO_SECTIONS;
+  const frame=$("#tokFrame");
+  const doc=pageDoc(tokens,sections,true);
+  frame.srcdoc=doc;
+  frame.onload=()=>{ frame.style.height=frame.contentDocument.body.scrollHeight+"px"; };
+  // font crossfade cue: fade the whole preview slightly at the switch point
+  const dev=frame.closest(".device");
+  if(dev){ const near=Math.abs(t-0.5); dev.style.opacity=(0.82+0.18*(near*2)).toFixed(2); }
+  $("#tokScrub").style.background=`linear-gradient(90deg,${A.accent} 0%,${mixHex(A.accent,B.accent,.5)} 50%,${B.accent} 100%)`;
+}
+const DEMO_SECTIONS=[
+  {id:"nav-min",axes:{tone:"light"}},
+  {id:"hero-center",axes:{tone:"dark",dens:"air"}},
+  {id:"feature-grid",axes:{tone:"light",media:"si"}},
+  {id:"cta-band",axes:{tone:"accent"}},
+];
+
+/* ===================================================================
+   BOOT
+   =================================================================== */
+liveInit();
+defInit();
+buildInit();
+tokInit();
+
+</script>
+
+<script id="i18n">
+/* ================= i18n · IT / EN =================
+   Motore ereditato da visualref: traduzione esatta dei nodi di testo con
+   MutationObserver, ripristino IT da una Map viva. Salta SCRIPT/STYLE/TEXTAREA.
+   Novità di quest'app: i contenuti placeholder delle sezioni fanno parte del
+   dizionario (la bozza mostrata al cliente è tutta nella lingua scelta); il
+   codice nei pannelli LIVE non si traduce mai (è dentro <pre>/<code>). */
+(function(){
+"use strict";
+const M={
+/* --- guscio / viste --- */
+"Live · pattern in azione":"Live · patterns in action",
+"Pattern di interazione":"Interaction patterns",
+"Ogni pattern gira davvero nel foglio chiaro: passa il mouse, clicca, scrolla. I controlli riscrivono le custom property in tempo reale — è il banco ottico del web design.":
+ "Each pattern actually runs in the light sheet: hover, click, scroll. The controls rewrite the custom properties in real time — it's the optical bench of web design.",
+"Def · glossario del design":"Def · design glossary",
+"Vocabolario condiviso":"Shared vocabulary",
+"Le stesse parole per studio e cliente — dalla tipografia all'accessibilità. Cerca in italiano o in inglese, filtra per dominio.":
+ "The same words for studio and client — from typography to accessibility. Search in Italian or English, filter by domain.",
+"Build · il compositore":"Build · the compositor",
+"Bozza di pagina, come i Lego":"A page draft, like Lego",
+"Impila sezioni, cambia le loro varianti, muovi i token globali e guarda tutta la pagina ridisegnarsi. Il link è il salvataggio; l'HTML esportato è l'artefatto.":
+ "Stack sections, change their variants, move the global tokens and watch the whole page redraw. The link is the save; the exported HTML is the artifact.",
+"Tokens · confronto A ⇄ B":"Tokens · A ⇄ B comparison",
+"Due direzioni, uno scrubber":"Two directions, one scrubber",
+"Fissa due set di token sulla stessa bozza e interpola gradualmente tra loro. I numeri si interpolano, i font fanno crossfade — niente scatti a metà corsa. Il momento \"wow\" per il cliente indeciso.":
+ "Pin two token sets on the same draft and interpolate gradually between them. Numbers interpolate, fonts crossfade — no jumps at mid-run. The \"wow\" moment for the undecided client.",
+/* --- LIVE readouts --- */
+"Cosa fa?":"What it does",
+"In produzione":"In production",
+"Controlli live":"Live controls",
+"Nessun controllo — osserva il pattern.":"No controls — just watch the pattern.",
+"Copia":"Copy","Copiato ✓":"Copied ✓",
+/* --- LIVE categorie --- */
+"Micro-interazioni":"Micro-interactions","Motion":"Motion","Scroll":"Scroll",
+"Layout & tipografia":"Layout & type","Feedback":"Feedback",
+/* --- LIVE nomi pattern --- */
+"Button — stati hover":"Button — hover states","Bottone magnetico":"Magnetic button",
+"Ripple al click":"Click ripple","Toggle animato":"Animated toggle",
+"Input — focus ring":"Input — focus ring","Easing a confronto":"Easing compared",
+"Stagger di lista":"List stagger","Skeleton → contenuto":"Skeleton → content",
+"Reveal on scroll":"Reveal on scroll","Parallax a 2 livelli":"2-layer parallax",
+"Header sticky shrink":"Sticky header shrink","Fluid type — clamp()":"Fluid type — clamp()",
+"Griglia 12 colonne":"12-column grid","Variable font su hover":"Variable font on hover",
+"Toast":"Toast","Stati di caricamento":"Loading states","Validazione inline":"Inline validation",
+/* --- LIVE control labels --- */
+"Durata":"Duration","Sollevamento":"Lift","Easing":"Easing","Forza":"Strength",
+"Raggio d'azione":"Range","Opacità":"Opacity","Rimbalzo":"Bounce","Dimensione":"Size",
+"Spessore anello":"Ring width","Distanza":"Distance","Ritardo/elem.":"Delay/item",
+"Spostamento":"Shift","Velocità shimmer":"Shimmer speed","Profondità":"Depth","Soglia":"Threshold",
+"Minimo":"Minimum","Massimo":"Maximum","Colonne":"Columns","Gutter":"Gutter",
+"Peso base":"Base weight","Peso hover":"Hover weight","Permanenza":"Duration",
+"Posizione":"Position","Tipo":"Type","Quando valida":"Validate when",
+"nessuno":"none","morbido":"soft","marcato":"strong","basso":"bottom","alto":"top",
+"spinner":"spinner","progress":"progress","skeleton":"skeleton","digitando":"on type","al blur":"on blur",
+/* --- DEF --- */
+"Cerca un termine — italiano o inglese…":"Search a term — Italian or English…",
+"Nessun termine trovato.":"No terms found.","Tutti":"All",
+"Tipografia":"Typography","Colore":"Color","Layout":"Layout","UI pattern":"UI patterns",
+"UX":"UX","Accessibilità":"Accessibility","Front-end":"Front-end","Design system":"Design system","Workflow":"Workflow",
+/* --- BUILD ui --- */
+"Libreria — trascina o clicca":"Library — drag or click",
+"La bozza compare qui. Trascina una sezione dalla libreria, oppure cliccala per aggiungerla in fondo.":
+ "The draft appears here. Drag a section from the library, or click it to append it.",
+"Bozza vuota":"Empty draft",
+"Token globali":"Global tokens","Coppia tipografica":"Type pairing","Accent":"Accent",
+"Radius":"Radius","Spaziatura":"Spacing","Sezione selezionata":"Selected section",
+"Seleziona una sezione nell'anteprima per modificarne le varianti.":"Select a section in the preview to edit its variants.",
+"↗ Condividi":"↗ Share","Condividi":"Share","Link copiato ✓":"Link copied ✓",
+"↓ HTML":"↓ HTML","↓ PDF":"↓ PDF","Svuota":"Clear","Scaricato ✓":"Downloaded ✓",
+"Bozza vuota":"Empty draft","Popup bloccato":"Popup blocked",
+"▭ Desktop":"▭ Desktop","▯ Tablet":"▯ Tablet","▮ Mobile":"▮ Mobile",
+"✕ Rimuovi sezione":"✕ Remove section",
+/* varianti (assi) */
+"Tono":"Tone","Densità":"Density","Media":"Media","Icona":"Icon","Allineamento":"Alignment",
+"light":"light","dark":"dark","accent":"accent","air":"air","tight":"tight",
+"photo":"photo","illu":"illu","none":"none","si":"yes","no":"no","destra":"right","sinistra":"left",
+/* nomi sezioni */
+"Navbar minimale":"Minimal navbar","Navbar con CTA":"Navbar with CTA",
+"Hero testo + CTA":"Hero text + CTA","Hero split":"Hero split","Hero prodotto 3D":"3D product hero",
+"Feature grid 3-up":"3-up feature grid","Feature alternata":"Alternating feature",
+"Stats / numeri":"Stats / numbers","Logo wall":"Logo wall","Gallery / masonry":"Gallery / masonry",
+"Testo editoriale":"Editorial text","Pricing 3 colonne":"3-column pricing","Testimonial":"Testimonial",
+"FAQ accordion":"FAQ accordion","CTA band":"CTA band","Form contatti":"Contact form",
+"Newsletter":"Newsletter","Footer compatto":"Compact footer","Footer esteso":"Extended footer",
+"Navigazione":"Navigation","Hero":"Hero","Contenuto":"Content","Conversione":"Conversion","Chiusura":"Closing",
+/* descrizioni sezioni */
+"Logo a sinistra, poche voci a destra. Essenziale.":"Logo left, a few items right. Essential.",
+"Come la minimale, con un pulsante d'azione a destra.":"Like the minimal one, with an action button on the right.",
+"Titolo grande centrato, sottotitolo, due pulsanti.":"Big centered title, subtitle, two buttons.",
+"Titolo e CTA a sinistra, media a destra.":"Title and CTA left, media right.",
+"Placeholder per un prodotto 3D al centro, testo sopra.":"Placeholder for a 3D product centered, text above.",
+"Tre colonne, un beneficio ciascuna.":"Three columns, one benefit each.",
+"Testo e media che si alternano a zig-zag.":"Text and media alternating zig-zag.",
+"Quattro numeri che dicono la scala in un colpo.":"Four numbers that state the scale at a glance.",
+"La parete dei clienti: prova sociale immediata.":"The client wall: instant social proof.",
+"Griglia di lavori a moduli irregolari.":"A grid of work in irregular modules.",
+"Un blocco di testo lungo, ben impaginato.":"A long, well-set block of text.",
+"Tre piani affiancati, uno in evidenza.":"Three plans side by side, one highlighted.",
+"Una citazione forte con nome e ruolo.":"A strong quote with name and role.",
+"Domande e risposte in lista aperta.":"Questions and answers in an open list.",
+"Una fascia con un'unica azione forte.":"A band with a single strong action.",
+"Campi essenziali per farsi contattare.":"Essential fields to get contacted.",
+"Una riga: email + iscriviti.":"One line: email + subscribe.",
+"Logo, copyright, poche voci.":"Logo, copyright, a few items.",
+"Colonne di link, contatti, chiusura.":"Columns of links, contacts, closing.",
+/* --- contenuti placeholder delle sezioni (la bozza) --- */
+"Memento Studio":"Memento Studio","Studio":"Studio","Lavori":"Work","Info":"Info","Contatti":"Contacts",
+"Servizi":"Services","Parliamone":"Let's talk","Chi siamo":"About","Scopri lo studio":"Discover the studio",
+"Diamo forma alle idee, dal 3D al web.":"We give shape to ideas, from 3D to web.",
+"CGI, motion design ed esperienze interattive per marchi che vogliono distinguersi.":
+ "CGI, motion design and interactive experiences for brands that want to stand out.",
+"Inizia un progetto":"Start a project","Guarda i lavori":"See the work",
+"Uno studio full-service, un solo interlocutore.":"A full-service studio, a single point of contact.",
+"Dalla brand identity al 3D, dalla motion al codice: seguiamo l'intera filiera creativa.":
+ "From brand identity to 3D, from motion to code: we handle the whole creative chain.",
+"Il prodotto, in scena.":"The product, on stage.",
+"Ruota, esplora, configura — direttamente nel browser.":"Rotate, explore, configure — right in the browser.",
+"viewport 3D":"3D viewport",
+"Brand identity":"Brand identity","3D & CGI":"3D & CGI","Web & motion":"Web & motion",
+"Sistemi visivi che restano riconoscibili ovunque.":"Visual systems that stay recognizable anywhere.",
+"Prodotti fotorealistici senza set fisici.":"Photorealistic products without physical sets.",
+"Siti ed esperienze che si muovono con te.":"Sites and experiences that move with you.",
+"Dalla concept alla resa finale":"From concept to final render",
+"Copriamo l'intera pipeline: modellazione, look-dev, animazione, post.":
+ "We cover the whole pipeline: modeling, look-dev, animation, post.",
+"Interattivo, non solo guardato":"Interactive, not just watched",
+"Configuratori 3D ed esperienze web che l'utente tocca davvero.":
+ "3D configurators and web experiences the user actually touches.",
+"progetti consegnati":"projects delivered","anni di pipeline":"years of pipeline",
+"clienti in Italia":"clients in Italy","in-house":"in-house",
+"Hanno lavorato con noi":"They've worked with us","Lavori selezionati":"Selected work",
+"Crediamo che il 3D non debba sembrare 3D.":"We believe 3D shouldn't look like 3D.",
+"Ogni progetto parte da una domanda semplice: cosa deve sentire chi guarda? Da lì costruiamo luce, materiali e movimento perché la tecnica sparisca e resti solo l'immagine.":
+ "Every project starts from a simple question: what should the viewer feel? From there we build light, materials and motion so the technique disappears and only the image remains.",
+"La stessa cura vale per il web: interfacce che si tolgono di mezzo e lasciano parlare il contenuto.":
+ "The same care applies to the web: interfaces that get out of the way and let the content speak.",
+"Come lavoriamo insieme":"How we work together","Base":"Base","Full":"Full",
+"da 2k":"from 2k","da 6k":"from 6k","su misura":"custom",
+"Brand starter":"Brand starter","Il più scelto":"Most chosen","Progetto continuativo":"Ongoing project",
+"3 concept · 1 revisione":"3 concepts · 1 revision","Identity completa · 3D · web":"Full identity · 3D · web",
+"Team dedicato · retainer":"Dedicated team · retainer","Scegli":"Choose",
+"\"Hanno trasformato un brief confuso in un sistema visivo che usiamo ogni giorno. Un solo interlocutore per tutto.\"":
+ "\"They turned a confused brief into a visual system we use every day. A single point of contact for everything.\"",
+"Marketing lead, azienda cliente":"Marketing lead, client company",
+"Domande frequenti":"Frequent questions",
+"Quanto dura un progetto?":"How long does a project take?",
+"Da poche settimane per una singola resa a qualche mese per un sistema completo.":
+ "From a few weeks for a single render to a few months for a complete system.",
+"Lavorate anche da remoto?":"Do you also work remotely?",
+"Sì. Seguiamo clienti in tutta Italia con revisioni condivise online.":
+ "Yes. We serve clients across Italy with shared online reviews.",
+"Fate anche il codice?":"Do you also do the code?",
+"Sì: dal design allo sviluppo front-end, tutto in-house.":
+ "Yes: from design to front-end development, all in-house.",
+"Pronti a dare forma alla vostra idea?":"Ready to give shape to your idea?",
+"Raccontateci il progetto: rispondiamo entro un giorno.":"Tell us about the project: we reply within a day.",
+"Scrivici ora":"Write to us","Parliamo del progetto":"Let's talk about the project",
+"Nome":"Name","Email":"Email","Raccontaci in due righe…":"Tell us in two lines…","Invia":"Send",
+"Resta aggiornato":"Stay updated","Un lavoro nuovo, una volta al mese. Niente spam.":
+ "A new piece of work, once a month. No spam.","Iscriviti":"Subscribe",
+"Privacy":"Privacy","Instagram":"Instagram","Behance":"Behance","LinkedIn":"LinkedIn",
+"Milano, per clienti in tutta Italia.":"Milan, for clients across Italy.",
+"CGI, motion e web design. Milano, per clienti in tutta Italia.":
+ "CGI, motion and web design. Milan, for clients across Italy.",
+"Social":"Social","Brand":"Brand","3D":"3D","Web":"Web",
+/* --- TOKENS --- */
+"Stato A":"State A","Stato B":"State B",
+"Modifica i token qui sotto per lo stato attivo, poi trascina lo scrubber.":
+ "Edit the tokens below for the active state, then drag the scrubber.",
+"Lo scrubber interpola tutto in modo graduale su tutta la corsa: radius e spaziatura numericamente, i font con un crossfade.":
+ "The scrubber interpolates everything gradually across the whole run: radius and spacing numerically, fonts with a crossfade.",
+/* --- LIVE demo (facoltativo, contenuti brevi) --- */
+"Continua":"Continue","Annulla":"Cancel","Scopri":"Discover","Clicca qui":"Click here",
+"Indirizzo email":"Email address","▶ Riproduci":"▶ Play","▶ Rigioca":"▶ Replay","▶ Ricarica":"▶ Reload",
+"Design che respira":"Design that breathes","Salva le modifiche":"Save changes","Modifiche salvate":"Changes saved",
+"caricamento…":"loading…","Email valida":"Valid email","Formato non valido":"Invalid format",
+"Scrivi un'email (prova con e senza @)":"Type an email (try with and without @)",
+"↓ scrolla dentro il riquadro":"↓ scroll inside the box","↓ scrolla":"↓ scroll",
+"↓ scrolla per rimpicciolire l'header":"↓ scroll to shrink the header",
+"↔ trascina l'angolo in basso a destra del riquadro":"↔ drag the box's bottom-right corner",
+"Diamo forma alle idee":"We give shape to ideas",
+"Il primo piano scorre normale":"The foreground scrolls normally",
+"Lo sfondo si muove più lento: la scena acquista strati.":"The background moves slower: the scene gains layers.",
+"Due velocità":"Two speeds","La differenza tra i piani è tutta la magia.":"The difference between planes is all the magic.",
+"Lo studio si occupa di CGI, motion e web design. Scrolla e osserva l'header contrarsi mantenendo la navigazione a portata.":
+ "The studio handles CGI, motion and web design. Scroll and watch the header contract while keeping navigation within reach.",
+"Progetto · brand identity":"Project · brand identity","Progetto · sito e-commerce":"Project · e-commerce site",
+"Progetto · motion reel":"Project · motion reel","Progetto · design system":"Project · design system",
+"CGI · motion · web design":"CGI · motion · web design",
+"Hero":"Hero","Feature grid":"Feature grid","Testimonial":"Testimonial","CTA finale":"Final CTA",
+"La prima impressione, above the fold.":"The first impression, above the fold.",
+"Tre colonne, un beneficio ciascuna.":"Three columns, one benefit each.",
+"La prova sociale al momento giusto.":"Social proof at the right moment.",
+"Una sola azione, chiara.":"A single, clear action.",
+};
+/* composed strings with numbers */
+const RX=[
+ [/^(\d+) termini$/, (m,n)=>n+" terms"],
+ [/^BOZZA · /, ()=>"DRAFT · "],
+ [/ sezioni · tono chiaro · /, ()=>" sections · light tone · "],
+ [/ sezioni · tono scuro · /, ()=>" sections · dark tone · "],
+ [/ sezioni · tono accent · /, ()=>" sections · accent tone · "],
+];
+/* mixed-content lead paragraphs handled by innerHTML swap */
+const ELEMS=[];
+const ATTRS=["placeholder","title","aria-label"];
+let lang="it";
+const ORIG=new Map(), ORIG_A=new Map(), ORIG_E=new Map();
+
+function tr(core){
+  if(M[core]!=null) return M[core];
+  let out=core,hit=false;
+  for(const [re,fn] of RX){ const m=core.match(re); if(m){ const r=fn.apply(null,m); if(r!=null){ out=core.replace(re,r); hit=true; core=out; } } }
+  return hit?out:null;
+}
+function trNode(n){ const v=n.nodeValue,core=v.trim(); if(!core) return;
+  const t=tr(core); if(t!=null&&t!==core){ if(!ORIG.has(n)) ORIG.set(n,v); n.nodeValue=v.replace(core,t); } }
+function trAttrs(el){ ATTRS.forEach(a=>{ const v=el.getAttribute&&el.getAttribute(a); if(!v) return;
+  const t=tr(v.trim()); if(t!=null&&t!==v.trim()){ const rec=ORIG_A.get(el)||{}; if(!(a in rec)){rec[a]=v;ORIG_A.set(el,rec);} el.setAttribute(a,t); } }); }
+const SKIP={SCRIPT:1,STYLE:1,TEXTAREA:1,NOSCRIPT:1,PRE:1,CODE:1,IFRAME:1};
+function walk(root){
+  if(root.nodeType===3){ const p=root.parentNode; if(!p||SKIP[p.nodeName]) return; trNode(root); return; }
+  if(root.nodeType!==1&&root.nodeType!==9) return;
+  if(root.nodeType===1){ if(SKIP[root.nodeName]) return; trAttrs(root); }
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT|NodeFilter.SHOW_ELEMENT,{
+    acceptNode:n=>{ const el=n.nodeType===3?n.parentNode:n; return (el&&SKIP[el.nodeName])?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT; }});
+  let n; while(n=w.nextNode()){ if(n.nodeType===3) trNode(n); else trAttrs(n); }
+}
+const CFG={childList:true,characterData:true,subtree:true};
+const mo=new MutationObserver(muts=>{
+  if(lang!=="en") return; mo.disconnect();
+  muts.forEach(m=>{ if(m.type==="characterData"){ ORIG.delete(m.target); trNode(m.target); }
+    m.addedNodes&&m.addedNodes.forEach(nd=>walk(nd)); });
+  mo.takeRecords(); mo.observe(document.body,CFG);
+});
+function setLang(l){
+  if(l===lang) return; mo.disconnect();
+  if(l==="en"){ ELEMS.forEach(([sel,en])=>{ const el=document.querySelector(sel);
+      if(el){ if(!ORIG_E.has(el)) ORIG_E.set(el,el.innerHTML); el.innerHTML=en; } });
+    walk(document.body); mo.takeRecords(); mo.observe(document.body,CFG);
+  }else{
+    ORIG.forEach((v,n)=>{ if(n.isConnected) n.nodeValue=v; }); ORIG.clear();
+    ORIG_A.forEach((rec,el)=>{ if(el.isConnected) for(const a in rec) el.setAttribute(a,rec[a]); }); ORIG_A.clear();
+    ORIG_E.forEach((v,el)=>{ if(el.isConnected) el.innerHTML=v; }); ORIG_E.clear();
+  }
+  lang=l; document.documentElement.lang=l;
+  const bi=document.getElementById("langIT"),be=document.getElementById("langEN");
+  if(bi) bi.setAttribute("aria-pressed",String(l==="it"));
+  if(be) be.setAttribute("aria-pressed",String(l==="en"));
+  try{ localStorage.setItem("mdr_lang",l); }catch(e){}
+  /* re-render the BUILD preview so the iframe draft picks up the language too */
+  try{ if(typeof buildRender==="function") buildRender(); if(typeof tokRender==="function") tokRender(); }catch(e){}
+}
+window.__i18nApply=root=>{ if(lang==="en") walk(root||document.body); };
+window.__i18nDict=M;   /* used by iframe draft translation */
+document.getElementById("langIT").onclick=()=>setLang("it");
+document.getElementById("langEN").onclick=()=>setLang("en");
+let saved=null; try{ saved=localStorage.getItem("mdr_lang"); }catch(e){}
+if(saved==="en") setLang("en");
+})();
+</script>
+
+</body>
+</html>
