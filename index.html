@@ -275,6 +275,11 @@
   .swatch:hover{transform:scale(1.08)}
   .swatch[aria-pressed="true"]{border-color:var(--txt)}
   .props-empty{padding:30px 18px;color:var(--txt-3);font-size:12.5px;line-height:1.6;text-align:center}
+  .fxgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .fxbtn{appearance:none;border:1px solid var(--line-2);background:transparent;color:var(--txt-2);
+    padding:8px 6px;border-radius:7px;font-size:11px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+  .fxbtn:hover{color:var(--txt);border-color:var(--txt-3)}
+  .fxbtn[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:#17130f}
   .sel-name{font-family:var(--disp);font-size:15px;color:var(--txt);margin-bottom:2px}
   .sel-desc{font-size:11.5px;color:var(--txt-2);line-height:1.5;margin-bottom:14px}
   .del-sec{border:0;background:transparent;color:var(--accent-dim);font-size:11px;cursor:pointer;
@@ -449,6 +454,8 @@
               <button id="vpMob" aria-pressed="false" title="Mobile 390px">▮ Mobile</button>
             </div>
             <button class="tbtn" id="btnShare" title="Copia link della bozza">↗ Condividi</button>
+            <button class="tbtn" id="btnImgMode" title="Immagini: SVG generati o foto reali">🖼 SVG</button>
+            <button class="tbtn" id="btnImgShuffle" title="Rigenera le immagini">🔀 Immagini</button>
             <button class="tbtn" id="btnHTML" title="Esporta HTML autosufficiente">↓ HTML</button>
             <button class="tbtn" id="btnPDF" title="Stampa / PDF">↓ PDF</button>
             <button class="tbtn ghost" id="btnClear" title="Svuota la bozza">Svuota</button>
@@ -506,7 +513,8 @@
             <button id="tokA" aria-pressed="true">Stile A</button>
             <button id="tokB" aria-pressed="false">Stile B</button>
           </div>
-          <button class="tbtn" id="tokDice" title="Genera uno stile casuale per la direzione attiva" style="margin-left:6px">🎲 Varia</button>
+          <button class="tbtn" id="tokDice" title="Genera uno stile casuale coerente con la categoria" style="margin-left:6px">🎲 Varia</button>
+          <button class="tbtn" id="tokImgShuffle" title="Rigenera le immagini" style="margin-left:4px">🔀 Img</button>
           <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
             <select class="pairsel" id="tokPairAB" style="width:auto" title="Coppia tipografica"></select>
             <div class="accent-row" id="tokAccentAB"></div>
@@ -1395,6 +1403,117 @@ const PATTERNS=[
 ];
 
 /* ===================================================================
+   IMG · sistema immagini placeholder — ibrido SVG / foto
+   - IMG_MODE: "svg" (offline, generato) | "photo" (foto reali, serve rete)
+   - ogni immagine è tematizzata per CATEGORIA (food, room, product, portrait,
+     landscape, editorial, abstract) e randomizzata da un seed deterministico
+   =================================================================== */
+let IMG_MODE="svg";           // impostato dall'app (toggle in BUILD/TOKENS)
+let IMG_SEED=1;               // cambia per rigenerare tutte le immagini
+function imgSeed(n){ IMG_SEED=n; }
+/* PRNG deterministico da seed+indice così la stessa bozza resta stabile */
+function rng(a){ let s=a>>>0; return ()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
+
+/* palette per categoria — coppie (base, accentuale) in HSL */
+const IMG_THEME={
+  food:      [[18,62,52],[36,70,58],[8,55,46]],
+  room:      [[28,22,60],[210,18,52],[36,26,66]],
+  product:   [[220,12,42],[260,20,54],[200,16,48]],
+  portrait:  [[24,30,58],[340,24,60],[16,34,52]],
+  landscape: [[200,40,55],[160,38,48],[220,44,60]],
+  editorial: [[240,10,46],[280,16,56],[210,14,50]],
+  fashion:   [[330,24,56],[20,28,58],[280,20,52]],
+  tech:      [[210,60,54],[190,64,50],[230,56,58]],
+  abstract:  [[265,45,58],[190,50,54],[330,40,56]],
+};
+function hsl(h,s,l,a){ return `hsla(${h},${s}%,${l}%,${a==null?1:a})`; }
+
+/* soggetti SVG per categoria — disegnano una "scena" riconoscibile */
+function imgScene(cat,w,h,r){
+  const pick=IMG_THEME[cat]||IMG_THEME.abstract;
+  const c0=pick[Math.floor(r()*pick.length)], c1=pick[Math.floor(r()*pick.length)];
+  const [h0,s0,l0]=c0,[h1,s1,l1]=c1;
+  const bg=`<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="${hsl(h0,s0,l0)}"/><stop offset="1" stop-color="${hsl(h1,s1,Math.max(18,l1-14))}"/></linearGradient></defs>
+    <rect width="${w}" height="${h}" fill="url(#g)"/>`;
+  const cx=w/2, cy=h/2;
+  let s="";
+  if(cat==="food"){
+    // piatto visto dall'alto
+    s=`<circle cx="${cx}" cy="${cy}" r="${Math.min(w,h)*0.42}" fill="${hsl(h0,20,94,.9)}"/>
+       <circle cx="${cx}" cy="${cy}" r="${Math.min(w,h)*0.34}" fill="${hsl(h1,30,90)}"/>
+       <circle cx="${cx}" cy="${cy}" r="${Math.min(w,h)*0.2}" fill="${hsl(h0,s0,l0)}"/>
+       ${Array.from({length:6}).map((_,i)=>{const a=i/6*6.28+r();const rr=Math.min(w,h)*0.26;return `<circle cx="${cx+Math.cos(a)*rr}" cy="${cy+Math.sin(a)*rr}" r="${6+r()*10}" fill="${hsl(h1,s1,Math.min(70,l1+12))}"/>`;}).join("")}`;
+  } else if(cat==="room"){
+    // stanza: finestra + orizzonte
+    s=`<rect x="0" y="${h*0.62}" width="${w}" height="${h*0.38}" fill="${hsl(h0,s0,Math.max(20,l0-16))}"/>
+       <rect x="${w*0.58}" y="${h*0.14}" width="${w*0.32}" height="${h*0.5}" rx="4" fill="${hsl(h1,40,82,.9)}"/>
+       <line x1="${w*0.74}" y1="${h*0.14}" x2="${w*0.74}" y2="${h*0.64}" stroke="${hsl(h0,20,40,.5)}" stroke-width="3"/>
+       <rect x="${w*0.1}" y="${h*0.5}" width="${w*0.32}" height="${h*0.2}" rx="6" fill="${hsl(h1,s1,Math.min(72,l1+8))}"/>`;
+  } else if(cat==="product"){
+    // prodotto centrato con ombra
+    s=`<ellipse cx="${cx}" cy="${h*0.78}" rx="${w*0.24}" ry="${h*0.05}" fill="rgba(0,0,0,.22)"/>
+       <rect x="${cx-w*0.16}" y="${cy-h*0.22}" width="${w*0.32}" height="${h*0.44}" rx="${Math.min(28,w*0.05)}" fill="${hsl(h0,s0,Math.min(66,l0+8))}"/>
+       <rect x="${cx-w*0.16}" y="${cy-h*0.22}" width="${w*0.32}" height="${h*0.16}" rx="${Math.min(28,w*0.05)}" fill="${hsl(h1,s1,Math.min(74,l1+16))}"/>`;
+  } else if(cat==="portrait"){
+    // ritratto stilizzato
+    s=`<rect width="${w}" height="${h}" fill="${hsl(h0,s0,l0)}"/>
+       <circle cx="${cx}" cy="${h*0.42}" r="${Math.min(w,h)*0.2}" fill="${hsl(h1,28,72)}"/>
+       <path d="M${cx-w*0.22} ${h} Q${cx} ${h*0.56} ${cx+w*0.22} ${h} Z" fill="${hsl(h1,s1,Math.min(70,l1+10))}"/>`;
+  } else if(cat==="landscape"){
+    s=`<rect width="${w}" height="${h}" fill="${hsl(h0,s0,Math.min(70,l0+8))}"/>
+       <circle cx="${w*0.74}" cy="${h*0.28}" r="${Math.min(w,h)*0.12}" fill="${hsl(h1,60,80,.9)}"/>
+       <path d="M0 ${h} L${w*0.3} ${h*0.52} L${w*0.5} ${h*0.72} L${w*0.72} ${h*0.44} L${w} ${h*0.66} L${w} ${h} Z" fill="${hsl(h1,s1,Math.max(22,l1-10))}"/>
+       <path d="M0 ${h} L${w*0.2} ${h*0.7} L${w*0.44} ${h*0.85} L${w*0.68} ${h*0.62} L${w} ${h*0.82} L${w} ${h} Z" fill="${hsl(h0,s0,Math.max(16,l0-18))}"/>`;
+  } else if(cat==="fashion"){
+    s=`<rect width="${w}" height="${h}" fill="${hsl(h0,s0,l0)}"/>
+       <rect x="${cx-w*0.13}" y="${h*0.2}" width="${w*0.26}" height="${h*0.66}" rx="${w*0.13}" fill="${hsl(h1,s1,Math.min(72,l1+10))}"/>
+       <circle cx="${cx}" cy="${h*0.26}" r="${Math.min(w,h)*0.1}" fill="${hsl(h1,26,74)}"/>`;
+  } else if(cat==="tech"){
+    // griglia astratta hi-tech
+    s=`<rect width="${w}" height="${h}" fill="${hsl(h0,s0,Math.max(14,l0-24))}"/>
+       ${Array.from({length:5}).map((_,i)=>`<rect x="${w*0.1+i*w*0.16}" y="${h*(0.3+r()*0.3)}" width="${w*0.1}" height="${h*0.4}" rx="4" fill="${hsl(h1,s1,l1,.7)}"/>`).join("")}
+       <circle cx="${w*0.5}" cy="${h*0.5}" r="${Math.min(w,h)*0.06}" fill="${hsl(h1,70,64)}"/>`;
+  } else if(cat==="editorial"){
+    s=`<rect width="${w}" height="${h}" fill="${hsl(h0,s0,l0)}"/>
+       ${Array.from({length:5}).map((_,i)=>`<rect x="${w*0.14}" y="${h*(0.24+i*0.12)}" width="${w*(0.4+r()*0.3)}" height="6" rx="3" fill="${hsl(h1,20,90,.6)}"/>`).join("")}
+       <rect x="${w*0.62}" y="${h*0.22}" width="${w*0.24}" height="${h*0.5}" rx="6" fill="${hsl(h1,s1,Math.min(72,l1+12))}"/>`;
+  } else {
+    // abstract
+    s=`${Array.from({length:4}).map((_,i)=>{const rr=(0.1+r()*0.24);return `<circle cx="${w*r()}" cy="${h*r()}" r="${Math.min(w,h)*rr}" fill="${hsl(pick[i%pick.length][0],pick[i%pick.length][1],pick[i%pick.length][2],.55)}"/>`;}).join("")}`;
+  }
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"
+    style="position:absolute;inset:0;width:100%;height:100%">${bg}${s}</svg>`;
+}
+
+/* mappa categoria pagina → categoria immagine dominante */
+const CAT_IMG={hospitality:"room",restaurant:"food",ecommerce:"product",insurance:"editorial",
+  blog:"editorial",saas:"tech",app:"tech",portfolio:"abstract",agency:"abstract",player:"landscape",store:"product"};
+
+/* contatore per dare a ogni immagine un seed diverso ma deterministico */
+let _imgN=0;
+let IMG_PAGECAT="";   // categoria dominante della pagina (da preset); fallback per ph()
+function resetImg(){ _imgN=0; }
+function setPageCat(c){ IMG_PAGECAT=c||""; }
+/* ph(h, fallbackColor, accent, category?) — se category assente usa IMG_PAGECAT, poi "abstract" */
+function ph(h,c,accent,cat){
+  const idx=_imgN++;
+  const category=cat||IMG_PAGECAT||"abstract";
+  const r=rng((IMG_SEED*7919)+(idx*104729)+category.length*31);
+  const box=`border-radius:calc(var(--radius));overflow:hidden;position:relative;height:${h}px;background:${c}`;
+  if(IMG_MODE==="photo"){
+    // foto reale deterministica da picsum (serve rete). Fallback: la scena SVG resta sotto.
+    const pid=((IMG_SEED*131+idx*17)%1000)+1;
+    const url=`https://picsum.photos/seed/${category}${pid}/640/480`;
+    return `<div style="${box}">
+      ${imgScene(category,400,300,r)}
+      <img src="${url}" loading="lazy" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"
+        onerror="this.style.display='none'"></div>`;
+  }
+  return `<div style="${box}">${imgScene(category,400,300,r)}</div>`;
+}
+
+/* ===================================================================
    BUILD · libreria sezioni — ognuna: {id,cat,name,desc,axes,tpl(state,tokens)}
    tpl restituisce HTML che vive dentro l'iframe anteprima.
    Le varianti si applicano via attributi data-* sul nodo sezione.
@@ -1422,20 +1541,6 @@ function tone(t){
 }
 /* density → padding scale */
 function dens(d,base){ return d==="tight"?base*0.62:base; }
-/* richer media placeholder — soft gradient + subtle mountain/photo glyph, on-brand */
-function ph(h,c,accent){
-  const a=accent||"var(--accent)";
-  return `<div style="height:${h}px;border-radius:calc(var(--radius));overflow:hidden;position:relative;
-    background:linear-gradient(135deg,${c} 0%,rgba(128,128,128,.10) 100%)">
-    <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%;opacity:.5">
-      <defs><linearGradient id="pg" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="${a}" stop-opacity=".25"/><stop offset="1" stop-color="${a}" stop-opacity="0"/></linearGradient></defs>
-      <rect width="400" height="300" fill="url(#pg)"/>
-      <circle cx="300" cy="80" r="34" fill="${a}" opacity=".35"/>
-      <path d="M0 300 L120 170 L210 240 L300 150 L400 250 L400 300 Z" fill="${a}" opacity=".22"/>
-      <path d="M0 300 L90 220 L180 270 L280 200 L400 280 L400 300 Z" fill="${a}" opacity=".14"/>
-    </svg></div>`;
-}
 
 const SECTIONS=[
 /* ---------- NAV ---------- */
@@ -1490,7 +1595,7 @@ const SECTIONS=[
         <p style="font-family:${t.body};font-size:16px;line-height:1.65;color:${c.mut};margin:0 0 26px">Dalla brand identity al 3D, dalla motion al codice: seguiamo l'intera filiera creativa.</p>
         <a style="background:var(--accent);color:#fff;padding:13px 26px;border-radius:var(--radius);font-family:${t.body};font-weight:600;font-size:15px;display:inline-block">Scopri lo studio</a></div>`;
     let media="";
-    if(s.media==="photo") media=`<div style="flex:1;min-width:0">${ph(320,c.card)}</div>`;
+    if(s.media==="photo") media=`<div style="flex:1;min-width:0">${ph(320,c.card,null,"abstract")}</div>`;
     else if(s.media==="illu") media=`<div style="flex:1;min-width:0;border-radius:var(--radius);height:320px;background:radial-gradient(circle at 40% 30%,var(--accent),transparent 60%),${c.card}"></div>`;
     const order = s.align==="sinistra" ? media+txt : txt+media;
     return `<section data-tone="${s.tone}" data-media="${s.media}" style="background:${c.bg};color:${c.fg};padding:calc(80px*var(--sp)) 40px">
@@ -1540,7 +1645,7 @@ const SECTIONS=[
   axes:[{id:"tone",label:"Tono",opts:["light","dark"],def:"light"}],
   tpl(s,t){ const c=tone(s.tone);
     const row=(h,p,flip)=>`<div style="display:flex;gap:48px;align-items:center;flex-wrap:wrap;${flip?"flex-direction:row-reverse":""}">
-      <div style="flex:1;min-width:220px">${ph(240,c.card)}</div>
+      <div style="flex:1;min-width:220px">${ph(240,c.card,null,"abstract")}</div>
       <div style="flex:1;min-width:220px">
         <h3 style="font-family:${t.head};font-weight:600;font-size:26px;margin:0 0 12px">${h}</h3>
         <p style="font-family:${t.body};font-size:15px;line-height:1.65;color:${c.mut};margin:0">${p}</p></div></div>`;
@@ -1587,7 +1692,7 @@ const SECTIONS=[
     return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(70px*var(--sp)) 40px">
       <h2 style="font-family:${t.head};font-weight:600;font-size:30px;text-align:center;margin:0 0 34px">Lavori selezionati</h2>
       <div style="max-width:1000px;margin:0 auto;columns:3;column-gap:16px">
-        ${hs.map(h=>`<div style="break-inside:avoid;margin-bottom:16px">${ph(h,c.card)}</div>`).join("")}
+        ${hs.map((h,gi)=>`<div style="break-inside:avoid;margin-bottom:16px">${ph(h,c.card,null,["abstract","landscape","fashion","product","editorial","room"][gi%6])}</div>`).join("")}
       </div></section>`; }},
 
 { id:"editorial", cat:"content", name:"Testo editoriale",
@@ -1781,8 +1886,8 @@ const SECTIONS=[
     return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(48px*var(--sp)) 40px">
       <div style="max-width:960px;margin:0 auto;display:grid;grid-template-columns:1.6fr 1fr;gap:24px">
         <div>
-          <div style="border-radius:calc(var(--radius)*1.2);overflow:hidden">${ph(260,c.card)}</div>
-          <div style="display:flex;gap:8px;margin-top:10px">${Array.from({length:shots}).map(()=>`<div style="flex:1;border-radius:6px;overflow:hidden">${ph(56,c.card)}</div>`).join("")}</div>
+          <div style="border-radius:calc(var(--radius)*1.2);overflow:hidden">${ph(260,c.card,null,"product")}</div>
+          <div style="display:flex;gap:8px;margin-top:10px">${Array.from({length:shots}).map(()=>`<div style="flex:1;border-radius:6px;overflow:hidden">${ph(56,c.card,null,"product")}</div>`).join("")}</div>
         </div>
         <div>
           <div style="font-family:${t.head};font-size:26px;font-weight:600;margin-bottom:8px">Nome del titolo</div>
@@ -1853,7 +1958,7 @@ const SECTIONS=[
             <a style="border:1.5px solid ${c.line};color:${c.fg};padding:13px 24px;border-radius:var(--radius);font-family:${t.body};font-weight:600;font-size:15px">Le camere</a></div></div></div>
       <div style="max-width:1000px;margin:0 auto;padding:calc(48px*var(--sp)) 40px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
         ${rooms.map(([r,p])=>`<div style="border-radius:calc(var(--radius)*1.3);overflow:hidden;border:1px solid ${c.line}">
-          ${ph(150,c.card)}<div style="padding:14px"><div style="font-family:${t.head};font-size:17px;font-weight:600">${r}</div>
+          ${ph(150,c.card,null,"room")}<div style="padding:14px"><div style="font-family:${t.head};font-size:17px;font-weight:600">${r}</div>
           <div style="font-family:${t.body};font-size:14px;color:var(--accent);margin-top:4px">${p} / notte</div></div></div>`).join("")}
       </div></section>`; }},
 
@@ -1910,7 +2015,7 @@ const SECTIONS=[
         <div style="display:flex;gap:12px;align-items:center;margin-bottom:28px">
           <div style="width:40px;height:40px;border-radius:50%;background:var(--accent)"></div>
           <div style="font-family:${t.body};font-size:13px"><b>Gian & il team</b><span style="color:${c.mut}"> · 12 marzo 2026</span></div></div>
-        <div style="border-radius:calc(var(--radius)*1.3);overflow:hidden;margin-bottom:28px">${ph(280,c.card)}</div>
+        <div style="border-radius:calc(var(--radius)*1.3);overflow:hidden;margin-bottom:28px">${ph(280,c.card,null,"editorial")}</div>
         <p style="font-family:${t.body};font-size:18px;line-height:1.75;color:${c.fg};margin:0 0 18px">Ogni progetto parte da una domanda semplice: cosa deve sentire chi guarda? Da lì costruiamo luce, materiali e movimento perché la tecnica sparisca.</p>
         <p style="font-family:${t.body};font-size:17px;line-height:1.75;color:${c.mut};margin:0 0 18px">La resa fotorealistica non è il fine, è il mezzo. Quando funziona, lo spettatore non pensa "che bel 3D" — pensa soltanto all'oggetto, al desiderio, alla storia.</p>
         <h2 style="font-family:${t.head};font-size:24px;font-weight:600;margin:32px 0 12px">Il dettaglio che fa la differenza</h2>
@@ -1937,49 +2042,49 @@ const SECTIONS=[
 /* ================= PRESET DI PAGINA — pagine intere pronte =================
    Ogni preset: {id,name,desc,tokens?,sections:[{id,axes}]} */
 const PRESETS=[
- { id:"p-blog", name:"Blog / Magazine", desc:"Testata editoriale, articolo, correlati",
+ { id:"p-blog", cat:"editorial", name:"Blog / Magazine", desc:"Testata editoriale, articolo, correlati",
    tokens:{pair:"inter-fraunces",accent:"#ff7950",radius:8,space:1},
    sections:[{id:"nav-min",axes:{tone:"light"}},{id:"sec-blogpost",axes:{tone:"light"}},
      {id:"comp-cards",axes:{tone:"light",cols:"3"}},{id:"newsletter",axes:{tone:"dark"}},{id:"footer-min",axes:{tone:"dark"}}]},
- { id:"p-hospitality", name:"Hospitality / Hotel", desc:"Relais sul lago: camere, servizi, prenota",
+ { id:"p-hospitality", cat:"room", name:"Hospitality / Hotel", desc:"Relais sul lago: camere, servizi, prenota",
    tokens:{pair:"instrument-inter",accent:"#a88b5c",radius:4,space:1.1},
    sections:[{id:"nav-cta",axes:{tone:"light"}},{id:"sec-hospitality",axes:{tone:"light"}},
      {id:"comp-slider",axes:{tone:"light"}},{id:"stats",axes:{tone:"accent"}},{id:"testimonial",axes:{tone:"light"}},
      {id:"cta-band",axes:{tone:"accent"}},{id:"footer-big",axes:{tone:"dark"}}]},
- { id:"p-restaurant", name:"Ristorante", desc:"Osteria: menu, atmosfera, prenotazione",
+ { id:"p-restaurant", cat:"food", name:"Ristorante", desc:"Osteria: menu, atmosfera, prenotazione",
    tokens:{pair:"instrument-inter",accent:"#c1543a",radius:2,space:1.05},
    sections:[{id:"nav-min",axes:{tone:"dark"}},{id:"sec-restaurant",axes:{tone:"dark"}},
      {id:"comp-graphic",axes:{tone:"dark"}},{id:"testimonial",axes:{tone:"accent"}},{id:"contact",axes:{tone:"dark"}},{id:"footer-min",axes:{tone:"dark"}}]},
- { id:"p-insurance", name:"Assicurazione", desc:"Fiducia, preventivo, coperture, FAQ",
+ { id:"p-insurance", cat:"editorial", name:"Assicurazione", desc:"Fiducia, preventivo, coperture, FAQ",
    tokens:{pair:"space-inter",accent:"#2f6fed",radius:10,space:1},
    sections:[{id:"nav-cta",axes:{tone:"light"}},{id:"sec-insurance",axes:{tone:"light"}},
      {id:"feature-grid",axes:{tone:"light",media:"si"}},{id:"stats",axes:{tone:"dark"}},
      {id:"faq",axes:{tone:"light"}},{id:"cta-band",axes:{tone:"accent"}},{id:"footer-big",axes:{tone:"dark"}}]},
- { id:"p-player", name:"Video / Player (YouTube)", desc:"Player, canale, video correlati",
+ { id:"p-player", cat:"landscape", name:"Video / Player (YouTube)", desc:"Player, canale, video correlati",
    tokens:{pair:"inter-inter",accent:"#ff0033",radius:12,space:.95},
    sections:[{id:"nav-min",axes:{tone:"dark"}},{id:"comp-player",axes:{tone:"dark"}},
      {id:"comp-chips",axes:{tone:"dark"}},{id:"comp-cards",axes:{tone:"dark",cols:"4"}},{id:"footer-min",axes:{tone:"dark"}}]},
- { id:"p-store", name:"Store / Game (Steam)", desc:"Scheda prodotto, gallery, correlati",
+ { id:"p-store", cat:"product", name:"Store / Game (Steam)", desc:"Scheda prodotto, gallery, correlati",
    tokens:{pair:"space-inter",accent:"#66c0f4",radius:6,space:1},
    sections:[{id:"nav-cta",axes:{tone:"dark"}},{id:"comp-store",axes:{tone:"dark"}},
      {id:"comp-scrollfx",axes:{tone:"dark"}},{id:"comp-cards",axes:{tone:"dark",cols:"4"}},
      {id:"pricing",axes:{tone:"dark"}},{id:"footer-big",axes:{tone:"dark"}}]},
- { id:"p-saas", name:"SaaS / Landing", desc:"Prodotto software: hero, feature, prezzi",
+ { id:"p-saas", cat:"tech", name:"SaaS / Landing", desc:"Prodotto software: hero, feature, prezzi",
    tokens:{pair:"space-inter",accent:"#7c5cff",radius:12,space:1},
    sections:[{id:"nav-cta",axes:{tone:"dark"}},{id:"hero-center",axes:{tone:"dark",dens:"air"}},
      {id:"logowall",axes:{tone:"dark"}},{id:"feature-zig",axes:{tone:"dark"}},{id:"comp-scrollfx",axes:{tone:"dark"}},
      {id:"pricing",axes:{tone:"light"}},{id:"faq",axes:{tone:"light"}},{id:"cta-band",axes:{tone:"accent"}},{id:"footer-big",axes:{tone:"dark"}}]},
- { id:"p-app", name:"App mobile", desc:"Download app: hero, feature, store",
+ { id:"p-app", cat:"tech", name:"App mobile", desc:"Download app: hero, feature, store",
    tokens:{pair:"inter-inter",accent:"#10b981",radius:16,space:1},
    sections:[{id:"nav-min",axes:{tone:"dark"}},{id:"sec-appdownload",axes:{tone:"dark"}},
      {id:"feature-grid",axes:{tone:"dark",media:"si"}},{id:"comp-slider",axes:{tone:"dark"}},
      {id:"testimonial",axes:{tone:"accent"}},{id:"footer-min",axes:{tone:"dark"}}]},
- { id:"p-portfolio", name:"Portfolio / Studio", desc:"Studio creativo: lavori, servizi, contatti",
+ { id:"p-portfolio", cat:"abstract", name:"Portfolio / Studio", desc:"Studio creativo: lavori, servizi, contatti",
    tokens:{pair:"inter-fraunces",accent:"#ff7950",radius:8,space:1},
    sections:[{id:"nav-min",axes:{tone:"dark"}},{id:"hero-split",axes:{tone:"dark",align:"destra",media:"illu"}},
      {id:"gallery",axes:{tone:"dark"}},{id:"feature-grid",axes:{tone:"dark",media:"si"}},
      {id:"stats",axes:{tone:"accent"}},{id:"contact",axes:{tone:"dark"}},{id:"footer-big",axes:{tone:"dark"}}]},
- { id:"p-agency", name:"Agenzia / Corporate", desc:"Sito aziendale completo",
+ { id:"p-agency", cat:"abstract", name:"Agenzia / Corporate", desc:"Sito aziendale completo",
    tokens:{pair:"space-inter",accent:"#3b82f6",radius:8,space:1},
    sections:[{id:"nav-cta",axes:{tone:"light"}},{id:"hero-center",axes:{tone:"light",dens:"air"}},
      {id:"logowall",axes:{tone:"light"}},{id:"feature-grid",axes:{tone:"light",media:"si"}},
@@ -2473,7 +2578,7 @@ function defRender(){
    BUILD · compositore
    =================================================================== */
 const DEFAULT_TOKENS={pair:"inter-fraunces",accent:"#ff7950",radius:8,space:1};
-let comp={v:1,tokens:{...DEFAULT_TOKENS},sections:[]};
+let comp={v:1,tokens:{...DEFAULT_TOKENS},sections:[],imgcat:""};
 let selIdx=-1, viewport=1280;
 let hashTimer=null;
 
@@ -2525,6 +2630,12 @@ function buildInit(){
 
   // toolbar actions
   $("#btnShare").addEventListener("click",shareLink);
+  $("#btnImgMode").addEventListener("click",()=>{
+    IMG_MODE = IMG_MODE==="svg" ? "photo" : "svg";
+    $("#btnImgMode").textContent = IMG_MODE==="svg" ? "🖼 SVG" : "🖼 Foto";
+    buildRender(); saveHash();
+  });
+  $("#btnImgShuffle").addEventListener("click",()=>{ imgSeed(Math.floor(Math.random()*99999)+1); buildRender(); saveHash(); });
   $("#btnHTML").addEventListener("click",exportHTML);
   $("#btnPDF").addEventListener("click",exportPDF);
   $("#btnClear").addEventListener("click",()=>{ comp.sections=[]; selIdx=-1; buildRender(); saveHash(); });
@@ -2564,6 +2675,7 @@ function applyPreset(id){
   // deep copy sections so editing doesn't mutate the preset
   comp.sections=p.sections.map(s=>({id:s.id,axes:{...s.axes}}));
   if(p.tokens) comp.tokens={...DEFAULT_TOKENS,...p.tokens};
+  comp.imgcat=p.cat||"";
   selIdx=0;
   buildRender(); saveHash();
 }
@@ -2576,6 +2688,8 @@ function addSection(id){
   buildRender(); saveHash();
 }
 function removeSection(i){ comp.sections.splice(i,1); if(selIdx>=comp.sections.length) selIdx=comp.sections.length-1; buildRender(); saveHash(); }
+function duplicateSection(i){ const src=comp.sections[i]; const copy={id:src.id,axes:{...src.axes},fx:src.fx?{...src.fx}:undefined};
+  comp.sections.splice(i+1,0,copy); selIdx=i+1; buildRender(); saveHash(); }
 function moveSection(i,dir){ const j=i+dir; if(j<0||j>=comp.sections.length) return;
   const t=comp.sections[i]; comp.sections[i]=comp.sections[j]; comp.sections[j]=t; selIdx=j; buildRender(); saveHash(); }
 
@@ -2595,12 +2709,21 @@ function trDraft(html){
   });
 }
 function pageDoc(tokens,sections,forExport){
+  if(typeof resetImg==="function") resetImg();
   const T=PAIRS[tokens.pair]||PAIRS["inter-fraunces"];
   const rad = tokens.radius>=999 ? "999px" : tokens.radius+"px";
+  let anyFx=false;
   const body=sections.map((sec,i)=>{
     const s=SECTIONS.find(x=>x.id===sec.id); if(!s) return "";
     let html=trDraft(s.tpl(sec.axes,T));
-    if(!forExport) html='<div class="sec-wrap" data-i="'+i+'">'+html+'</div>';
+    const fx=sec.fx||{}; const fxList=Object.keys(fx).filter(k=>fx[k]);
+    if(fxList.length) anyFx=true;
+    const fxAttr=fxList.length?' data-fx="'+fxList.join(" ")+'"':'';
+    if(!forExport){
+      html='<div class="sec-wrap" data-i="'+i+'"'+fxAttr+'>'+html+'</div>';
+    } else if(fxList.length){
+      html='<div class="fx"'+fxAttr+'>'+html+'</div>';
+    }
     return html;
   }).join("");
   const fonts='<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">';
@@ -2619,6 +2742,19 @@ function pageDoc(tokens,sections,forExport){
       backdrop-filter:blur(4px);transition:background .12s}
     .sec-wrap .secbar button:hover{background:var(--accent)}
     .sec-wrap .secbar button[data-a="del"]:hover{background:#e0473f}`;
+  // FX runtime — IntersectionObserver for reveal/float/zoom + scroll parallax.
+  // Injected in preview (targets .sec-wrap) and in export (targets .fx).
+  const fxSel = forExport ? ".fx[data-fx]" : ".sec-wrap[data-fx]";
+  const fxRuntime = (anyFx||!forExport) ? `<script>(function(){
+    var els=[].slice.call(document.querySelectorAll('${fxSel}'));
+    if(!els.length) return;
+    if(matchMedia('(prefers-reduced-motion:reduce)').matches){els.forEach(function(e){e.classList.add('fx-in')});return;}
+    var io=new IntersectionObserver(function(en){en.forEach(function(x){if(x.isIntersecting){x.target.classList.add('fx-in');io.unobserve(x.target);}})},{threshold:.18});
+    els.forEach(function(e){io.observe(e);});
+    ${forExport?"":"setTimeout(function(){els.forEach(function(e){if(!e.classList.contains('fx-in')){var r=e.getBoundingClientRect();if(r.top<innerHeight)e.classList.add('fx-in');}});},400);"}
+    var par=els.filter(function(e){return /parallax/.test(e.getAttribute('data-fx')||'')});
+    if(par.length){window.addEventListener('scroll',function(){var vh=innerHeight;par.forEach(function(e){var r=e.getBoundingClientRect();var p=(r.top+r.height/2-vh/2)/vh;var t=e.querySelector('section,nav,footer');if(t)t.style.transform='translateY('+(p*-24)+'px)';});},{passive:true});}
+  })();<\/script>` : "";
   return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${fonts}
     <style>
       :root{--accent:${tokens.accent};--radius:${rad};--sp:${tokens.space};--head:${T.head};--body:${T.body};
@@ -2630,9 +2766,17 @@ function pageDoc(tokens,sections,forExport){
       section [style*="border:1px"],nav,footer{border-width:var(--bord)!important}
       h1,h2,h3{letter-spacing:var(--track)}
       section [style*="border-radius"]{box-shadow:0 calc(var(--shadow)*14px) calc(var(--shadow)*40px) rgba(0,0,0,calc(var(--shadow)*.18))}
+      /* --- scroll FX --- */
+      [data-fx]{--fxo:1}
+      [data-fx~="reveal"]{opacity:0;transform:translateY(28px);transition:opacity .7s var(--fxe,cubic-bezier(.22,.61,.36,1)),transform .7s var(--fxe,cubic-bezier(.22,.61,.36,1))}
+      [data-fx~="float"]{opacity:0;transform:translateY(48px) scale(.98);transition:opacity .8s ease,transform .8s cubic-bezier(.22,.61,.36,1)}
+      [data-fx~="zoom"]{opacity:0;transform:scale(1.06);transition:opacity .7s ease,transform .9s cubic-bezier(.22,.61,.36,1)}
+      [data-fx].fx-in{opacity:1!important;transform:none!important}
+      [data-fx~="parallax"] .fx-bg,[data-fx~="parallax"]>section:first-child{will-change:transform}
+      @media(prefers-reduced-motion:reduce){[data-fx]{opacity:1!important;transform:none!important}}
       @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
       ${selCss}
-    </style></head><body>${body}</body></html>`;
+    </style></head><body>${body}${fxRuntime}</body></html>`;
 }
 /* inject sel labels for the interactive frame */
 function labeledSections(sections){
@@ -2643,6 +2787,7 @@ function labeledSections(sections){
 }
 
 function buildRender(){
+  if(typeof setPageCat==="function") setPageCat(comp.imgcat||"");
   const device=$("#device"), frame=$("#pageFrame"), ph=$("#devicePh");
   // token controls sync (in case loaded from hash)
   $("#tokPair").value=comp.tokens.pair;
@@ -2677,6 +2822,7 @@ function buildRender(){
       const bar=d.createElement("div"); bar.className="secbar";
       bar.innerHTML='<button data-a="up" title="Su">↑</button>'
                    +'<button data-a="down" title="Giù">↓</button>'
+                   +'<button data-a="dup" title="Duplica">⧉</button>'
                    +'<button data-a="del" title="Rimuovi">✕</button>';
       w.prepend(bar);
       bar.querySelectorAll("button").forEach(b=>b.addEventListener("click",ev=>{
@@ -2684,6 +2830,7 @@ function buildRender(){
         const a=b.dataset.a;
         if(a==="up") moveSection(i,-1);
         else if(a==="down") moveSection(i,1);
+        else if(a==="dup") duplicateSection(i);
         else removeSection(i);
       }));
       if(i===selIdx) w.classList.add("sel");
@@ -2713,27 +2860,41 @@ function renderProps(){
     ax.opts.forEach(o=>{ html+='<button data-v="'+o+'" aria-pressed="'+(sec.axes[ax.id]===o)+'">'+o+'</button>'; });
     html+='</div></div>';
   });
-  html+='<div style="display:flex;gap:8px;margin-top:14px">'+
+  // --- FX per sezione ---
+  const fx=sec.fx||{};
+  const FXO=[["reveal","Reveal in scroll"],["parallax","Parallax bg"],["float","Float in"],["zoom","Zoom in"]];
+  html+='<div class="axis" style="margin-top:16px"><div class="alabel">Effetti di scroll</div><div class="fxgrid">';
+  FXO.forEach(([k,lab])=>{ html+='<button class="fxbtn" data-fx="'+k+'" aria-pressed="'+(!!fx[k])+'">'+lab+'</button>'; });
+  html+='</div></div>';
+  html+='<div style="display:flex;gap:8px;margin-top:16px">'+
         '<button class="tbtn" data-mv="-1" title="Su">↑</button>'+
-        '<button class="tbtn" data-mv="1" title="Giù">↓</button></div>'+
+        '<button class="tbtn" data-mv="1" title="Giù">↓</button>'+
+        '<button class="tbtn" data-dup="1" title="Duplica">⧉ Duplica</button></div>'+
         '<button class="del-sec" style="margin-top:14px">✕ Rimuovi sezione</button>';
   axesBox.innerHTML=html;
   $$(".seg[data-ax] button",axesBox).forEach(b=>b.addEventListener("click",()=>{
     const ax=b.parentNode.dataset.ax; comp.sections[selIdx].axes[ax]=b.dataset.v;
     buildRender();
   }));
+  $$(".fxbtn",axesBox).forEach(b=>b.addEventListener("click",()=>{
+    const k=b.dataset.fx; const cur=comp.sections[selIdx].fx||{};
+    cur[k]=!cur[k]; comp.sections[selIdx].fx=cur; buildRender();
+  }));
+  $$("[data-dup]",axesBox).forEach(b=>b.addEventListener("click",()=>duplicateSection(selIdx)));
   $$("[data-mv]",axesBox).forEach(b=>b.addEventListener("click",()=>moveSection(selIdx,parseInt(b.dataset.mv))));
   $(".del-sec",axesBox).addEventListener("click",()=>removeSection(selIdx));
   if(window.__i18nApply) window.__i18nApply($("#buildProps"));
 }
 
 /* ---------- hash share & export ---------- */
-function saveHash(){ try{ location.hash="c="+btoa(unescape(encodeURIComponent(JSON.stringify(comp)))); }catch(e){} }
+function saveHash(){ try{ const payload={...comp,_im:IMG_MODE,_is:IMG_SEED}; location.hash="c="+btoa(unescape(encodeURIComponent(JSON.stringify(payload)))); }catch(e){} }
 function saveHashDebounced(){ clearTimeout(hashTimer); hashTimer=setTimeout(saveHash,400); }
 function loadHash(){
   try{ const m=location.hash.match(/c=([^&]+)/);
     if(m){ const obj=JSON.parse(decodeURIComponent(escape(atob(m[1]))));
-      if(obj&&obj.sections){ comp={v:1,tokens:{...DEFAULT_TOKENS,...obj.tokens},sections:obj.sections}; selIdx=comp.sections.length?0:-1; } }
+      if(obj&&obj.sections){ comp={v:1,tokens:{...DEFAULT_TOKENS,...obj.tokens},sections:obj.sections,imgcat:obj.imgcat||""}; selIdx=comp.sections.length?0:-1;
+        if(obj._im) IMG_MODE=obj._im; if(obj._is) IMG_SEED=obj._is;
+        if(typeof $("#btnImgMode")!=="undefined"&&$("#btnImgMode")) $("#btnImgMode").textContent=IMG_MODE==="svg"?"🖼 SVG":"🖼 Foto"; } }
   }catch(e){}
   buildRender();
 }
@@ -2803,7 +2964,8 @@ function tokInit(){
   const base=$("#tokBase");
   PRESETS.forEach(p=>{ const o=document.createElement("option"); o.value=p.id; o.textContent=p.name; base.appendChild(o); });
   base.value=tokBaseId;
-  base.addEventListener("change",()=>{ tokBaseId=base.value; tokRender(); });
+  base.addEventListener("change",()=>{ tokBaseId=base.value; randomizeStyle("A"); randomizeStyle("B");
+    syncTokControls(); buildStyleRow(); tokRender(); });
   // font pair for active style
   const sel=$("#tokPairAB");
   TOK_FONTS.forEach(k=>{ const o=document.createElement("option"); o.value=k; o.textContent=PAIRS[k].label; sel.appendChild(o); });
@@ -2818,21 +2980,52 @@ function tokInit(){
   $("#tokB").addEventListener("click",()=>{ tokActive="B"; setTokAB(); });
   // randomize active style
   $("#tokDice").addEventListener("click",()=>{ randomizeStyle(tokActive); syncTokControls(); buildStyleRow(); tokRender(); });
+  const tokImg=$("#tokImgShuffle"); if(tokImg) tokImg.addEventListener("click",()=>{ imgSeed(Math.floor(Math.random()*99999)+1); tokRender(); });
   // scrubber
   $("#tokScrub").addEventListener("input",e=>{ tokPos=parseFloat(e.target.value); tokRender(); });
   buildStyleRow();
   setTokAB();
 }
+/* DNA stilistico per categoria — vincola la casualità a restare coerente e premium.
+   Ogni voce: range di radius/space/bord/shadow/track + set di font e accent adatti. */
+const CAT_DNA={
+  // hospitality: elegante, arioso, serif, ombre morbide, poco radius
+  room:      {rad:[0,2,4,6],     space:[1.1,1.35], bord:[0.5,1],   shadow:[0.1,0.4], track:[-0.01,0.01],
+              fonts:["instrument-inter","inter-fraunces"], acc:["#a88b5c","#8a9a5b","#b0784f","#16161a"]},
+  // ristorazione: caldo, deciso, contrasto, radius basso
+  food:      {rad:[0,2,6],       space:[1,1.2],    bord:[1,2],     shadow:[0.2,0.6], track:[-0.005,0.015],
+              fonts:["instrument-inter","inter-fraunces","inter-inter"], acc:["#c1543a","#d08a2c","#7a2e1e","#e0a030"]},
+  // e-commerce / product: pulito, griglie, radius medio, ombre leggere
+  product:   {rad:[6,10,14],     space:[0.9,1.05], bord:[0.5,1],   shadow:[0.1,0.4], track:[0,0.01],
+              fonts:["space-inter","inter-inter"], acc:["#3b82f6","#10b981","#7c5cff","#16161a"]},
+  // editorial / blog: sobrio, testuale, tracking curato
+  editorial: {rad:[0,4,8],       space:[1,1.25],   bord:[0.5,1],   shadow:[0,0.25], track:[-0.01,0.02],
+              fonts:["inter-fraunces","instrument-inter"], acc:["#ff7950","#16161a","#3b82f6"]},
+  // saas / tech: moderno, radius alto, accent vivi, ombre nette
+  tech:      {rad:[10,16,20,24], space:[0.95,1.1], bord:[0,1],     shadow:[0.3,0.9], track:[-0.005,0.01],
+              fonts:["space-inter","inter-inter"], acc:["#7c5cff","#3b82f6","#10b981","#ff0033"]},
+  // portfolio / agency: espressivo, contrasti, libertà maggiore
+  abstract:  {rad:[0,8,16,24],   space:[0.9,1.3],  bord:[0,1.5],   shadow:[0,0.8],   track:[-0.02,0.03],
+              fonts:["inter-fraunces","space-inter","instrument-inter","inter-inter"], acc:ACCENTS},
+  // player / media: immersivo, scuro, radius medio
+  landscape: {rad:[6,10,14],     space:[0.9,1.05], bord:[0,1],     shadow:[0.2,0.6], track:[0,0.01],
+              fonts:["inter-inter","space-inter"], acc:["#ff0033","#66c0f4","#ff7950","#7c5cff"]},
+};
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function inRange([a,b]){ return a+Math.random()*(b-a); }
 function randomizeStyle(which){
   const s=tokState[which];
-  s.radius=[0,2,4,8,12,18,24][Math.floor(Math.random()*7)];
-  s.space=+(0.85+Math.random()*0.5).toFixed(2);
-  s.bord=[0.5,1,1.5,2,3][Math.floor(Math.random()*5)];
-  s.shadow=+(Math.random()).toFixed(2);
-  s.track=+(-0.02+Math.random()*0.07).toFixed(3);
-  s.pair=TOK_FONTS[Math.floor(Math.random()*TOK_FONTS.length)];
-  s.accent=ACCENTS[Math.floor(Math.random()*ACCENTS.length)];
+  const cat=tokPageCat(), dna=CAT_DNA[cat]||CAT_DNA.abstract;
+  s.radius=pick(dna.rad);
+  s.space=+inRange(dna.space).toFixed(2);
+  s.bord=pick(dna.bord);
+  s.shadow=+inRange(dna.shadow).toFixed(2);
+  s.track=+inRange(dna.track).toFixed(3);
+  s.pair=pick(dna.fonts);
+  s.accent=pick(dna.acc);
 }
+/* categoria immagine/DNA della pagina base scelta in TOKENS */
+function tokPageCat(){ const p=PRESETS.find(x=>x.id===tokBaseId); return (p&&p.cat)||"abstract"; }
 function buildStyleRow(){
   const row=$("#tokStyleRow"); if(!row) return;
   row.innerHTML="";
@@ -2863,6 +3056,7 @@ function hexRGB(h){ h=rgbToHex(h).replace("#",""); return [parseInt(h.slice(0,2)
 function mixHex(a,b,t){ const A=hexRGB(a),B=hexRGB(b);
   return "#"+A.map((v,i)=>Math.round(lerp(v,B[i],t)).toString(16).padStart(2,"0")).join(""); }
 function tokRender(){
+  if(typeof setPageCat==="function") setPageCat(tokPageCat());
   const A=tokState.A,B=tokState.B,t=tokPos;
   const tokens={
     pair: t<0.5?A.pair:B.pair,
@@ -3012,6 +3206,10 @@ const M={
 "Hospitality — camere":"Hospitality — rooms","Ristorazione — menù":"Restaurant — menu",
 "Assicurazione — preventivo":"Insurance — quote","Blog — articolo":"Blog — article","App — download":"App — download",
 "Colonne":"Columns",
+"🖼 SVG":"🖼 SVG","🖼 Foto":"🖼 Photo","🔀 Immagini":"🔀 Images","🔀 Img":"🔀 Img",
+"Effetti di scroll":"Scroll effects",
+"Reveal in scroll":"Scroll reveal","Parallax bg":"Parallax bg","Float in":"Float in","Zoom in":"Zoom in",
+"⧉ Duplica":"⧉ Duplicate","⧉ Duplica sezione":"⧉ Duplicate section",
 "Fondamenta":"Fundamentals","API":"API","Dati":"Data","Auth":"Auth","Basi":"Basics","Ambienti":"Environments",
 "Build":"Build","Distribuzione":"Distribution","Metodo":"Method","Errori comuni":"Common errors","Strumenti":"Tools",
 "Concetti":"Concepts","Flusso":"Flow","Pratiche":"Practices","Versionamento":"Versioning","Comandi dev":"Dev commands",
