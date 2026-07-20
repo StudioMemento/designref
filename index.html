@@ -96,14 +96,15 @@
   .live-main{display:flex;flex-direction:column;min-width:0}
   .live-stage-wrap{padding:18px;border-bottom:1px solid var(--line);background:
     radial-gradient(130% 150% at 60% 30%,#0a0a0c 0%,#050505 75%)}
-  .live-stage{background:var(--sheet);border:1px solid var(--line);border-radius:12px;
+  .live-stage{background:#0b0b0e;border:1px solid var(--line);border-radius:12px;
     min-height:260px;display:flex;align-items:center;justify-content:center;overflow:hidden;
     position:relative;transition:background .3s var(--ease);
+    box-shadow:inset 0 0 60px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.03)}
+  .live-stage[data-bg="light"]{background:var(--sheet);
     box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 0 rgba(0,0,0,.4)}
-  .live-stage[data-bg="dark"]{background:#16161a;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
   .live-name{position:absolute;top:10px;left:12px;font-family:var(--mono);font-size:9px;
-    letter-spacing:.14em;text-transform:uppercase;color:var(--txt-3);z-index:2}
-  .live-stage[data-bg="dark"] .live-name{color:#6a6a72}
+    letter-spacing:.14em;text-transform:uppercase;color:#5c5a63;z-index:2}
+  .live-stage[data-bg="light"] .live-name{color:var(--txt-3)}
 
   .live-lower{display:grid;grid-template-columns:1fr 300px;gap:0;min-height:0}
   @media(max-width:900px){.live-lower{grid-template-columns:1fr}}
@@ -301,6 +302,14 @@
     background:radial-gradient(140% 120% at 50% 0%,#0a0a0c 0%,#050505 80%)}
   .tok-scrub{padding:16px 20px;border-top:1px solid var(--line);background:var(--panel)}
   .tok-scrub .srow{display:flex;align-items:center;gap:14px}
+  .tok-stylerow{display:flex;gap:18px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line);
+    background:var(--panel-2)}
+  .tok-dim{flex:1;min-width:130px}
+  .tok-dim label{display:flex;justify-content:space-between;font-size:11px;color:var(--txt-2);margin-bottom:6px}
+  .tok-dim label b{color:var(--accent);font-family:var(--mono);font-weight:500;font-size:11px}
+  .tok-dim input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:3px;background:var(--line-2);border-radius:2px;outline:none}
+  .tok-dim input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--void)}
+  .tok-dim input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--void)}
   .tok-scrub .send{font-family:var(--mono);font-size:11px;color:var(--txt-3);letter-spacing:.1em}
   .tok-scrub .send b{color:var(--accent)}
   #tokScrub{-webkit-appearance:none;appearance:none;flex:1;height:4px;border-radius:2px;
@@ -431,6 +440,9 @@
         </aside>
         <div class="build-center">
           <div class="build-toolbar">
+            <select class="pairsel" id="presetSel" style="width:auto;max-width:210px" title="Carica una pagina pronta">
+              <option value="">⚡ Preset di pagina…</option>
+            </select>
             <div class="vp-toggle" role="group" aria-label="Viewport">
               <button id="vpDesk" aria-pressed="true" title="Desktop 1280px">▭ Desktop</button>
               <button id="vpTab" aria-pressed="false" title="Tablet 768px">▯ Tablet</button>
@@ -482,23 +494,25 @@
     <!-- ===================== TOKENS ===================== -->
     <section class="view" id="vTokens">
       <div class="vhead">
-        <p class="eyebrow">Tokens · confronto A ⇄ B</p>
-        <h1>Due direzioni, uno scrubber</h1>
-        <p>Fissa due set di token sulla stessa bozza e interpola gradualmente tra loro. I numeri si interpolano, i font fanno crossfade — niente scatti a metà corsa. Il momento "wow" per il cliente indeciso.</p>
+        <p class="eyebrow">Tokens · morphing A ⇄ B</p>
+        <h1>Parti da un preset, gioca fino a convincerti</h1>
+        <p>Scegli una pagina di partenza, fissa due direzioni stilistiche (A e B) e trascina lo scrubber: radius, spaziatura, bordi, ombre, spaziatura tra lettere, coppia tipografica e micro-layout si trasformano con continuità. Ti fermi dove ti convince.</p>
       </div>
       <div class="tok-wrap">
         <div class="tok-bar">
-          <div class="tok-ab" role="group" aria-label="Stato">
-            <button id="tokA" aria-pressed="true">Stato A</button>
-            <button id="tokB" aria-pressed="false">Stato B</button>
+          <label style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt-3)">Pagina</label>
+          <select class="pairsel" id="tokBase" style="width:auto;max-width:200px"></select>
+          <div class="tok-ab" role="group" aria-label="Direzione" style="margin-left:14px">
+            <button id="tokA" aria-pressed="true">Stile A</button>
+            <button id="tokB" aria-pressed="false">Stile B</button>
           </div>
-          <span style="font-size:12px;color:var(--txt-2)">Modifica i token qui sotto per lo stato attivo, poi trascina lo scrubber.</span>
-          <div class="props-sec" style="border:0;padding:0;margin-left:auto;display:flex;gap:10px;align-items:center">
-            <select class="pairsel" id="tokPairAB" style="width:auto"></select>
+          <button class="tbtn" id="tokDice" title="Genera uno stile casuale per la direzione attiva" style="margin-left:6px">🎲 Varia</button>
+          <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
+            <select class="pairsel" id="tokPairAB" style="width:auto" title="Coppia tipografica"></select>
             <div class="accent-row" id="tokAccentAB"></div>
-            <div class="seg" id="tokRadiusAB" role="group" style="width:150px"></div>
           </div>
         </div>
+        <div class="tok-stylerow" id="tokStyleRow"></div>
         <div class="tok-preview" id="tokPreview">
           <div class="device" style="width:1000px;transform:scale(.8);transform-origin:top center">
             <iframe id="tokFrame" title="Anteprima token" style="width:100%;border:0;display:block;background:#fff"></iframe>
@@ -506,11 +520,11 @@
         </div>
         <div class="tok-scrub">
           <div class="srow">
-            <span class="send">STATO <b>A</b></span>
+            <span class="send">STILE <b>A</b></span>
             <input type="range" id="tokScrub" min="0" max="1" step="0.01" value="0">
-            <span class="send">STATO <b>B</b></span>
+            <span class="send">STILE <b>B</b></span>
           </div>
-          <p class="tok-hint" id="tokHint">Lo scrubber interpola tutto in modo graduale su tutta la corsa: radius e spaziatura numericamente, i font con un crossfade.</p>
+          <p class="tok-hint" id="tokHint">Lo scrubber interpola tutto con continuità: numeri (radius, spaziatura, bordi, ombre, tracking) linearmente, i font con un crossfade a metà corsa. Nessuno scatto.</p>
         </div>
       </div>
     </section>
@@ -535,6 +549,10 @@ const DOMAINS=[
  ["fe","Front-end","Come il design diventa codice che gira nel browser. Le regole del mezzo — cascata, specificità, performance di rendering — governano cosa è davvero possibile."],
  ["ds","Design system","Il linguaggio condiviso che rende il design scalabile e coerente: token, componenti, varianti. Si progetta una volta, si usa mille."],
  ["flow","Workflow & consegna","Come il lavoro attraversa brief, revisioni e go-live. Il dominio meno affascinante e il primo che salta quando si va di fretta."],
+ ["be","Back-end & API","Ciò che gira sul server, lontano dagli occhi: dati, autenticazione, logica. Il front-end è la vetrina, il back-end è il magazzino e la cassa."],
+ ["host","Hosting & deploy","Come il codice passa dal tuo computer al mondo. Dominî, build, ambienti, CDN: il ponte tra 'funziona da me' e 'è online'."],
+ ["debug","Debugging & errori","Il mestiere vero non è scrivere codice, è capire perché non funziona. Leggere errori, isolare, correggere: metà del tempo di chi sviluppa passa qui."],
+ ["prog","Programmazione","I concetti trasversali a ogni linguaggio: variabili, funzioni, cicli, tipi. Il vocabolario minimo per parlare con chi scrive codice senza sentirsi persi."],
 ];
 
 const G=[
@@ -766,6 +784,98 @@ const G=[
 ["ds","Gestione","Token pipeline","style dictionary",`Lo strumento che trasforma i token in CSS, iOS, Android da un'unica sorgente: una verità, molte piattaforme.`],
 ["ux","Artefatti","Storyboard","storyboard",`La sequenza disegnata di come l'utente incontra il prodotto nel contesto reale: mette lo scenario prima dello schermo.`],
 ["flow","Revisione","Critique","design critique",`La critica strutturata e non difensiva del lavoro altrui: si critica la scelta, non la persona. Una competenza da allenare.`],
+
+/* ===== 11 · BACK-END & API ===== */
+["be","Fondamenta","Server","server",`Il computer sempre acceso che risponde alle richieste. Non è una scatola misteriosa: è un programma in ascolto su una porta.`],
+["be","Fondamenta","Client / Server","client-server",`Il client (browser) chiede, il server risponde. Tutta l'architettura web è questa conversazione, ripetuta milioni di volte.`],
+["be","Fondamenta","Front-end vs Back-end","front vs back",`Il front-end è ciò che l'utente vede e tocca; il back-end è la logica e i dati dietro le quinte. Due mestieri, un solo prodotto.`],
+["be","Fondamenta","Full-stack","full-stack",`Chi lavora su entrambi i lati, dal database all'interfaccia. Comodo per progetti piccoli, raro farlo bene su tutto.`],
+["be","API","API","API",`Il menù di ciò che un servizio sa fare: un contratto di richieste e risposte. Il front-end ordina, il back-end serve.`],
+["be","API","REST","REST",`Lo stile più diffuso di API: risorse raggiunte via URL con i verbi HTTP. Prevedibile, senza stato, facile da capire.`],
+["be","API","Endpoint","endpoint",`Un singolo indirizzo dell'API che fa una cosa: /utenti, /ordini/42. La porta specifica a cui bussi.`],
+["be","API","GraphQL","GraphQL",`Un'alternativa a REST: il client chiede esattamente i campi che vuole, in una sola richiesta. Potente, più complesso da gestire.`],
+["be","API","Payload","payload",`Il contenuto vero di una richiesta o risposta, di solito in JSON. Il pacco, al netto dell'imballaggio degli header.`],
+["be","API","JSON","JSON",`Il formato con cui client e server si scambiano dati: coppie chiave-valore leggibili. La lingua franca del web.`],
+["be","API","Webhook","webhook",`Invece di chiedere in continuazione, è il server a chiamarti quando succede qualcosa. 'Non richiamarci, ti chiamiamo noi'.`],
+["be","API","Rate limit","rate limiting",`Il tetto di richieste che puoi fare in un intervallo. Serve a non far cadere il server: superato, ricevi un 429.`],
+["be","Dati","Database","database",`Dove i dati vivono in modo ordinato e persistente. La memoria a lungo termine dell'applicazione.`],
+["be","Dati","SQL / NoSQL","SQL vs NoSQL",`SQL organizza in tabelle con relazioni rigide; NoSQL è più libero e flessibile. La scelta dipende dalla forma dei dati.`],
+["be","Dati","CRUD","CRUD",`Le quattro operazioni base sui dati: Create, Read, Update, Delete. Quasi ogni gestionale è, in fondo, un CRUD.`],
+["be","Dati","Migrazione","migration",`Una modifica versionata alla struttura del database. Come un commit, ma per lo schema dei dati: applicabile e reversibile.`],
+["be","Dati","Query","query",`Una domanda posta al database. Scritta male, è la causa numero uno delle pagine lente.`],
+["be","Dati","Cache","cache",`Una copia veloce di dati costosi da ricalcolare. Il modo più efficace di velocizzare — e la fonte di bug tra i più infidi.`],
+["be","Auth","Autenticazione","authentication",`Verificare chi sei (login). Da non confondere con l'autorizzazione: una cosa è entrare, un'altra è avere le chiavi di ogni stanza.`],
+["be","Auth","Autorizzazione","authorization",`Cosa hai il permesso di fare una volta entrato. L'utente è autenticato, ma può cancellare quell'ordine?`],
+["be","Auth","Token / JWT","JWT",`Un tesserino firmato che dimostra chi sei a ogni richiesta, senza rifare il login ogni volta. Va custodito con cura.`],
+["be","Auth","OAuth","OAuth",`Il meccanismo dietro 'Accedi con Google': deleghi l'identità a un altro servizio senza cedergli la password.`],
+["be","Auth","Variabile d'ambiente","env variable",`Un valore segreto o di configurazione tenuto fuori dal codice (chiavi API, password). Mai, mai committarlo nel repository.`],
+
+/* ===== 12 · HOSTING & DEPLOY ===== */
+["host","Basi","Hosting","hosting",`Lo spazio, sempre online, dove vive il tuo sito. Dall'hosting condiviso economico al cloud che scala da solo.`],
+["host","Basi","Deploy","deployment",`Il momento in cui il codice va in produzione, raggiungibile dagli utenti. 'Fare un deploy' = pubblicare una nuova versione.`],
+["host","Basi","Dominio","domain",`Il nome leggibile del tuo sito (studio.it) che punta a un indirizzo IP. Si affitta, non si compra per sempre.`],
+["host","Basi","DNS","DNS",`La rubrica di internet: traduce il nome del dominio nell'IP del server. Le modifiche possono metterci ore a propagarsi.`],
+["host","Basi","SSL / HTTPS","SSL certificate",`Il lucchetto nella barra: cifra il traffico tra browser e server. Oggi obbligatorio, spesso gratuito e automatico.`],
+["host","Ambienti","Ambiente","environment",`Una copia dell'app in un contesto: sviluppo (dev), test (staging), produzione (prod). Si prova a staging, si pubblica a prod.`],
+["host","Ambienti","Localhost","localhost",`Il server che gira sul tuo computer, di solito su localhost:3000. 'Da me funziona' nasce e muore qui.`],
+["host","Ambienti","Staging","staging",`L'ambiente gemello della produzione dove collaudare prima del pubblico. L'ultima rete di sicurezza.`],
+["host","Ambienti","Produzione","production",`L'ambiente reale, quello che vedono gli utenti. Quando qualcosa si rompe 'in prod', si rompe per davvero.`],
+["host","Build","Build","build",`Trasformare il codice sorgente nella versione ottimizzata per il web (minificata, impacchettata). Il passaggio prima del deploy.`],
+["host","Build","CI/CD","CI/CD",`L'automazione che testa e pubblica il codice a ogni modifica. Meno passaggi manuali, meno errori umani.`],
+["host","Build","Pipeline","pipeline",`La catena di passaggi automatici dal commit al sito online: installa, testa, builda, pubblica. Se un anello si rompe, si ferma.`],
+["host","Build","Rollback","rollback",`Tornare in fretta alla versione precedente quando un deploy va male. La cintura di sicurezza della pubblicazione.`],
+["host","Distribuzione","CDN","CDN",`Una rete di server sparsi nel mondo che serve i file dal nodo più vicino all'utente. Il sito carica veloce ovunque.`],
+["host","Distribuzione","Static vs Dynamic","static vs dynamic",`Le pagine statiche sono pre-costruite e velocissime; le dinamiche si generano a ogni richiesta. Molti siti moderni mescolano le due.`],
+["host","Distribuzione","Serverless","serverless",`Codice che gira su richiesta senza gestire un server sempre acceso: paghi solo l'uso reale. Il server c'è, non lo vedi tu.`],
+["host","Distribuzione","Edge","edge computing",`Eseguire codice sui nodi CDN, vicinissimi all'utente, invece che in un data center lontano. Latenza ridotta al minimo.`],
+
+/* ===== 13 · DEBUGGING & ERRORI ===== */
+["debug","Metodo","Debugging","debugging",`L'arte di scoprire perché il codice non fa ciò che pensavi. Più investigazione che scrittura: si isola, si verifica, si corregge.`],
+["debug","Metodo","Bug","bug",`Un comportamento diverso da quello atteso. Non un'anomalia rara: è la condizione normale del software prima di essere sistemato.`],
+["debug","Metodo","Stack trace","stack trace",`La lista di funzioni che ha portato all'errore, dall'ultima alla prima. Si legge dall'alto: lì c'è quasi sempre il colpevole.`],
+["debug","Metodo","Breakpoint","breakpoint",`Un punto in cui l'esecuzione si ferma per ispezionare lo stato. Meglio di riempire il codice di stampe a tappeto.`],
+["debug","Metodo","Console.log","console.log",`Stampare un valore per vedere cosa succede: il debug più antico e ancora il più usato. Umile ma insostituibile.`],
+["debug","Metodo","Riproduzione","reproduction",`I passi minimi per far ricomparire un bug a comando. Se non lo riproduci, stai indovinando, non correggendo.`],
+["debug","Metodo","Regressione","regression",`Un bug che ricompare, o una cosa che smette di funzionare dopo una modifica. Il motivo per cui esistono i test automatici.`],
+["debug","Errori comuni","404 Not Found","404",`La risorsa richiesta non esiste a quell'indirizzo. Link rotto, URL sbagliato o file spostato.`],
+["debug","Errori comuni","500 Server Error","500",`Qualcosa è esploso lato server. A differenza del 404, la colpa è del back-end, non della richiesta.`],
+["debug","Errori comuni","403 Forbidden","403",`La risorsa esiste ma non hai il permesso di vederla. Autenticato forse, autorizzato no.`],
+["debug","Errori comuni","CORS","CORS error",`Il browser blocca una richiesta verso un altro dominio non autorizzato. Frustrante e frequentissimo: si risolve lato server.`],
+["debug","Errori comuni","Null / Undefined","null reference",`Provare a usare qualcosa che non c'è: 'cannot read property of undefined'. L'errore più comune in JavaScript.`],
+["debug","Errori comuni","Syntax error","syntax error",`Il codice non rispetta la grammatica del linguaggio: una parentesi, una virgola. Il compilatore si ferma subito.`],
+["debug","Errori comuni","Timeout","timeout",`Un'operazione ha superato il tempo massimo d'attesa. Di solito una rete lenta o un server che non risponde.`],
+["debug","Strumenti","DevTools","browser devtools",`Il pannello del browser (F12) con console, rete, elementi. Il primo posto dove guardare quando qualcosa non va sul front-end.`],
+["debug","Strumenti","Linter","linter",`Uno strumento che segnala errori e cattive abitudini mentre scrivi, prima ancora di eseguire. Un correttore di bozze per il codice.`],
+["debug","Strumenti","Log","logging",`Le tracce che il programma lascia mentre gira. In produzione, spesso l'unico modo di sapere cosa è successo.`],
+
+/* ===== 14 · PROGRAMMAZIONE ===== */
+["prog","Concetti","Variabile","variable",`Un contenitore con un nome per un valore che può cambiare. Il mattone più elementare di ogni programma.`],
+["prog","Concetti","Funzione","function",`Un blocco di codice riutilizzabile che prende input e restituisce output. Scrivi una volta, richiama quante vuoi.`],
+["prog","Concetti","Ciclo","loop",`Ripetere un'azione più volte senza riscriverla: for, while. Il modo in cui il codice gestisce le liste.`],
+["prog","Concetti","Condizione","conditional",`Il bivio del codice: se questo, allora quello (if/else). Da qui nasce ogni comportamento non banale.`],
+["prog","Concetti","Tipo","data type",`La natura di un valore: numero, testo, booleano, lista. Confonderli è una fonte inesauribile di bug.`],
+["prog","Concetti","Array / Oggetto","array / object",`L'array è una lista ordinata; l'oggetto raggruppa valori con nomi. Le due strutture dati con cui si lavora ogni giorno.`],
+["prog","Concetti","Parametro / Argomento","parameter",`Il parametro è il segnaposto nella definizione della funzione; l'argomento è il valore reale che le passi.`],
+["prog","Concetti","Ritorno","return value",`Ciò che una funzione restituisce a chi l'ha chiamata. Senza return, la funzione lavora ma non consegna nulla.`],
+["prog","Flusso","Sincrono / Asincrono","async",`Sincrono = una cosa alla volta, in fila; asincrono = parte e prosegue senza aspettare. Il web è pieno di attese asincrone.`],
+["prog","Flusso","Promise / Await","promise",`Il modo moderno di gestire un risultato che arriverà 'tra poco' (una risposta di rete). await aspetta senza bloccare tutto.`],
+["prog","Flusso","Callback","callback",`Una funzione passata a un'altra da eseguire 'quando hai finito'. Utile, ma annidata troppo diventa illeggibile.`],
+["prog","Flusso","Evento","event",`Qualcosa che accade (un click, un caricamento) a cui il codice reagisce. Il web è programmazione guidata dagli eventi.`],
+["prog","Pratiche","Sintassi","syntax",`Le regole grammaticali di un linguaggio. Sbagliarle ferma tutto; rispettarle non garantisce che il codice sia giusto.`],
+["prog","Pratiche","Refactoring","refactoring",`Riscrivere il codice perché sia più chiaro, senza cambiarne il comportamento. Manutenzione, non nuove funzioni.`],
+["prog","Pratiche","Dipendenza","dependency",`Codice esterno da cui il tuo progetto dipende (una libreria). Comodo, ma ogni dipendenza è anche un rischio da aggiornare.`],
+["prog","Pratiche","Package manager","npm / package manager",`Lo strumento che installa e aggiorna le librerie (npm, yarn). Gestisce la catena di dipendenze al posto tuo.`],
+["prog","Pratiche","Commento","code comment",`Testo ignorato dal computer, scritto per gli umani. Spiega il perché, non il cosa: il cosa lo dice già il codice.`],
+["prog","Versionamento","Git","git",`Il sistema che tiene la storia di ogni modifica al codice. La macchina del tempo che rende sicuro sperimentare.`],
+["prog","Versionamento","Commit","commit",`Una fotografia salvata dello stato del codice, con un messaggio. L'unità base della storia in Git.`],
+["prog","Versionamento","Branch / Merge","branch",`Un ramo separato dove lavorare senza toccare il principale, poi riunito (merge). Come si sviluppa in parallelo senza pestarsi i piedi.`],
+["prog","Versionamento","Pull request","pull request",`La proposta di unire il tuo ramo, aperta alla revisione altrui prima del merge. Dove avviene la code review.`],
+["prog","Versionamento","Repository","repo",`Il contenitore versionato di un progetto, in locale e su piattaforme come GitHub. La casa del codice.`],
+["prog","Comandi dev","npm run dev","run dev",`Il comando che avvia il server di sviluppo locale con ricarica automatica. Il primo gesto di ogni giornata di lavoro.`],
+["prog","Comandi dev","npm install","install",`Scarica tutte le dipendenze del progetto nella cartella locale. Il primo comando dopo aver clonato un repo.`],
+["prog","Comandi dev","npm run build","build command",`Genera la versione di produzione ottimizzata. Ciò che gira prima di pubblicare, non mentre sviluppi.`],
+["prog","Comandi dev","Hot reload","HMR",`Il browser aggiorna il risultato appena salvi, senza ricaricare tutta la pagina. Il comfort che non noti finché non manca.`],
+["prog","Comandi dev","Terminale","terminal / CLI",`La finestra testuale da cui si danno comandi al sistema. Intimidatorio all'inizio, insostituibile dopo una settimana.`],
 ];
 
 /* ===================================================================
@@ -801,7 +911,7 @@ const PATTERNS=[
   ],
   code:{css:`.btn{
   padding:12px 24px;border-radius:var(--r,8px);
-  background:var(--accent,#ff7950);color:#fff;
+  background:var(--accent,#ff7950);color:#141418;
   transition:transform var(--dur,.18s) var(--ease),
              box-shadow var(--dur,.18s) var(--ease);
 }
@@ -813,11 +923,11 @@ const PATTERNS=[
      `.stage-el{--dur:.18s;--ease:cubic-bezier(.22,.61,.36,1);--lift:2px;display:flex;gap:14px;align-items:center;font-family:Inter,sans-serif}
       .btn{padding:13px 26px;border-radius:9px;border:0;cursor:pointer;font-size:14px;font-weight:600;
         transition:transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease)}
-      .btn.p{background:#ff7950;color:#fff}
+      .btn.p{background:#ff7950;color:#141418}
       .btn.p:hover{transform:translateY(calc(var(--lift)*-1));box-shadow:0 8px 22px rgba(255,121,80,.35)}
       .btn.p:active{transform:translateY(0)}
-      .btn.g{background:transparent;color:#16161a;border:1.5px solid #d5d3cd}
-      .btn.g:hover{transform:translateY(calc(var(--lift)*-1));border-color:#16161a}`,
+      .btn.g{background:transparent;color:#e8e6e3;border:1.5px solid #2a2a32}
+      .btn.g:hover{transform:translateY(calc(var(--lift)*-1));border-color:#e8e6e3}`,
      `<div class="stage-el"><button class="btn p">Continua</button><button class="btn g">Annulla</button></div>`);
     ctrl.on=(id,v)=>{
       if(id==="dur") sv(root,"--dur",v/1000+"s");
@@ -836,7 +946,7 @@ const PATTERNS=[
   mount(host,ctrl){
     const root=shadow(host,
      `.stage-el{display:flex;align-items:center;justify-content:center;min-height:180px;font-family:Inter,sans-serif}
-      .mag{padding:16px 34px;border-radius:40px;border:0;background:#16161a;color:#fff;font-size:14px;
+      .mag{padding:16px 34px;border-radius:40px;border:0;background:#e8e6e3;color:#141418;font-size:14px;
         font-weight:600;cursor:pointer;transition:transform .25s cubic-bezier(.22,.61,.36,1)}`,
      `<div class="stage-el"><button class="mag">Scopri</button></div>`);
     const btn=root.querySelector(".mag"); const wrap=root.querySelector(".stage-el");
@@ -863,8 +973,8 @@ const PATTERNS=[
     const root=shadow(host,
      `.stage-el{display:flex;align-items:center;justify-content:center;min-height:180px;font-family:Inter,sans-serif}
       .rip{position:relative;overflow:hidden;padding:15px 32px;border-radius:10px;border:0;
-        background:#ff7950;color:#fff;font-size:14px;font-weight:600;cursor:pointer;isolation:isolate}
-      .wave{position:absolute;border-radius:50%;background:#fff;pointer-events:none;
+        background:#ff7950;color:#141418;font-size:14px;font-weight:600;cursor:pointer;isolation:isolate}
+      .wave{position:absolute;border-radius:50%;background:#141418;pointer-events:none;
         transform:scale(0);animation:rp var(--d,.6s) ease-out forwards}
       @keyframes rp{to{transform:scale(4);opacity:0}}`,
      `<div class="stage-el"><button class="rip">Clicca qui</button></div>`);
@@ -890,11 +1000,11 @@ const PATTERNS=[
   mount(host,ctrl){
     const root=shadow(host,
      `.stage-el{display:flex;gap:18px;align-items:center;justify-content:center;min-height:180px;font-family:Inter,sans-serif;--s:1;--e:cubic-bezier(.34,1.4,.64,1)}
-      .sw{width:calc(52px*var(--s));height:calc(30px*var(--s));border-radius:999px;background:#d5d3cd;
+      .sw{width:calc(52px*var(--s));height:calc(30px*var(--s));border-radius:999px;background:#2a2a32;
         border:0;cursor:pointer;position:relative;transition:background .25s ease;padding:0}
       .sw[aria-checked="true"]{background:#ff7950}
       .dot{position:absolute;top:calc(3px*var(--s));left:calc(3px*var(--s));
-        width:calc(24px*var(--s));height:calc(24px*var(--s));border-radius:50%;background:#fff;
+        width:calc(24px*var(--s));height:calc(24px*var(--s));border-radius:50%;background:#141418;
         transition:transform .3s var(--e);box-shadow:0 2px 5px rgba(0,0,0,.2)}
       .sw[aria-checked="true"] .dot{transform:translateX(calc(22px*var(--s)))}`,
      `<div class="stage-el"><button class="sw" role="switch" aria-checked="false"><span class="dot"></span></button>
@@ -919,11 +1029,11 @@ const PATTERNS=[
     const root=shadow(host,
      `.stage-el{display:flex;align-items:center;justify-content:center;min-height:180px;font-family:Inter,sans-serif;--rw:3px;--d:.18s}
       .field{position:relative;width:260px}
-      .field input{width:100%;padding:16px 14px 10px;border:1.5px solid #d5d3cd;border-radius:9px;
-        font-size:14px;font-family:inherit;outline:none;background:#fff;color:#16161a;
+      .field input{width:100%;padding:16px 14px 10px;border:1.5px solid #2a2a32;border-radius:9px;
+        font-size:14px;font-family:inherit;outline:none;background:#141418;color:#e8e6e3;
         transition:border-color var(--d) ease,box-shadow var(--d) ease}
       .field input:focus{border-color:#ff7950;box-shadow:0 0 0 var(--rw) rgba(255,121,80,.22)}
-      .field label{position:absolute;left:14px;top:14px;color:#9a988f;font-size:14px;pointer-events:none;
+      .field label{position:absolute;left:14px;top:14px;color:#9d9aa4;font-size:14px;pointer-events:none;
         transition:transform var(--d) ease,color var(--d) ease;transform-origin:left}
       .field input:focus+label,.field input:not(:placeholder-shown)+label{
         transform:translateY(-8px) scale(.75);color:#ff7950}`,
@@ -943,15 +1053,15 @@ const PATTERNS=[
     const root=shadow(host,
      `.stage-el{padding:24px;font-family:Inter,sans-serif;--d:.9s;--dist:220px;min-height:180px;display:flex;flex-direction:column;justify-content:center;gap:16px}
       .track{display:flex;align-items:center;gap:12px}
-      .track .lb{font-size:10px;font-family:monospace;color:#9a988f;width:64px;letter-spacing:.05em}
-      .rail{flex:1;height:2px;background:#e5e3dd;position:relative}
+      .track .lb{font-size:10px;font-family:monospace;color:#9d9aa4;width:64px;letter-spacing:.05em}
+      .rail{flex:1;height:2px;background:#2a2a32;position:relative}
       .ball{position:absolute;top:-7px;left:0;width:16px;height:16px;border-radius:50%;background:#ff7950}
       .ball.go{animation:run var(--d) forwards}
       .b1.go{animation-timing-function:linear}
       .b2.go{animation-timing-function:cubic-bezier(.22,.61,.36,1)}
       .b3.go{animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
       @keyframes run{to{left:var(--dist)}}
-      .rep{align-self:flex-start;margin-top:4px;border:1px solid #d5d3cd;background:#fff;color:#16161a;
+      .rep{align-self:flex-start;margin-top:4px;border:1px solid #2a2a32;background:#141418;color:#e8e6e3;
         border-radius:7px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:inherit}`,
      `<div class="stage-el">
         <div class="track"><span class="lb">linear</span><div class="rail"><span class="ball b1"></span></div></div>
@@ -976,11 +1086,11 @@ const PATTERNS=[
     const root=shadow(host,
      `.stage-el{padding:20px;font-family:Inter,sans-serif;min-height:180px;--dl:60ms;--sh:16px;
         display:flex;flex-direction:column;gap:9px;justify-content:center}
-      .it{padding:12px 15px;background:#fff;border:1px solid #e5e3dd;border-radius:9px;font-size:13px;color:#16161a;
+      .it{padding:12px 15px;background:#141418;border:1px solid #2a2a32;border-radius:9px;font-size:13px;color:#e8e6e3;
         opacity:0;transform:translateY(var(--sh))}
       .it.go{animation:si .5s cubic-bezier(.22,.61,.36,1) forwards}
       @keyframes si{to{opacity:1;transform:translateY(0)}}
-      .rep{align-self:flex-start;margin-top:4px;border:1px solid #d5d3cd;background:#fff;color:#16161a;
+      .rep{align-self:flex-start;margin-top:4px;border:1px solid #2a2a32;background:#141418;color:#e8e6e3;
         border-radius:7px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:inherit}`,
      `<div class="stage-el">
         <div class="it">Progetto · brand identity</div>
@@ -1008,7 +1118,7 @@ const PATTERNS=[
     const root=shadow(host,
      `.stage-el{padding:20px;font-family:Inter,sans-serif;min-height:180px;--sp:1.4s;display:flex;flex-direction:column;gap:14px;justify-content:center}
       .card{display:flex;gap:14px;align-items:center}
-      .sk{background:linear-gradient(100deg,#e8e6e0 30%,#f4f2ee 50%,#e8e6e0 70%);
+      .sk{background:linear-gradient(100deg,#22222a 30%,#16161a 50%,#22222a 70%);
         background-size:200% 100%;border-radius:8px;animation:sh var(--sp) linear infinite}
       @keyframes sh{to{background-position:-200% 0}}
       .av{width:52px;height:52px;border-radius:50%;flex:none}
@@ -1016,9 +1126,9 @@ const PATTERNS=[
       .l1{height:12px;width:60%} .l2{height:10px;width:90%} .l3{height:10px;width:75%}
       .real{opacity:0}
       .real.on{opacity:1;transition:opacity .4s ease}
-      .real .av{background:#ff7950;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
-      .real .nm{font-size:14px;font-weight:600;color:#16161a} .real .rl{font-size:12px;color:#9a988f}
-      .rep{align-self:flex-start;border:1px solid #d5d3cd;background:#fff;color:#16161a;border-radius:7px;
+      .real .av{background:#ff7950;display:flex;align-items:center;justify-content:center;color:#141418;font-weight:700}
+      .real .nm{font-size:14px;font-weight:600;color:#e8e6e3} .real .rl{font-size:12px;color:#9d9aa4}
+      .rep{align-self:flex-start;border:1px solid #2a2a32;background:#141418;color:#e8e6e3;border-radius:7px;
         padding:7px 14px;font-size:12px;cursor:pointer;font-family:inherit}`,
      `<div class="stage-el">
         <div class="card ph"><div class="sk av"></div><div class="lines"><div class="sk l1"></div><div class="sk l2"></div><div class="sk l3"></div></div></div>
@@ -1043,15 +1153,15 @@ const PATTERNS=[
   mount(host,ctrl){
     const root=shadow(host,
      `.stage-el{min-height:200px;--sh:30px;--d:.6s;font-family:Inter,sans-serif}
-      .scroller{height:200px;overflow-y:auto;border:1px solid #e5e3dd;border-radius:10px;padding:16px;background:#fff}
+      .scroller{height:200px;overflow-y:auto;border:1px solid #2a2a32;border-radius:10px;padding:16px;background:#141418}
       .scroller::-webkit-scrollbar{width:6px}
-      .scroller::-webkit-scrollbar-thumb{background:#d5d3cd;border-radius:3px}
-      .hint{font-size:11px;color:#9a988f;text-align:center;margin-bottom:14px}
-      .blk{margin-bottom:20px;padding:20px;border-radius:9px;background:#f4f2ee;
+      .scroller::-webkit-scrollbar-thumb{background:#2a2a32;border-radius:3px}
+      .hint{font-size:11px;color:#9d9aa4;text-align:center;margin-bottom:14px}
+      .blk{margin-bottom:20px;padding:20px;border-radius:9px;background:#16161a;
         opacity:0;transform:translateY(var(--sh));transition:opacity var(--d) ease,transform var(--d) cubic-bezier(.22,.61,.36,1)}
       .blk.in{opacity:1;transform:translateY(0)}
-      .blk h4{margin:0 0 6px;font-size:14px;color:#16161a}
-      .blk p{margin:0;font-size:12px;color:#6b6a63;line-height:1.5}
+      .blk h4{margin:0 0 6px;font-size:14px;color:#e8e6e3}
+      .blk p{margin:0;font-size:12px;color:#9d9aa4;line-height:1.5}
       .spacer{height:120px}`,
      `<div class="stage-el"><div class="scroller">
         <div class="hint">↓ scrolla dentro il riquadro</div><div class="spacer"></div>
@@ -1073,15 +1183,15 @@ const PATTERNS=[
   mount(host,ctrl){
     const root=shadow(host,
      `.stage-el{font-family:Inter,sans-serif;--dp:.3}
-      .win{height:200px;overflow-y:auto;border-radius:10px;position:relative;background:#16161a}
+      .win{height:200px;overflow-y:auto;border-radius:10px;position:relative;background:#0d0d10}
       .win::-webkit-scrollbar{width:6px}.win::-webkit-scrollbar-thumb{background:#3a3a42;border-radius:3px}
       .inner{height:600px;position:relative}
       .bg{position:sticky;top:0;height:200px;display:flex;align-items:center;justify-content:center;
-        background:radial-gradient(circle at 50% 30%,#ff7950 0%,#a34c31 40%,#16161a 75%);will-change:transform}
+        background:radial-gradient(circle at 50% 30%,#ff7950 0%,#a34c31 40%,#0d0d10 75%);will-change:transform}
       .bg span{font-family:Fraunces,serif;font-size:40px;color:rgba(255,255,255,.16);will-change:transform}
       .fg{position:relative;margin-top:-140px;padding:0 24px 40px}
-      .fg .c{background:#fff;border-radius:12px;padding:20px;margin-bottom:14px;box-shadow:0 12px 30px rgba(0,0,0,.3)}
-      .fg h4{margin:0 0 6px;font-size:15px;color:#16161a}.fg p{margin:0;font-size:12px;color:#6b6a63;line-height:1.5}
+      .fg .c{background:#1a1a1f;border-radius:12px;padding:20px;margin-bottom:14px;box-shadow:0 12px 30px rgba(0,0,0,.4)}
+      .fg h4{margin:0 0 6px;font-size:15px;color:#e8e6e3}.fg p{margin:0;font-size:12px;color:#9d9aa4;line-height:1.5}
       .hint{position:absolute;top:8px;left:0;right:0;text-align:center;font-size:11px;color:rgba(255,255,255,.6);z-index:2}`,
      `<div class="stage-el"><div class="win">
         <div class="hint">↓ scrolla</div>
@@ -1103,16 +1213,16 @@ const PATTERNS=[
   mount(host,ctrl){
     const root=shadow(host,
      `.stage-el{font-family:Inter,sans-serif}
-      .win{height:200px;overflow-y:auto;border:1px solid #e5e3dd;border-radius:10px;position:relative;background:#fff}
-      .win::-webkit-scrollbar{width:6px}.win::-webkit-scrollbar-thumb{background:#d5d3cd;border-radius:3px}
-      .hd{position:sticky;top:0;background:#16161a;color:#fff;display:flex;align-items:center;justify-content:space-between;
+      .win{height:200px;overflow-y:auto;border:1px solid #2a2a32;border-radius:10px;position:relative;background:#141418}
+      .win::-webkit-scrollbar{width:6px}.win::-webkit-scrollbar-thumb{background:#2a2a32;border-radius:3px}
+      .hd{position:sticky;top:0;background:#e8e6e3;color:#141418;display:flex;align-items:center;justify-content:space-between;
         padding:0 18px;height:64px;transition:height .25s ease,font-size .25s ease;z-index:2}
       .hd.small{height:42px}
       .hd .lg{font-family:Fraunces,serif;font-size:20px;transition:font-size .25s ease}
       .hd.small .lg{font-size:15px}
       .hd .nv{font-size:12px;color:#c9c7c2}
-      .body{padding:18px}.body p{font-size:12px;color:#6b6a63;line-height:1.7;margin:0 0 14px}
-      .hint{font-size:11px;color:#9a988f;text-align:center;padding:8px}`,
+      .body{padding:18px}.body p{font-size:12px;color:#9d9aa4;line-height:1.7;margin:0 0 14px}
+      .hint{font-size:11px;color:#9d9aa4;text-align:center;padding:8px}`,
      `<div class="stage-el"><div class="win">
         <div class="hd"><span class="lg">MEMENTO</span><span class="nv">Lavori · Studio · Contatti</span></div>
         <div class="hint">↓ scrolla per rimpicciolire l'header</div>
@@ -1134,11 +1244,11 @@ const PATTERNS=[
   mount(host,ctrl){
     const root=shadow(host,
      `.stage-el{font-family:Inter,sans-serif;padding:20px;--mn:22px;--mx:56px;min-height:180px;display:flex;flex-direction:column;justify-content:center}
-      .box{border:1px dashed #d5d3cd;border-radius:10px;padding:20px;resize:horizontal;overflow:hidden;
-        width:100%;min-width:200px;max-width:100%;background:#fff}
-      .box h2{font-family:Fraunces,serif;font-weight:500;margin:0;color:#16161a;
+      .box{border:1px dashed #2a2a32;border-radius:10px;padding:20px;resize:horizontal;overflow:hidden;
+        width:100%;min-width:200px;max-width:100%;background:#141418}
+      .box h2{font-family:Fraunces,serif;font-weight:500;margin:0;color:#e8e6e3;
         font-size:clamp(var(--mn),8vw,var(--mx));line-height:1.05}
-      .hint{font-size:11px;color:#9a988f;margin-top:12px;text-align:center}
+      .hint{font-size:11px;color:#9d9aa4;margin-top:12px;text-align:center}
       .code{font-family:monospace;font-size:11px;color:#ff7950;margin-top:6px;text-align:center;word-break:break-all}`,
      `<div class="stage-el"><div class="box"><h2>Design che respira</h2></div>
        <div class="hint">↔ trascina l'angolo in basso a destra del riquadro</div>
@@ -1162,8 +1272,8 @@ const PATTERNS=[
       .grid{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:var(--gap)}
       .col{height:60px;background:rgba(255,121,80,.14);border:1px solid rgba(255,121,80,.4);border-radius:4px}
       .demo{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:var(--gap)}
-      .demo .a{grid-column:span calc(var(--cols)/2);background:#16161a;color:#fff;border-radius:8px;padding:14px;font-size:12px}
-      .demo .b{grid-column:span calc(var(--cols)/2);background:#f4f2ee;color:#16161a;border-radius:8px;padding:14px;font-size:12px}`,
+      .demo .a{grid-column:span calc(var(--cols)/2);background:#e8e6e3;color:#141418;border-radius:8px;padding:14px;font-size:12px}
+      .demo .b{grid-column:span calc(var(--cols)/2);background:#16161a;color:#e8e6e3;border-radius:8px;padding:14px;font-size:12px}`,
      `<div class="stage-el">
         <div class="grid" id="g"></div>
         <div class="demo"><div class="a">Contenuto su metà griglia</div><div class="b">L'altra metà</div></div>
@@ -1184,7 +1294,7 @@ const PATTERNS=[
   mount(host,ctrl){
     const root=shadow(host,
      `.stage-el{font-family:Inter,sans-serif;min-height:180px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:center;padding:24px;--mn:400;--mx:800}
-      .w{font-size:34px;color:#16161a;font-weight:var(--mn);cursor:default;transition:font-weight .3s ease,color .3s ease}
+      .w{font-size:34px;color:#e8e6e3;font-weight:var(--mn);cursor:default;transition:font-weight .3s ease,color .3s ease}
       .w:hover{font-weight:var(--mx);color:#ff7950}`,
      `<div class="stage-el">${["Forma","Peso","Ritmo","Voce","Tono"].map(w=>`<span class="w">${w}</span>`).join("")}</div>`);
     ctrl.on=(id,v)=>{ if(id==="min")sv(root,"--mn",v); if(id==="max")sv(root,"--mx",v); };
@@ -1201,9 +1311,9 @@ const PATTERNS=[
   mount(host,ctrl){
     const root=shadow(host,
      `.stage-el{font-family:Inter,sans-serif;min-height:180px;position:relative;display:flex;align-items:center;justify-content:center}
-      .trig{padding:13px 26px;border-radius:9px;border:0;background:#16161a;color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+      .trig{padding:13px 26px;border-radius:9px;border:0;background:#e8e6e3;color:#141418;font-size:13px;font-weight:600;cursor:pointer}
       .toast{position:absolute;left:50%;transform:translateX(-50%) translateY(20px);
-        background:#16161a;color:#fff;padding:13px 18px;border-radius:10px;font-size:13px;display:flex;
+        background:#e8e6e3;color:#141418;padding:13px 18px;border-radius:10px;font-size:13px;display:flex;
         gap:10px;align-items:center;opacity:0;transition:opacity .3s ease,transform .3s cubic-bezier(.22,.61,.36,1);
         box-shadow:0 10px 30px rgba(0,0,0,.3);white-space:nowrap}
       .toast.bottom{bottom:20px} .toast.top{top:20px;transform:translateX(-50%) translateY(-20px)}
@@ -1228,18 +1338,18 @@ const PATTERNS=[
     const root=shadow(host,
      `.stage-el{font-family:Inter,sans-serif;min-height:180px;display:flex;align-items:center;justify-content:center;padding:24px}
       .box{width:240px}
-      .spin{width:40px;height:40px;border:4px solid #e5e3dd;border-top-color:#ff7950;border-radius:50%;
+      .spin{width:40px;height:40px;border:4px solid #2a2a32;border-top-color:#ff7950;border-radius:50%;
         animation:sp .8s linear infinite;margin:0 auto}
       @keyframes sp{to{transform:rotate(360deg)}}
-      .bar{height:8px;background:#e5e3dd;border-radius:4px;overflow:hidden}
+      .bar{height:8px;background:#2a2a32;border-radius:4px;overflow:hidden}
       .bar i{display:block;height:100%;width:0;background:#ff7950;border-radius:4px;animation:pg 2.4s ease-in-out infinite}
       @keyframes pg{0%{width:0}70%{width:88%}100%{width:100%}}
-      .pct{font-size:11px;color:#9a988f;text-align:center;margin-top:8px;font-family:monospace}
+      .pct{font-size:11px;color:#9d9aa4;text-align:center;margin-top:8px;font-family:monospace}
       .sk{display:flex;gap:12px;align-items:center}
       .sk .a{width:44px;height:44px;border-radius:50%;flex:none}
       .sk .ln{flex:1;display:flex;flex-direction:column;gap:7px}
       .sk .l{height:10px} .sk .l1{width:70%} .sk .l2{width:100%} .sk .l3{width:85%}
-      .g{background:linear-gradient(100deg,#e8e6e0 30%,#f4f2ee 50%,#e8e6e0 70%);background-size:200% 100%;
+      .g{background:linear-gradient(100deg,#22222a 30%,#16161a 50%,#22222a 70%);background-size:200% 100%;
         border-radius:6px;animation:shm 1.4s linear infinite}
       @keyframes shm{to{background-position:-200% 0}}`,
      `<div class="stage-el"><div class="box" id="box"></div></div>`);
@@ -1263,13 +1373,13 @@ const PATTERNS=[
     const root=shadow(host,
      `.stage-el{font-family:Inter,sans-serif;min-height:180px;display:flex;align-items:center;justify-content:center;padding:24px}
       .f{width:260px}
-      .f input{width:100%;padding:13px 14px;border:1.5px solid #d5d3cd;border-radius:9px;font-size:14px;
+      .f input{width:100%;padding:13px 14px;border:1.5px solid #2a2a32;border-radius:9px;font-size:14px;
         font-family:inherit;outline:none;transition:border-color .2s ease}
-      .f input:focus{border-color:#9a988f}
+      .f input:focus{border-color:#9d9aa4}
       .f.ok input{border-color:#4ade80} .f.err input{border-color:#f87171}
       .msg{font-size:12px;margin-top:7px;display:flex;gap:6px;align-items:center;min-height:16px}
       .f.ok .msg{color:#3aa564} .f.err .msg{color:#e05252}
-      .hint{font-size:11px;color:#9a988f;margin-bottom:8px}`,
+      .hint{font-size:11px;color:#9d9aa4;margin-bottom:8px}`,
      `<div class="stage-el"><div class="f"><div class="hint">Scrivi un'email (prova con e senza @)</div>
        <input id="em" placeholder="nome@studio.it"><div class="msg" id="m"></div></div></div>`);
     const f=root.querySelector(".f"),inp=root.querySelector("#em"),m=root.querySelector("#m");let WHEN="al blur";
@@ -1292,6 +1402,7 @@ const PATTERNS=[
 const BUILD_CATS=[
  ["nav","Navigazione"],["hero","Hero"],["content","Contenuto"],
  ["convert","Conversione"],["footer","Chiusura"],
+ ["component","Componenti & FX"],["sector","Blocchi per settore"],
 ];
 
 /* token → font stacks */
@@ -1594,6 +1705,573 @@ const SECTIONS=[
         ${col("Social",["Instagram","Behance","LinkedIn"])}
       </div>
       <div style="max-width:1000px;margin:40px auto 0;padding-top:20px;border-top:1px solid ${c.line};font-family:${t.body};font-size:13px;color:${c.mut}">© 2026 Memento Studio · P.IVA 00000000000</div></footer>`; }},
+
+/* ================= COMPONENTI & FX ================= */
+{ id:"comp-slider", cat:"component", name:"Slider / carosello",
+  desc:"Carosello con slide attiva, frecce e dots.",
+  axes:[{id:"tone",label:"Tono",opts:["dark","light","accent"],def:"dark"}],
+  tpl(s,t){ const c=tone(s.tone);
+    const slides=["01","02","03"];
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(56px*var(--sp)) 40px">
+      <div style="max-width:900px;margin:0 auto">
+        <div style="position:relative;border-radius:calc(var(--radius)*1.5);overflow:hidden;height:300px;background:${c.card};display:flex">
+          ${slides.map((n,i)=>`<div style="flex:none;width:100%;height:100%;display:${i===0?"flex":"none"};align-items:center;justify-content:center;position:relative;
+            background:${i===0?`linear-gradient(120deg,var(--accent) 0%,${c.card} 70%)`:c.card}">
+            <span style="font-family:${t.head};font-size:60px;font-weight:600;opacity:.5">${n}</span></div>`).join("")}
+          <button style="position:absolute;left:14px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;border:0;background:rgba(0,0,0,.4);color:#fff;font-size:18px;cursor:pointer">‹</button>
+          <button style="position:absolute;right:14px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;border:0;background:rgba(0,0,0,.4);color:#fff;font-size:18px;cursor:pointer">›</button>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:center;margin-top:16px">
+          ${slides.map((_,i)=>`<span style="width:${i===0?"24px":"8px"};height:8px;border-radius:4px;background:${i===0?"var(--accent)":c.line};transition:width .3s"></span>`).join("")}
+        </div></div></section>`; }},
+
+{ id:"comp-cards", cat:"component", name:"Cards grid",
+  desc:"Griglia di card con immagine, tag e titolo.",
+  axes:[{id:"tone",label:"Tono",opts:["dark","light"],def:"dark"},{id:"cols",label:"Colonne",opts:["3","4"],def:"3"}],
+  tpl(s,t){ const c=tone(s.tone); const n=s.cols==="4"?4:3;
+    const items=[["Progetto","Brand"],["Progetto","3D"],["Progetto","Web"],["Progetto","Motion"],["Progetto","UI"],["Progetto","CGI"],["Progetto","Film"],["Progetto","AR"]];
+    return `<section data-tone="${s.tone}" data-cols="${s.cols}" style="background:${c.bg};color:${c.fg};padding:calc(64px*var(--sp)) 40px">
+      <div style="max-width:1080px;margin:0 auto;display:grid;grid-template-columns:repeat(${n},1fr);gap:18px">
+        ${items.slice(0,n*2).map(([ti,tag])=>`<div style="border-radius:calc(var(--radius)*1.3);overflow:hidden;background:${c.card};border:1px solid ${c.line}">
+          ${ph(150,c.card)}
+          <div style="padding:14px">
+            <span style="font-family:${t.body};font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)">${tag}</span>
+            <div style="font-family:${t.head};font-size:16px;font-weight:600;margin-top:6px">${ti} ${tag}</div></div></div>`).join("")}
+      </div></section>`; }},
+
+{ id:"comp-chips", cat:"component", name:"Chips / filtri",
+  desc:"Barra di chip filtro, una attiva.",
+  axes:[{id:"tone",label:"Tono",opts:["dark","light"],def:"dark"}],
+  tpl(s,t){ const c=tone(s.tone);
+    const chips=["Tutti","Brand","3D & CGI","Web","Motion","Interattivo","AR/VR"];
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(40px*var(--sp)) 40px">
+      <div style="max-width:900px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px;justify-content:center">
+        ${chips.map((ch,i)=>`<span style="padding:9px 18px;border-radius:999px;font-family:${t.body};font-size:13px;cursor:pointer;
+          border:1px solid ${i===0?"var(--accent)":c.line};color:${i===0?"#fff":c.mut};background:${i===0?"var(--accent)":"transparent"}">${ch}</span>`).join("")}
+      </div></section>`; }},
+
+{ id:"comp-player", cat:"component", name:"Video player (YouTube)",
+  desc:"Player con controlli, titolo, canale e azioni.",
+  axes:[{id:"tone",label:"Tono",opts:["dark","light"],def:"dark"}],
+  tpl(s,t){ const c=tone(s.tone);
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(48px*var(--sp)) 40px">
+      <div style="max-width:860px;margin:0 auto">
+        <div style="position:relative;border-radius:calc(var(--radius)*1.3);overflow:hidden;aspect-ratio:16/9;background:#000;display:flex;align-items:center;justify-content:center">
+          <div style="width:74px;height:74px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer">
+            <span style="border-left:22px solid #fff;border-top:14px solid transparent;border-bottom:14px solid transparent;margin-left:6px"></span></div>
+          <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px;background:linear-gradient(transparent,rgba(0,0,0,.7))">
+            <div style="height:4px;background:rgba(255,255,255,.3);border-radius:2px;margin-bottom:10px"><div style="width:38%;height:100%;background:var(--accent);border-radius:2px"></div></div>
+            <div style="display:flex;gap:14px;align-items:center;color:#fff;font-family:${t.body};font-size:13px">▶ ‖ &nbsp; 3:24 / 8:50 <span style="margin-left:auto">⚙ ⛶</span></div>
+          </div></div>
+        <div style="display:flex;gap:14px;margin-top:16px">
+          <div style="width:44px;height:44px;border-radius:50%;background:var(--accent);flex:none"></div>
+          <div style="flex:1">
+            <div style="font-family:${t.head};font-size:18px;font-weight:600">Showreel 2026 — Memento Studio</div>
+            <div style="font-family:${t.body};font-size:13px;color:${c.mut};margin-top:2px">Memento Studio · 12k visualizzazioni · 2 giorni fa</div></div>
+          <div style="display:flex;gap:8px;align-items:flex-start;font-family:${t.body};font-size:13px;color:${c.fg}">
+            <span style="padding:8px 14px;border-radius:999px;background:${c.card}">♥ 1.2k</span>
+            <span style="padding:8px 14px;border-radius:999px;background:${c.card}">↗ Condividi</span></div>
+        </div></div></section>`; }},
+
+{ id:"comp-store", cat:"component", name:"Store card (Steam)",
+  desc:"Scheda prodotto stile store: media, prezzo, tag.",
+  axes:[{id:"tone",label:"Tono",opts:["dark","light"],def:"dark"}],
+  tpl(s,t){ const c=tone(s.tone);
+    const shots=4;
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(48px*var(--sp)) 40px">
+      <div style="max-width:960px;margin:0 auto;display:grid;grid-template-columns:1.6fr 1fr;gap:24px">
+        <div>
+          <div style="border-radius:calc(var(--radius)*1.2);overflow:hidden">${ph(260,c.card)}</div>
+          <div style="display:flex;gap:8px;margin-top:10px">${Array.from({length:shots}).map(()=>`<div style="flex:1;border-radius:6px;overflow:hidden">${ph(56,c.card)}</div>`).join("")}</div>
+        </div>
+        <div>
+          <div style="font-family:${t.head};font-size:26px;font-weight:600;margin-bottom:8px">Nome del titolo</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+            ${["Azione","Indie","3D","Singleplayer"].map(g=>`<span style="font-family:${t.body};font-size:11px;padding:4px 10px;border-radius:5px;background:${c.card};color:${c.mut}">${g}</span>`).join("")}</div>
+          <p style="font-family:${t.body};font-size:14px;line-height:1.6;color:${c.mut};margin:0 0 18px">Una breve descrizione del prodotto, due righe che spiegano di cosa si tratta e perché vale la pena.</p>
+          <div style="background:${c.card};border-radius:var(--radius);padding:14px;display:flex;align-items:center;gap:12px">
+            <span style="background:#4c9a2a;color:#fff;font-family:${t.body};font-weight:700;font-size:13px;padding:4px 8px;border-radius:4px">-40%</span>
+            <div><div style="font-family:${t.body};font-size:11px;color:${c.mut};text-decoration:line-through">49,99 €</div>
+              <div style="font-family:${t.head};font-size:20px;font-weight:600">29,99 €</div></div>
+            <a style="margin-left:auto;background:var(--accent);color:#fff;padding:11px 20px;border-radius:var(--radius);font-family:${t.body};font-weight:600;font-size:14px">Al carrello</a>
+          </div></div></div></section>`; }},
+
+{ id:"comp-parallax", cat:"component", name:"Banda parallax",
+  desc:"Fascia immersiva con profondità e testo sovrapposto.",
+  axes:[{id:"tone",label:"Tono",opts:["dark","accent"],def:"dark"}],
+  tpl(s,t){ const c=tone(s.tone);
+    return `<section data-tone="${s.tone}" style="position:relative;height:340px;overflow:hidden;display:flex;align-items:center;justify-content:center;
+      background:radial-gradient(120% 140% at 50% 20%,var(--accent) 0%,transparent 45%),${c.bg}">
+      <div style="position:absolute;inset:0;background:
+        repeating-linear-gradient(115deg,transparent 0 38px,rgba(255,255,255,.03) 38px 39px)"></div>
+      <div style="position:relative;text-align:center;color:#fff">
+        <div style="font-family:${t.body};font-size:12px;letter-spacing:.2em;text-transform:uppercase;opacity:.7;margin-bottom:12px">Scroll experience</div>
+        <h2 style="font-family:${t.head};font-weight:600;font-size:clamp(30px,5vw,52px);margin:0;text-shadow:0 4px 30px rgba(0,0,0,.5)">La profondità che cattura</h2></div></section>`; }},
+
+{ id:"comp-scrollfx", cat:"component", name:"Scroll FX — reveal",
+  desc:"Sequenza di blocchi che entrano scrollando.",
+  axes:[{id:"tone",label:"Tono",opts:["dark","light"],def:"dark"}],
+  tpl(s,t){ const c=tone(s.tone);
+    const rows=[["01","Concept","Da dove parte tutto: la ricerca visiva."],["02","Design","La forma prende identità e regole."],["03","Build","Il codice rende vivo ciò che è disegnato."]];
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(70px*var(--sp)) 40px">
+      <div style="max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:20px">
+        ${rows.map(([n,h,p])=>`<div style="display:flex;gap:22px;align-items:flex-start;padding:22px;border-radius:calc(var(--radius)*1.3);background:${c.card};border:1px solid ${c.line}">
+          <div style="font-family:${t.head};font-size:34px;font-weight:600;color:var(--accent);line-height:1">${n}</div>
+          <div><div style="font-family:${t.head};font-size:20px;font-weight:600;margin-bottom:4px">${h}</div>
+            <p style="font-family:${t.body};font-size:14px;color:${c.mut};margin:0;line-height:1.55">${p}</p></div></div>`).join("")}
+      </div></section>`; }},
+
+{ id:"comp-graphic", cat:"component", name:"Blocco grafico",
+  desc:"Composizione astratta con forme e accent.",
+  axes:[{id:"tone",label:"Tono",opts:["dark","accent","light"],def:"dark"}],
+  tpl(s,t){ const c=tone(s.tone);
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(70px*var(--sp)) 40px;overflow:hidden">
+      <div style="max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center">
+        <div><h2 style="font-family:${t.head};font-weight:600;font-size:clamp(26px,3.6vw,40px);margin:0 0 14px">Forme che raccontano</h2>
+          <p style="font-family:${t.body};font-size:15px;line-height:1.65;color:${c.mut};margin:0">Un blocco puramente visivo per dare ritmo tra due sezioni di testo.</p></div>
+        <div style="position:relative;height:240px">
+          <div style="position:absolute;width:140px;height:140px;border-radius:30px;background:var(--accent);top:0;left:20px;transform:rotate(12deg)"></div>
+          <div style="position:absolute;width:110px;height:110px;border-radius:50%;border:2px solid ${c.fg};opacity:.5;bottom:0;left:90px"></div>
+          <div style="position:absolute;width:90px;height:90px;border-radius:14px;background:${c.card};right:10px;top:60px;transform:rotate(-8deg)"></div>
+        </div></div></section>`; }},
+
+/* ================= BLOCCHI PER SETTORE ================= */
+{ id:"sec-hospitality", cat:"sector", name:"Hospitality — camere",
+  desc:"Hero ricettività: claim, prenota, camere.",
+  axes:[{id:"tone",label:"Tono",opts:["light","dark"],def:"light"}],
+  tpl(s,t){ const c=tone(s.tone);
+    const rooms=[["Camera Classic","da 89€"],["Suite Vista","da 149€"],["Attico","da 220€"]];
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:0">
+      <div style="position:relative;height:360px;display:flex;align-items:center;padding:0 48px;
+        background:linear-gradient(90deg,${c.bg} 0%,transparent 60%),${c.card}">
+        <div style="max-width:460px;position:relative">
+          <div style="font-family:${t.body};font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:14px">Relais & Spa · Lago di Como</div>
+          <h1 style="font-family:${t.head};font-weight:600;font-size:clamp(30px,4.6vw,50px);line-height:1.06;margin:0 0 16px">Il tuo rifugio sul lago</h1>
+          <p style="font-family:${t.body};font-size:16px;color:${c.mut};line-height:1.6;margin:0 0 24px">Camere affacciate sull'acqua, spa panoramica e cucina del territorio.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <a style="background:var(--accent);color:#fff;padding:13px 24px;border-radius:var(--radius);font-family:${t.body};font-weight:600;font-size:15px">Prenota ora</a>
+            <a style="border:1.5px solid ${c.line};color:${c.fg};padding:13px 24px;border-radius:var(--radius);font-family:${t.body};font-weight:600;font-size:15px">Le camere</a></div></div></div>
+      <div style="max-width:1000px;margin:0 auto;padding:calc(48px*var(--sp)) 40px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+        ${rooms.map(([r,p])=>`<div style="border-radius:calc(var(--radius)*1.3);overflow:hidden;border:1px solid ${c.line}">
+          ${ph(150,c.card)}<div style="padding:14px"><div style="font-family:${t.head};font-size:17px;font-weight:600">${r}</div>
+          <div style="font-family:${t.body};font-size:14px;color:var(--accent);margin-top:4px">${p} / notte</div></div></div>`).join("")}
+      </div></section>`; }},
+
+{ id:"sec-restaurant", cat:"sector", name:"Ristorazione — menù",
+  desc:"Hero ristorante con menù e prenotazione.",
+  axes:[{id:"tone",label:"Tono",opts:["dark","light"],def:"dark"}],
+  tpl(s,t){ const c=tone(s.tone);
+    const dishes=[["Tartare di manzo","nocciola, senape antica","18€"],["Risotto allo zafferano","midollo, ossobuco","22€"],["Piccione arrosto","rapa rossa, ribes","28€"],["Tortino al cioccolato","cuore caldo, gelato fiordilatte","12€"]];
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(64px*var(--sp)) 40px">
+      <div style="max-width:820px;margin:0 auto;text-align:center">
+        <div style="font-family:${t.body};font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:14px">Cucina contemporanea · dal 1998</div>
+        <h1 style="font-family:${t.head};font-weight:600;font-size:clamp(30px,5vw,52px);margin:0 0 10px">Osteria Moderna</h1>
+        <p style="font-family:${t.body};font-size:16px;color:${c.mut};margin:0 0 34px">Materia prima del territorio, mano leggera, carta dei vini scelta.</p>
+        <div style="text-align:left;border-top:1px solid ${c.line}">
+          ${dishes.map(([n,d,p])=>`<div style="display:flex;justify-content:space-between;gap:20px;padding:18px 0;border-bottom:1px solid ${c.line}">
+            <div><div style="font-family:${t.head};font-size:18px;font-weight:600">${n}</div>
+              <div style="font-family:${t.body};font-size:13px;color:${c.mut};margin-top:3px">${d}</div></div>
+            <div style="font-family:${t.head};font-size:18px;font-weight:600;color:var(--accent);white-space:nowrap">${p}</div></div>`).join("")}
+        </div>
+        <a style="display:inline-block;margin-top:30px;background:var(--accent);color:#fff;padding:14px 30px;border-radius:var(--radius);font-family:${t.body};font-weight:600;font-size:15px">Prenota un tavolo</a>
+      </div></section>`; }},
+
+{ id:"sec-insurance", cat:"sector", name:"Assicurazione — preventivo",
+  desc:"Hero assicurativo: fiducia, preventivo, coperture.",
+  axes:[{id:"tone",label:"Tono",opts:["light","dark"],def:"light"}],
+  tpl(s,t){ const c=tone(s.tone);
+    const covers=[["Auto","RC, furto, kasko","🚗"],["Casa","incendio, furto, danni","🏠"],["Vita","tutela della famiglia","🛡"],["Salute","rimborsi e prevenzione","➕"]];
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(70px*var(--sp)) 40px">
+      <div style="max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center">
+        <div>
+          <div style="font-family:${t.body};font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:14px">Protezione su misura</div>
+          <h1 style="font-family:${t.head};font-weight:600;font-size:clamp(28px,4.2vw,44px);line-height:1.1;margin:0 0 16px">La serenità che meriti, senza pensieri</h1>
+          <p style="font-family:${t.body};font-size:16px;color:${c.mut};line-height:1.6;margin:0 0 22px">Un preventivo chiaro in due minuti, senza impegno. Coperture flessibili, assistenza h24.</p>
+          <div style="display:flex;gap:20px;margin-bottom:24px">
+            <div><div style="font-family:${t.head};font-size:28px;font-weight:600;color:var(--accent)">4.8/5</div><div style="font-family:${t.body};font-size:12px;color:${c.mut}">recensioni clienti</div></div>
+            <div><div style="font-family:${t.head};font-size:28px;font-weight:600;color:var(--accent)">120k</div><div style="font-family:${t.body};font-size:12px;color:${c.mut}">famiglie assicurate</div></div></div>
+        </div>
+        <div style="background:${c.card};border:1px solid ${c.line};border-radius:calc(var(--radius)*1.5);padding:26px">
+          <div style="font-family:${t.head};font-size:19px;font-weight:600;margin-bottom:18px">Calcola il tuo preventivo</div>
+          ${covers.map(([n,d,ic])=>`<label style="display:flex;gap:12px;align-items:center;padding:12px;border:1px solid ${c.line};border-radius:var(--radius);margin-bottom:10px;cursor:pointer">
+            <span style="font-size:20px">${ic}</span><span style="flex:1"><b style="font-family:${t.body};font-size:14px;display:block">${n}</b><span style="font-family:${t.body};font-size:12px;color:${c.mut}">${d}</span></span>
+            <span style="width:18px;height:18px;border-radius:5px;border:1.5px solid ${c.line}"></span></label>`).join("")}
+          <a style="display:block;text-align:center;margin-top:8px;background:var(--accent);color:#fff;padding:14px;border-radius:var(--radius);font-family:${t.body};font-weight:600;font-size:15px">Ottieni il preventivo</a>
+        </div></div></section>`; }},
+
+{ id:"sec-blogpost", cat:"sector", name:"Blog — articolo",
+  desc:"Testata articolo: titolo, autore, corpo.",
+  axes:[{id:"tone",label:"Tono",opts:["light","dark"],def:"light"}],
+  tpl(s,t){ const c=tone(s.tone);
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(70px*var(--sp)) 40px">
+      <div style="max-width:680px;margin:0 auto">
+        <div style="font-family:${t.body};font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:16px">Design · 6 min di lettura</div>
+        <h1 style="font-family:${t.head};font-weight:600;font-size:clamp(30px,4.6vw,46px);line-height:1.12;margin:0 0 20px">Perché il 3D non deve sembrare 3D</h1>
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:28px">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--accent)"></div>
+          <div style="font-family:${t.body};font-size:13px"><b>Gian & il team</b><span style="color:${c.mut}"> · 12 marzo 2026</span></div></div>
+        <div style="border-radius:calc(var(--radius)*1.3);overflow:hidden;margin-bottom:28px">${ph(280,c.card)}</div>
+        <p style="font-family:${t.body};font-size:18px;line-height:1.75;color:${c.fg};margin:0 0 18px">Ogni progetto parte da una domanda semplice: cosa deve sentire chi guarda? Da lì costruiamo luce, materiali e movimento perché la tecnica sparisca.</p>
+        <p style="font-family:${t.body};font-size:17px;line-height:1.75;color:${c.mut};margin:0 0 18px">La resa fotorealistica non è il fine, è il mezzo. Quando funziona, lo spettatore non pensa "che bel 3D" — pensa soltanto all'oggetto, al desiderio, alla storia.</p>
+        <h2 style="font-family:${t.head};font-size:24px;font-weight:600;margin:32px 0 12px">Il dettaglio che fa la differenza</h2>
+        <p style="font-family:${t.body};font-size:17px;line-height:1.75;color:${c.mut};margin:0">Sono le imperfezioni controllate — una polvere, un graffio, un riflesso storto — a rendere credibile un'immagine perfetta.</p>
+      </div></section>`; }},
+
+{ id:"sec-appdownload", cat:"sector", name:"App — download",
+  desc:"Hero app mobile con mockup e store badge.",
+  axes:[{id:"tone",label:"Tono",opts:["dark","accent","light"],def:"dark"}],
+  tpl(s,t){ const c=tone(s.tone);
+    return `<section data-tone="${s.tone}" style="background:${c.bg};color:${c.fg};padding:calc(64px*var(--sp)) 40px;overflow:hidden">
+      <div style="max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center">
+        <div>
+          <h1 style="font-family:${t.head};font-weight:600;font-size:clamp(30px,4.6vw,48px);line-height:1.08;margin:0 0 16px">Tutto in tasca, sempre con te</h1>
+          <p style="font-family:${t.body};font-size:17px;color:${c.mut};line-height:1.6;margin:0 0 26px">Scarica l'app e porta il tuo studio ovunque. Sincronizzata, veloce, offline-first.</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            ${["App Store","Google Play"].map(st=>`<span style="display:flex;gap:10px;align-items:center;background:${c.card};border:1px solid ${c.line};padding:11px 18px;border-radius:var(--radius);font-family:${t.body};font-size:14px">▶ ${st}</span>`).join("")}</div>
+        </div>
+        <div style="display:flex;justify-content:center">
+          <div style="width:210px;height:300px;border-radius:32px;border:8px solid ${c.card};background:linear-gradient(160deg,var(--accent),${c.card});box-shadow:0 24px 60px rgba(0,0,0,.4)"></div>
+        </div></div></section>`; }},
+];
+
+/* ================= PRESET DI PAGINA — pagine intere pronte =================
+   Ogni preset: {id,name,desc,tokens?,sections:[{id,axes}]} */
+const PRESETS=[
+ { id:"p-blog", name:"Blog / Magazine", desc:"Testata editoriale, articolo, correlati",
+   tokens:{pair:"inter-fraunces",accent:"#ff7950",radius:8,space:1},
+   sections:[{id:"nav-min",axes:{tone:"light"}},{id:"sec-blogpost",axes:{tone:"light"}},
+     {id:"comp-cards",axes:{tone:"light",cols:"3"}},{id:"newsletter",axes:{tone:"dark"}},{id:"footer-min",axes:{tone:"dark"}}]},
+ { id:"p-hospitality", name:"Hospitality / Hotel", desc:"Relais sul lago: camere, servizi, prenota",
+   tokens:{pair:"instrument-inter",accent:"#a88b5c",radius:4,space:1.1},
+   sections:[{id:"nav-cta",axes:{tone:"light"}},{id:"sec-hospitality",axes:{tone:"light"}},
+     {id:"comp-slider",axes:{tone:"light"}},{id:"stats",axes:{tone:"accent"}},{id:"testimonial",axes:{tone:"light"}},
+     {id:"cta-band",axes:{tone:"accent"}},{id:"footer-big",axes:{tone:"dark"}}]},
+ { id:"p-restaurant", name:"Ristorante", desc:"Osteria: menu, atmosfera, prenotazione",
+   tokens:{pair:"instrument-inter",accent:"#c1543a",radius:2,space:1.05},
+   sections:[{id:"nav-min",axes:{tone:"dark"}},{id:"sec-restaurant",axes:{tone:"dark"}},
+     {id:"comp-graphic",axes:{tone:"dark"}},{id:"testimonial",axes:{tone:"accent"}},{id:"contact",axes:{tone:"dark"}},{id:"footer-min",axes:{tone:"dark"}}]},
+ { id:"p-insurance", name:"Assicurazione", desc:"Fiducia, preventivo, coperture, FAQ",
+   tokens:{pair:"space-inter",accent:"#2f6fed",radius:10,space:1},
+   sections:[{id:"nav-cta",axes:{tone:"light"}},{id:"sec-insurance",axes:{tone:"light"}},
+     {id:"feature-grid",axes:{tone:"light",media:"si"}},{id:"stats",axes:{tone:"dark"}},
+     {id:"faq",axes:{tone:"light"}},{id:"cta-band",axes:{tone:"accent"}},{id:"footer-big",axes:{tone:"dark"}}]},
+ { id:"p-player", name:"Video / Player (YouTube)", desc:"Player, canale, video correlati",
+   tokens:{pair:"inter-inter",accent:"#ff0033",radius:12,space:.95},
+   sections:[{id:"nav-min",axes:{tone:"dark"}},{id:"comp-player",axes:{tone:"dark"}},
+     {id:"comp-chips",axes:{tone:"dark"}},{id:"comp-cards",axes:{tone:"dark",cols:"4"}},{id:"footer-min",axes:{tone:"dark"}}]},
+ { id:"p-store", name:"Store / Game (Steam)", desc:"Scheda prodotto, gallery, correlati",
+   tokens:{pair:"space-inter",accent:"#66c0f4",radius:6,space:1},
+   sections:[{id:"nav-cta",axes:{tone:"dark"}},{id:"comp-store",axes:{tone:"dark"}},
+     {id:"comp-scrollfx",axes:{tone:"dark"}},{id:"comp-cards",axes:{tone:"dark",cols:"4"}},
+     {id:"pricing",axes:{tone:"dark"}},{id:"footer-big",axes:{tone:"dark"}}]},
+ { id:"p-saas", name:"SaaS / Landing", desc:"Prodotto software: hero, feature, prezzi",
+   tokens:{pair:"space-inter",accent:"#7c5cff",radius:12,space:1},
+   sections:[{id:"nav-cta",axes:{tone:"dark"}},{id:"hero-center",axes:{tone:"dark",dens:"air"}},
+     {id:"logowall",axes:{tone:"dark"}},{id:"feature-zig",axes:{tone:"dark"}},{id:"comp-scrollfx",axes:{tone:"dark"}},
+     {id:"pricing",axes:{tone:"light"}},{id:"faq",axes:{tone:"light"}},{id:"cta-band",axes:{tone:"accent"}},{id:"footer-big",axes:{tone:"dark"}}]},
+ { id:"p-app", name:"App mobile", desc:"Download app: hero, feature, store",
+   tokens:{pair:"inter-inter",accent:"#10b981",radius:16,space:1},
+   sections:[{id:"nav-min",axes:{tone:"dark"}},{id:"sec-appdownload",axes:{tone:"dark"}},
+     {id:"feature-grid",axes:{tone:"dark",media:"si"}},{id:"comp-slider",axes:{tone:"dark"}},
+     {id:"testimonial",axes:{tone:"accent"}},{id:"footer-min",axes:{tone:"dark"}}]},
+ { id:"p-portfolio", name:"Portfolio / Studio", desc:"Studio creativo: lavori, servizi, contatti",
+   tokens:{pair:"inter-fraunces",accent:"#ff7950",radius:8,space:1},
+   sections:[{id:"nav-min",axes:{tone:"dark"}},{id:"hero-split",axes:{tone:"dark",align:"destra",media:"illu"}},
+     {id:"gallery",axes:{tone:"dark"}},{id:"feature-grid",axes:{tone:"dark",media:"si"}},
+     {id:"stats",axes:{tone:"accent"}},{id:"contact",axes:{tone:"dark"}},{id:"footer-big",axes:{tone:"dark"}}]},
+ { id:"p-agency", name:"Agenzia / Corporate", desc:"Sito aziendale completo",
+   tokens:{pair:"space-inter",accent:"#3b82f6",radius:8,space:1},
+   sections:[{id:"nav-cta",axes:{tone:"light"}},{id:"hero-center",axes:{tone:"light",dens:"air"}},
+     {id:"logowall",axes:{tone:"light"}},{id:"feature-grid",axes:{tone:"light",media:"si"}},
+     {id:"stats",axes:{tone:"dark"}},{id:"testimonial",axes:{tone:"accent"}},{id:"faq",axes:{tone:"light"}},{id:"footer-big",axes:{tone:"dark"}}]},
+];
+
+/* ===================================================================
+   DEF · English definitions — GEN[i] matches G[i] one-to-one (row order).
+   Used when the UI language is EN; the IT definition (G[i][4]) stays for IT.
+   =================================================================== */
+const GEN=[
+/* 0 typo Kerning */`The space between two specific letters. Adjusted in pairs: the flaw only jumps out when it's done badly.`,
+/* 1 Tracking */`The uniform spacing of a whole block. Open it up in small caps, tighten it in large headings.`,
+/* 2 Interlinea */`The vertical space between lines. Golden rule: the longer the line, the more air the lines need.`,
+/* 3 Altezza-x */`The height of lowercase letters without ascenders. Tall = readable at small sizes; short = elegant but tiring.`,
+/* 4 Occhiello */`The enclosed space inside letters like o, e, a. Its width sets the color of text on the page.`,
+/* 5 Asta / Grazia */`The stem is the main vertical stroke; the serif is the terminal foot that tells serif from sans.`,
+/* 6 Scala modulare */`Sizes linked by a constant ratio (1.25, 1.333…): hierarchy becomes mathematical instead of random.`,
+/* 7 Fluid type */`The size grows with the viewport between a min and a max, with no breakpoints: a single clamp() covers every screen.`,
+/* 8 Gerarchia tipografica */`How many levels of text and how they differ: size, weight, color. Three levels are almost always enough.`,
+/* 9 Corpo / Punto */`The size of the type. On screen you think in px or rem; the point stays for print.`,
+/* 10 Vedova / Orfana */`A line stranded at the end of a paragraph (widow) or a single word on its own line (orphan): they break the gray of the text.`,
+/* 11 Sbandieratura */`The ragged edge of left-aligned text. A good rag is soft, with no abrupt indents or bulges.`,
+/* 12 Giustificato */`Text aligned on both sides. Beautiful but risky on the web: without hyphenation it creates rivers of space.`,
+/* 13 Fiume */`White gaps that line up vertically between lines. A classic flaw of tight justified text.`,
+/* 14 Misura */`Characters per line. The comfortable zone is 45–75: below it breaks up, above the eye loses the next line.`,
+/* 15 Variable font */`A single file holding infinite weights and widths along an axis. Lighter footprint, continuous control.`,
+/* 16 Font di sistema */`Using the fonts already on the OS: zero download, native rendering, a pinch of cross-platform inconsistency.`,
+/* 17 Web font */`A font loaded via CSS. Watch for FOUT/FOIT: text that flashes or vanishes while it loads.`,
+/* 18 Feature OpenType */`True ligatures, lining figures, real small caps: details that separate a set font from a merely installed one.`,
+/* 19 Pairing */`Pairing two fonts that converse without competing: usually a serif for headings, a sans for body.`,
+/* 20 Superfamiglia */`Serif and sans designed together, with the same structure: the safest pairing because it's already harmonious.`,
+/* 21 Display vs Testo */`Display fonts live large (headings); text fonts are drawn to hold up small. They don't swap.`,
+/* 22 color HSL */`Hue, saturation, lightness: the most human way to reason about color in CSS. Rotate the hue, keep the rest.`,
+/* 23 RGB / HEX */`How the screen builds color from red, green, blue. Precise but unintuitive to tweak by hand.`,
+/* 24 OKLCH */`A perceptually uniform space: changing lightness actually changes perceived light. The future of color tokens.`,
+/* 25 Gamut */`The set of colors a device can show. sRGB is the standard; P3 is wider and now common.`,
+/* 26 Palette 60-30-10 */`A dosing rule: 60% dominant, 30% secondary, 10% accent. Keeps pages from shouting everywhere.`,
+/* 27 Scala di colore */`From lightest to darkest of one hue (50→900): the base for consistent states, borders and backgrounds.`,
+/* 28 Colore semantico */`Assigning a role, not a hue: 'success', 'danger', 'surface'. The theme changes, the role stays.`,
+/* 29 Tinta / Tono / Ombra */`A color + white (tint), + gray (tone), + black (shade): the classic way to build a harmonious scale.`,
+/* 30 Contrasto WCAG */`The luminance ratio between text and background. 4.5:1 for body, 3:1 for large text: it's law, not taste.`,
+/* 31 Temperatura */`Warm colors advance, cool ones recede: temperature creates depth even in a flat interface.`,
+/* 32 Colore accessibile */`Never rely on color alone for information: 8% of men can't tell red from green.`,
+/* 33 Vibrazione */`Two saturated complementary colors touching seem to shimmer. Damp it by desaturating or adding a neutral border.`,
+/* 34 Dark mode */`It's not just inverting: pure blacks tire the eye, very dark grays are better; colors must be desaturated so they don't glare.`,
+/* 35 Gradiente */`A transition between colors. Interpolating in OKLCH avoids the muddy gray mid-zones that RGB produces.`,
+/* 36 Duotone */`An image mapped to just two colors: a strong, recognizable way to unify mismatched photos.`,
+/* 37 Overlay */`A dark or colored veil over an image to let text breathe. The fastest way to guarantee contrast.`,
+/* 38 layout Griglia a colonne */`Vertical columns with fixed gutters (often 12): the structure that aligns everything horizontally.`,
+/* 39 Baseline grid */`An invisible horizontal grid every line of text sits on: it gives the page vertical rhythm.`,
+/* 40 Gutter */`The space between two columns. Constant across the page, it sets how much the grid breathes.`,
+/* 41 Modulo */`The base cell born from the crossing of columns and rows. Composing by modules keeps everything proportioned.`,
+/* 42 Griglia rotta */`Breaking the grid on purpose to create tension: it only works if the grid exists and is solid first.`,
+/* 43 Spazio bianco */`Empty space isn't wasted: it's what gives hierarchy and breathing room. The beginner fears it, the designer uses it.`,
+/* 44 Scala di spaziatura */`Margins and padding drawn from a fixed scale (4, 8, 16, 24…): spatial consistency is born here.`,
+/* 45 Densità */`How much information per screen. A dashboard wants high density; a landing wants air. It's a choice, not chance.`,
+/* 46 Prossimità */`Elements near each other read as a group. Space groups more than any border or box.`,
+/* 47 Above the fold */`What's visible without scrolling. It needn't hold everything, but it must give a reason to keep going.`,
+/* 48 Gerarchia visiva */`The order in which the eye meets elements: designed with size, weight, color and position.`,
+/* 49 Sezione aurea */`The 1:1.618 ratio that recurs in nature. Useful as a starting point, not a dogma to chase.`,
+/* 50 Regola dei terzi */`Divide into thirds and place key elements on the lines: dynamic composition instead of centered.`,
+/* 51 Breakpoint */`The width at which the layout changes structure. Better driven by content than by phone models.`,
+/* 52 Mobile-first */`Designing the small first and adding later: it forces you to decide what really matters.`,
+/* 53 Container query */`A component reacts to its container's width, not the viewport's: true responsiveness per component.`,
+/* 54 Fluid layout */`Percentage widths and clamp() instead of fixed values: the page adapts without jumps between breakpoints.`,
+/* 55 ui Hero */`The first big section: promise, context and a single action. Not a container for everything — a hook.`,
+/* 56 Navbar */`The navigation bar. Few items, clear hierarchy, one CTA: if it holds everything it no longer guides.`,
+/* 57 Breadcrumb */`The 'you are here' trail: it says where you are in the hierarchy and how to go back. Precious in deep sites.`,
+/* 58 Card */`A self-contained container grouping image, title and action. The most used brick of the modern web.`,
+/* 59 Accordion */`Sections that open one at a time. Great for FAQs, poor for content meant to be read in full.`,
+/* 60 Tab */`Alternate views in the same space. They work when the options are few and equal.`,
+/* 61 Carosello */`Content that rotates through. Nice to show, rarely seen in practice: past the first slide, almost no one looks.`,
+/* 62 Modale */`A window that blocks the rest until you answer. Use it for decisions, never for content you could have shown in place.`,
+/* 63 Drawer */`A panel that slides in from a side. Perfect for mobile navigation or filters, without leaving the page.`,
+/* 64 Tooltip */`A hint on hover. Never essential: on touch there is no hover.`,
+/* 65 Popover */`Like a tooltip but clickable and rich: it can hold actions. Closes on click-away or Esc.`,
+/* 66 Paginazione */`Splitting results into numbered pages: it gives control and a sense of quantity, at the cost of an extra click.`,
+/* 67 Scroll infinito */`Content loads as you scroll. Immersive for feeds, frustrating when you're looking for the footer or a precise item.`,
+/* 68 Empty state */`What you show when there's nothing. The most overlooked and most instructive moment: it guides the first step.`,
+/* 69 Skeleton */`Gray shapes in place of loading content: the page feels faster than it is.`,
+/* 70 Campo & Label */`The label sits above the field, always visible: using the placeholder as a label is a trap that vanishes as you type.`,
+/* 71 Stato di validazione */`Error, success, waiting: communicated inline, near the field, at the right moment — not only on submit.`,
+/* 72 CTA */`The button that asks for the action. Clear verb, one primary per screen, contrast that sets it apart.`,
+/* 73 motion Affordance */`The visual cue that an element is clickable, draggable, typable. If it looks like a button, it must be one.`,
+/* 74 Feedback */`Every action must get an immediate response: hover, press, loading. Silence breeds doubt and double-clicks.`,
+/* 75 Optimistic UI */`Showing the result right away, before the server confirms: the app feels instant, correcting only if it fails.`,
+/* 76 Microcopy */`The interface's minimal words: labels, errors, empty states. Small, but they set the tone and remove friction.`,
+/* 77 Easing */`How an animation speeds up and slows down. Linear is mechanical; ease-out is the natural default for entrances.`,
+/* 78 Spring */`Animation driven by physics (mass, tension) rather than duration: it gives a lively, organic bounce.`,
+/* 79 Durata */`How long a movement lasts. 150–300ms for micro-interactions: below it disappears, above it slows the user.`,
+/* 80 Cubic-bezier */`The four numbers that draw the easing curve. It's the signature of a brand's motion.`,
+/* 81 Stagger */`Elements entering staggered instead of together: it turns a list that appears into a readable cascade.`,
+/* 82 FLIP */`First-Last-Invert-Play: animating a reorder by measuring before and after. The trick behind smooth layout transitions.`,
+/* 83 Transizione di stato */`The animated bridge between two states (closed→open). It makes cause visible: the user grasps what happened.`,
+/* 84 Parallax */`Layers scrolling at different speeds: it creates depth. Powerful in tiny doses, nauseating in excess.`,
+/* 85 Reveal on scroll */`Elements appear as they enter the viewport, often via IntersectionObserver. It paces the reading.`,
+/* 86 Sticky */`An element that pins as you scroll: a header that shrinks, an index that follows. Orientation at no cost.`,
+/* 87 Scroll snap */`Scrolling snaps to precise points: perfect for full-screen galleries and horizontal sections.`,
+/* 88 Scroll-driven */`The animation is tied to scroll position, not time: scroll back and it plays back too.`,
+/* 89 ux User flow */`The step-by-step path toward a goal. Drawing it reveals the dead ends before you build a single screen.`,
+/* 90 Architettura informativa */`How content is organized and named. If people can't find something, for them it doesn't exist.`,
+/* 91 Jobs to be done */`People 'hire' a product for a task. Design for the job to be done, not for the feature itself.`,
+/* 92 Wireframe */`The skeleton without aesthetics: structure and priority before colors and fonts. It's for debating the what, not the how.`,
+/* 93 Prototipo */`A clickable but fake version, to test a flow before writing code. Fidelity varies with the question.`,
+/* 94 Persona */`An archetypal user built from research. Useful when based on real data, harmful when invented for convenience.`,
+/* 95 Journey map */`The user's journey over time, with emotions and friction points. It shows where the product disappoints or delights.`,
+/* 96 Test di usabilità */`Watching real people use the product. Five users uncover most of the serious problems.`,
+/* 97 Valutazione euristica */`An expert checks the interface against known principles (Nielsen's heuristics): fast, cheap, no users needed.`,
+/* 98 A/B test */`Two variants shown to different groups to measure which converts. It answers 'which', not 'why'.`,
+/* 99 Card sorting */`Asking users to group content: it builds an information architecture from their model, not ours.`,
+/* 100 Ricerca generativa */`Interviews and observation to discover needs before having a solution: it defines the right problem.`,
+/* 101 a11y WCAG */`The international guidelines for web accessibility. Level AA is the standard required almost everywhere.`,
+/* 102 POUR */`The four WCAG principles: perceivable, operable, understandable, robust. Every criterion falls under one of these.`,
+/* 103 Contrasto minimo */`4.5:1 for normal text, 3:1 for large text and UI elements. Non-negotiable, checkable in one click.`,
+/* 104 Focus visibile */`The indicator of where you are navigating by keyboard. Removing it for looks cuts out anyone not using a mouse.`,
+/* 105 Ordine di tabulazione */`The sequence in which focus moves through the page. It must follow the logical order, not the code's.`,
+/* 106 Skip link */`A hidden link that skips navigation and jumps to content: the first courtesy toward keyboard users.`,
+/* 107 Focus trap */`Inside a modal the focus must stay trapped there, not escape behind. Opening and closing must be handled.`,
+/* 108 ARIA */`Attributes that give role and state to screen readers when HTML isn't enough. First rule: don't use ARIA if the native element exists.`,
+/* 109 HTML semantico */`Use button for buttons, nav for navigation: half of accessibility is free if the markup is correct.`,
+/* 110 Testo alternativo */`The description of an image for those who can't see it. Empty if decorative, descriptive if informative: never 'image'.`,
+/* 111 Landmark */`The regions of the page (header, main, footer) that let you jump into them with a screen reader.`,
+/* 112 Reduced motion */`The system preference of those who suffer with animation. Respecting it is one line of CSS and a duty.`,
+/* 113 Target size */`The minimum tappable area, about 44×44px. Small, close targets are the number-one frustration on mobile.`,
+/* 114 Screen reader */`The software that reads the page aloud. Design for the ear, not only the eye.`,
+/* 115 fe Custom property */`Native CSS variables (--x). Changing one at runtime redraws everything that uses it: the heart of theming.`,
+/* 116 Specificità */`The score that decides which rule wins. Fighting it with !important is a symptom, not a fix.`,
+/* 117 Cascata */`The order in which rules stack. Understanding it is the difference between driving CSS and arguing with it.`,
+/* 118 Box model */`Content, padding, border, margin: how an element's size is computed. box-sizing:border-box is a lifesaver.`,
+/* 119 Flexbox */`One-dimensional layout, row or column. The right tool to align and distribute along one axis.`,
+/* 120 Grid */`Two-dimensional layout in rows and columns. Real structure, no needless wrappers: the grid enters CSS.`,
+/* 121 Subgrid */`A nested element inherits the parent's grid: it aligns content inside different cards on the same line.`,
+/* 122 Core Web Vitals */`Google's three metrics: LCP (speed), INP (responsiveness), CLS (stability). They matter for the user and for ranking.`,
+/* 123 CLS */`Cumulative Layout Shift: how much the page 'jumps' while loading. Top cause: images without dimensions.`,
+/* 124 Lazy loading */`Loading images and components only when needed. Less weight at startup, a useful page sooner.`,
+/* 125 Critical CSS */`The minimal CSS to render the first screen, placed inline: it removes the wait for the external stylesheet.`,
+/* 126 DOM */`The tree representation of the page the browser builds and JS manipulates. Touching it too much costs frames.`,
+/* 127 Reflow / Repaint */`Recomputing layout (reflow) or just the pixels (repaint). Animating transform and opacity avoids both.`,
+/* 128 Shadow DOM */`An encapsulated tree with styles isolated from the rest of the page: zero CSS conflicts, the basis of web components.`,
+/* 129 ds Token */`The abstract design value in a name: --color-accent, --space-4. Change the source, change the whole product.`,
+/* 130 Token primitivo vs semantico */`The primitive is the raw value (blue-500); the semantic is the role (color-primary) that uses it. The theme lives in the latter.`,
+/* 131 Primitive */`The indivisible bricks — colors, spacings, sizes — from which everything else is built. The root of the system.`,
+/* 132 Componente */`A reusable element with defined behavior: button, card, field. Designed once, consistent everywhere.`,
+/* 133 Variante */`The versions of a component (primary/ghost, sm/lg). An axis of choice, not a brand-new component from scratch.`,
+/* 134 Slot */`The point where a component accepts arbitrary content from outside: flexibility without breaking the structure.`,
+/* 135 Stato */`How a component looks in hover, focus, disabled, loading. A component without states is half a component.`,
+/* 136 Handoff */`The pass from design to development: specs, tokens, behavior. The less interpretation needed, the better the handoff.`,
+/* 137 Libreria */`The living collection of components, in Figma and in code. They must stay in sync or the system splits in two.`,
+/* 138 Versioning */`Tracking changes to the system with version numbers: whoever uses it knows what changed and what will break.`,
+/* 139 Documentazione */`The usage rules of each component. A design system without docs is just a folder of files no one knows how to use.`,
+/* 140 Deprecazione */`Marking something as no-longer-to-use, giving time to migrate: you remove it with grace, not all at once.`,
+/* 141 flow Brief */`The document that sets goals, constraints and audience before starting. A weak brief causes half the problems.`,
+/* 142 Moodboard */`A collection of visual references that aligns the tone before producing. It gets the direction discussed, not the details.`,
+/* 143 Scope */`What's in and what's out of the project. Writing it down avoids scope creep: work that grows without the budget doing so.`,
+/* 144 Design review */`A structured moment of critiquing the work. It works with clear goals; it degenerates into opinion-gathering without.`,
+/* 145 Redline */`Annotations with exact measures and spacings over the design, for development. Today often replaced by automatic inspect.`,
+/* 146 QA visivo */`Comparing what's built with what's designed, pixel by pixel. The last mile where details are won or lost.`,
+/* 147 Round di revisione */`A full cycle of feedback and fixes. They should be counted and put in the contract, or they multiply endlessly.`,
+/* 148 Naming */`Fixed rules for file and layer names. Boring until you're hunting for something among a thousand assets at midnight.`,
+/* 149 Staging */`An environment identical to production to test on before publishing. The last net before the public.`,
+/* 150 Go-live */`The moment of publishing. Never on a Friday: if something breaks, you want someone awake to fix it.`,
+/* 151 Handover */`Handing the finished project to whoever will maintain it: docs, access, context. Where memory gets lost.`,
+/* 152 typo Legatura */`Two letters fused into a single glyph (fi, fl) to avoid the shapes colliding. A sign of a careful font.`,
+/* 153 Cifre */`'Text' figures drop below the line like lowercase; 'lining' figures are all the same height. Each has its context.`,
+/* 154 Grottesco */`Neutral sans with no obvious personality (Helvetica, Inter): they disappear, and for body text that's a virtue.`,
+/* 155 Umanista */`Sans with a memory of the pen: warm apertures and calligraphic proportions. More readable in long text.`,
+/* 156 Capolettera */`The enlarged initial letter that anchors a paragraph. An editorial heritage that gives an article tone.`,
+/* 157 color Mesh gradient */`A multi-point gradient blending in every direction: organic, soft backgrounds that are hard to render flat.`,
+/* 158 Accessibilità del tema */`Every text/background pair in the theme must be checked for contrast: a beautiful but unreadable dark mode is no theme.`,
+/* 159 Simultaneità */`The same gray looks darker on white and lighter on black: context alters perceived color.`,
+/* 160 layout Ritmo */`The regular repetition of spaces and sizes that gives the page musicality. You feel it before you see it.`,
+/* 161 Punto focale */`The place where the eye lands first. If there are three, there are none.`,
+/* 162 Aspect-ratio */`Locking a box's proportions (16:9) so it doesn't collapse while loading: preventive care against layout shift.`,
+/* 163 Bento */`A grid of tiles of different sizes, like a bento box: very in vogue for product landing pages.`,
+/* 164 ui Mega menu */`A wide dropdown that shows whole sections. Useful for vast sites, scattered if it isn't well organized.`,
+/* 165 Timeline */`Events laid along a time axis. It tells a process or a story better than a bullet list.`,
+/* 166 Logo wall */`The wall of client logos. Instant social proof, as long as you don't turn it into a graveyard of brands.`,
+/* 167 Toast */`A brief notification that appears and vanishes on its own. For non-blocking confirmations: 'saved', 'copied'.`,
+/* 168 Badge */`A small numeric or status indicator attached to an element: unread notifications, 'new', counts.`,
+/* 169 Segmented control */`A group of mutually exclusive options in a line: like tabs, but to pick a value, not a view.`,
+/* 170 motion Anticipazione */`A tiny counter-movement before the action prepares it and makes it readable: a principle inherited from animation.`,
+/* 171 Morphing */`One shape transforms continuously into another, with no cut: the button that becomes the panel it opened.`,
+/* 172 View transition */`The API that animates the transition between two whole page states. With a fallback, since not every browser supports it.`,
+/* 173 Progress bar */`The bar that fills as you scroll: it says how much is left. A small courtesy on long articles.`,
+/* 174 ux North star metric */`The single metric that captures the product's core value. It aligns the team better than ten disconnected KPIs.`,
+/* 175 Modello mentale */`How the user imagines the system works. Designing against their model creates 'their' errors that are really ours.`,
+/* 176 Dogfooding */`Using the product you build yourself: the fastest way to feel the friction that tests don't show.`,
+/* 177 a11y Live region */`A zone that announces dynamic changes (a toast, an error) to screen readers without moving focus.`,
+/* 178 Ordine di lettura */`The sequence in which the screen reader traverses the page. It must match the visual order, or it's confusion.`,
+/* 179 fe Cascade layer */`Cascade layers that order rules by explicit priority: you master specificity instead of enduring it.`,
+/* 180 Logical properties */`margin-inline instead of margin-left: properties that adapt on their own to right-to-left languages.`,
+/* 181 will-change */`It hints to the browser what will animate, so it prepares a layer. Powerful and to be used sparingly: it costs memory.`,
+/* 182 Debounce / Throttle */`Limiting how often a function runs on frequent events (scroll, resize): less work, more fluidity.`,
+/* 183 ds Elevation */`The depth scale rendered with shadows: it says what floats above what. A token like any other.`,
+/* 184 Composizione */`Building the interface by putting small components together instead of creating huge, specific ones. Less code, more consistency.`,
+/* 185 flow Kickoff */`The meeting that starts the project: goals, roles and timeline get aligned. Skipping it is paid for halfway through.`,
+/* 186 Style guide */`The document with the brand's visual rules: colors, fonts, spacing, tone. The reference when in doubt.`,
+/* 187 typo Font subsetting */`Shipping only the glyphs you actually need: a web font weighing a third loads sooner and doesn't block text.`,
+/* 188 color Alpha */`A color's transparency channel. An accent at 10% alpha becomes its hover-state background, for free.`,
+/* 189 layout Optical alignment */`Aligning by eye, not to the box edge: a circle or a comma must be pushed past the line to look right.`,
+/* 190 ui Bottom sheet */`The drawer that rises from the bottom, native to mobile: reachable with the thumb, closes by dragging it down.`,
+/* 191 motion Choreography */`Orchestrating several animations so they enter in order, not all at once: it gives motion a direction.`,
+/* 192 a11y Zoom 200% */`The page must stay usable zoomed to 200% with no horizontal scroll: a WCAG requirement often forgotten.`,
+/* 193 fe Intrinsic sizing */`Sizing based on the content itself rather than fixed values: layouts that don't break with unexpected text.`,
+/* 194 ds Token pipeline */`The tool that turns tokens into CSS, iOS, Android from a single source: one truth, many platforms.`,
+/* 195 ux Storyboard */`The drawn sequence of how the user meets the product in the real context: it puts the scenario before the screen.`,
+/* 196 flow Critique */`The structured, non-defensive critique of others' work: you critique the choice, not the person. A skill to train.`,
+/* 197 be Server */`The always-on computer that answers requests. Not a mysterious box: it's a program listening on a port.`,
+/* 198 Client / Server */`The client (browser) asks, the server answers. All web architecture is this conversation, repeated millions of times.`,
+/* 199 Front-end vs Back-end */`The front-end is what the user sees and touches; the back-end is the logic and data behind the scenes. Two crafts, one product.`,
+/* 200 Full-stack */`Someone working on both sides, from the database to the interface. Handy for small projects, rare to do well across all of it.`,
+/* 201 API */`The menu of what a service can do: a contract of requests and responses. The front-end orders, the back-end serves.`,
+/* 202 REST */`The most widespread API style: resources reached via URL with the HTTP verbs. Predictable, stateless, easy to grasp.`,
+/* 203 Endpoint */`A single API address that does one thing: /users, /orders/42. The specific door you knock on.`,
+/* 204 GraphQL */`An alternative to REST: the client asks for exactly the fields it wants, in a single request. Powerful, more complex to manage.`,
+/* 205 Payload */`The real content of a request or response, usually in JSON. The parcel, minus the packaging of the headers.`,
+/* 206 JSON */`The format client and server exchange data in: readable key-value pairs. The lingua franca of the web.`,
+/* 207 Webhook */`Instead of asking constantly, the server calls you when something happens. 'Don't call us, we'll call you'.`,
+/* 208 Rate limit */`The cap of requests you can make in an interval. It keeps the server from falling over: exceed it and you get a 429.`,
+/* 209 Database */`Where data lives in an orderly, persistent way. The application's long-term memory.`,
+/* 210 SQL / NoSQL */`SQL organizes into tables with rigid relations; NoSQL is freer and more flexible. The choice depends on the shape of the data.`,
+/* 211 CRUD */`The four basic operations on data: Create, Read, Update, Delete. Almost every business app is, at heart, a CRUD.`,
+/* 212 Migrazione */`A versioned change to the database structure. Like a commit, but for the data schema: applicable and reversible.`,
+/* 213 Query */`A question put to the database. Written badly, it's the number-one cause of slow pages.`,
+/* 214 Cache */`A fast copy of data that's expensive to recompute. The most effective way to speed things up — and among the sneakiest sources of bugs.`,
+/* 215 Autenticazione */`Verifying who you are (login). Don't confuse it with authorization: getting in is one thing, having the keys to every room is another.`,
+/* 216 Autorizzazione */`What you're allowed to do once inside. The user is authenticated, but can they delete that order?`,
+/* 217 Token / JWT */`A signed badge that proves who you are on every request, without logging in each time. It must be kept safe.`,
+/* 218 OAuth */`The mechanism behind 'Sign in with Google': you delegate identity to another service without handing it your password.`,
+/* 219 Variabile d'ambiente */`A secret or config value kept out of the code (API keys, passwords). Never, ever commit it to the repository.`,
+/* 220 host Hosting */`The always-online space where your site lives. From cheap shared hosting to cloud that scales on its own.`,
+/* 221 Deploy */`The moment code goes to production, reachable by users. 'To deploy' = to publish a new version.`,
+/* 222 Dominio */`Your site's readable name (studio.it) that points to an IP address. You rent it, you don't buy it forever.`,
+/* 223 DNS */`The internet's address book: it translates the domain name into the server's IP. Changes can take hours to propagate.`,
+/* 224 SSL / HTTPS */`The padlock in the bar: it encrypts the traffic between browser and server. Mandatory today, often free and automatic.`,
+/* 225 Ambiente */`A copy of the app in a context: development (dev), test (staging), production (prod). You test on staging, publish to prod.`,
+/* 226 Localhost */`The server running on your own computer, usually on localhost:3000. 'Works on my machine' is born and dies here.`,
+/* 227 Staging */`The twin environment of production where you rehearse before the public. The last safety net.`,
+/* 228 Produzione */`The real environment, the one users see. When something breaks 'in prod', it breaks for real.`,
+/* 229 Build */`Turning source code into the version optimized for the web (minified, bundled). The step before deploy.`,
+/* 230 CI/CD */`The automation that tests and publishes code on every change. Fewer manual steps, fewer human errors.`,
+/* 231 Pipeline */`The chain of automatic steps from commit to live site: install, test, build, publish. If one link breaks, it stops.`,
+/* 232 Rollback */`Quickly returning to the previous version when a deploy goes wrong. The seatbelt of publishing.`,
+/* 233 CDN */`A network of servers spread across the world serving files from the node nearest the user. The site loads fast everywhere.`,
+/* 234 Static vs Dynamic */`Static pages are pre-built and blazing fast; dynamic ones are generated on each request. Many modern sites mix the two.`,
+/* 235 Serverless */`Code that runs on demand without managing an always-on server: you pay only for real usage. The server exists, you just don't see it.`,
+/* 236 Edge */`Running code on the CDN nodes, right next to the user, instead of a distant data center. Latency cut to the minimum.`,
+/* 237 debug Debugging */`The art of finding out why code doesn't do what you thought. More investigation than writing: you isolate, verify, fix.`,
+/* 238 Bug */`A behavior different from the expected one. Not a rare anomaly: it's the normal condition of software before it's fixed.`,
+/* 239 Stack trace */`The list of functions that led to the error, from last to first. Read it from the top: the culprit is almost always there.`,
+/* 240 Breakpoint */`A point where execution stops to inspect the state. Better than filling the code with scattered prints.`,
+/* 241 Console.log */`Printing a value to see what's happening: the oldest debugging, and still the most used. Humble but irreplaceable.`,
+/* 242 Riproduzione */`The minimal steps to make a bug reappear on command. If you can't reproduce it, you're guessing, not fixing.`,
+/* 243 Regressione */`A bug that reappears, or something that stops working after a change. The reason automated tests exist.`,
+/* 244 404 Not Found */`The requested resource doesn't exist at that address. Broken link, wrong URL, or moved file.`,
+/* 245 500 Server Error */`Something blew up on the server side. Unlike a 404, the fault is the back-end's, not the request's.`,
+/* 246 403 Forbidden */`The resource exists but you don't have permission to see it. Authenticated maybe, authorized no.`,
+/* 247 CORS */`The browser blocks a request to another, unauthorized domain. Frustrating and very frequent: it's fixed on the server side.`,
+/* 248 Null / Undefined */`Trying to use something that isn't there: 'cannot read property of undefined'. The most common error in JavaScript.`,
+/* 249 Syntax error */`The code doesn't follow the language's grammar: a bracket, a comma. The compiler stops right away.`,
+/* 250 Timeout */`An operation exceeded the maximum wait time. Usually a slow network or a server that isn't responding.`,
+/* 251 DevTools */`The browser panel (F12) with console, network, elements. The first place to look when something's wrong on the front-end.`,
+/* 252 Linter */`A tool that flags errors and bad habits as you write, before you even run it. A proofreader for code.`,
+/* 253 Log */`The traces a program leaves as it runs. In production, often the only way to know what happened.`,
+/* 254 prog Variabile */`A named container for a value that can change. The most elementary brick of every program.`,
+/* 255 Funzione */`A reusable block of code that takes input and returns output. Write once, call as often as you like.`,
+/* 256 Ciclo */`Repeating an action several times without rewriting it: for, while. How code handles lists.`,
+/* 257 Condizione */`The code's fork: if this, then that (if/else). Every non-trivial behavior is born here.`,
+/* 258 Tipo */`The nature of a value: number, text, boolean, list. Confusing them is an endless source of bugs.`,
+/* 259 Array / Oggetto */`An array is an ordered list; an object groups values with names. The two data structures you work with every day.`,
+/* 260 Parametro / Argomento */`The parameter is the placeholder in the function definition; the argument is the real value you pass it.`,
+/* 261 Ritorno */`What a function gives back to whoever called it. Without a return, the function works but delivers nothing.`,
+/* 262 Sincrono / Asincrono */`Synchronous = one thing at a time, in line; asynchronous = it starts and moves on without waiting. The web is full of async waits.`,
+/* 263 Promise / Await */`The modern way to handle a result that will arrive 'shortly' (a network response). await waits without blocking everything.`,
+/* 264 Callback */`A function passed to another to run 'when you're done'. Useful, but nested too deep it becomes unreadable.`,
+/* 265 Evento */`Something that happens (a click, a load) the code reacts to. The web is event-driven programming.`,
+/* 266 Sintassi */`The grammatical rules of a language. Getting them wrong stops everything; getting them right doesn't guarantee the code is correct.`,
+/* 267 Refactoring */`Rewriting code so it's clearer, without changing its behavior. Maintenance, not new features.`,
+/* 268 Dipendenza */`External code your project depends on (a library). Handy, but every dependency is also a risk to keep updated.`,
+/* 269 Package manager */`The tool that installs and updates libraries (npm, yarn). It manages the chain of dependencies for you.`,
+/* 270 Commento */`Text ignored by the computer, written for humans. Explain the why, not the what: the what is already said by the code.`,
+/* 271 Git */`The system that keeps the history of every change to the code. The time machine that makes experimenting safe.`,
+/* 272 Commit */`A saved snapshot of the code's state, with a message. The base unit of history in Git.`,
+/* 273 Branch / Merge */`A separate branch to work on without touching the main one, then reunited (merge). How you develop in parallel without stepping on each other.`,
+/* 274 Pull request */`The proposal to merge your branch, open to others' review before the merge. Where code review happens.`,
+/* 275 Repository */`The versioned container of a project, locally and on platforms like GitHub. The home of the code.`,
+/* 276 npm run dev */`The command that starts the local dev server with automatic reload. The first gesture of every workday.`,
+/* 277 npm install */`Downloads all the project's dependencies into the local folder. The first command after cloning a repo.`,
+/* 278 npm run build */`Generates the optimized production version. What runs before publishing, not while you develop.`,
+/* 279 Hot reload */`The browser updates the result as soon as you save, without reloading the whole page. The comfort you don't notice until it's gone.`,
+/* 280 Terminale */`The text window from which you give commands to the system. Intimidating at first, indispensable after a week.`,
 ];
 
 </script>
@@ -1645,8 +2323,8 @@ function selectPattern(id){
   const holder=document.createElement("div"); holder.style.width="100%"; stage.appendChild(holder);
   const ctrlApi={on:()=>{}};
   p.mount(holder,ctrlApi);
-  // reflect bg (some demos are dark)
-  stage.setAttribute("data-bg", ["parallax"].includes(p.id)?"dark":"light");
+  // reflect bg — demos are dark by default; a few explicitly light ones opt in
+  stage.setAttribute("data-bg", ["fluidtype"].includes(p.id)?"light":"dark");
   // controls
   buildControls(p,ctrlApi);
   // code panel
@@ -1720,11 +2398,19 @@ const DOM_ICON={
  fe:'<path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13 5l-2 14"/>',
  ds:'<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/>',
  flow:'<circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.5 6H15a3 3 0 013 3v6.5M6 8.5V15a3 3 0 003 3h6.5"/>',
+ be:'<ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6M5 12v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6"/>',
+ host:'<rect x="3" y="5" width="18" height="6" rx="1.5"/><rect x="3" y="13" width="18" height="6" rx="1.5"/><path d="M7 8h.01M7 16h.01"/>',
+ debug:'<rect x="8" y="6" width="8" height="12" rx="4"/><path d="M12 3v3M4 9h4M4 15h4M16 9h4M16 15h4M9 4l2 2M15 4l-2 2"/>',
+ prog:'<path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13 4l-2 16"/>',
 };
 function domIcon(d){
   return `<span class="gicon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${DOM_ICON[d]||DOM_ICON.ds}</svg></span>`;
 }
 let gFilter="all", gQuery="";
+/* map each G row to its global index so we can pull the EN definition GEN[i] */
+const G_INDEX=new Map(); G.forEach((r,i)=>G_INDEX.set(r,i));
+function isEN(){ return document.documentElement.lang==="en"; }
+function defOf(r){ const i=G_INDEX.get(r); return (isEN() && typeof GEN!=="undefined" && GEN[i])?GEN[i]:r[4]; }
 function defInit(){
   // chips
   const chips=$("#gchips");
@@ -1735,7 +2421,7 @@ function defInit(){
     b.setAttribute("aria-pressed","false"); chips.appendChild(b);
   });
   // relabel chips with proper short names
-  const short={typo:"Tipografia",color:"Colore",layout:"Layout",ui:"UI pattern",motion:"Motion",ux:"UX",a11y:"Accessibilità",fe:"Front-end",ds:"Design system",flow:"Workflow"};
+  const short={typo:"Tipografia",color:"Colore",layout:"Layout",ui:"UI pattern",motion:"Motion",ux:"UX",a11y:"Accessibilità",fe:"Front-end",ds:"Design system",flow:"Workflow",be:"Back-end",host:"Hosting",debug:"Debugging",prog:"Programmazione"};
   $$("#gchips button").forEach(b=>{ if(b.dataset.d!=="all") b.textContent=short[b.dataset.d]||b.textContent; });
   $$("#gchips button").forEach(b=>b.addEventListener("click",()=>{
     gFilter=b.dataset.d; $$("#gchips button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
@@ -1751,7 +2437,7 @@ function defRender(){
     if(gFilter!=="all" && gFilter!==did) return;
     const rows=G.filter(r=>r[0]===did).filter(r=>{
       if(!gQuery) return true;
-      return (r[2]+" "+r[3]+" "+r[4]).toLowerCase().includes(gQuery);
+      return (r[2]+" "+r[3]+" "+r[4]+" "+defOf(r)).toLowerCase().includes(gQuery);
     });
     if(!rows.length) return;
     const dom=document.createElement("div"); dom.className="gdom";
@@ -1771,7 +2457,7 @@ function defRender(){
         const txt=document.createElement("div"); txt.className="txt";
         let inner='<div class="gterm">'+r[2]+'</div>';
         if(r[3]) inner+='<div class="galias">'+r[3]+'</div>';
-        inner+='<div class="gdef">'+r[4]+'</div>';
+        inner+='<div class="gdef">'+defOf(r)+'</div>';
         txt.innerHTML=inner; card.appendChild(txt); cards.appendChild(card); count++;
       });
       sub.appendChild(cards); dom.appendChild(sub);
@@ -1792,6 +2478,10 @@ let selIdx=-1, viewport=1280;
 let hashTimer=null;
 
 function buildInit(){
+  // preset dropdown
+  const presetSel=$("#presetSel");
+  PRESETS.forEach(p=>{ const o=document.createElement("option"); o.value=p.id; o.textContent=p.name; presetSel.appendChild(o); });
+  presetSel.addEventListener("change",()=>{ if(presetSel.value){ applyPreset(presetSel.value); presetSel.value=""; } });
   // library
   const lib=$("#buildLib");
   BUILD_CATS.forEach(([cid,clabel])=>{
@@ -1869,6 +2559,14 @@ function renderThumb(host,s){
   host.innerHTML='<div style="width:'+(100/scale)+'%;transform:scale('+scale+');transform-origin:top left;--accent:'+comp.tokens.accent+';--radius:8px;--sp:1;pointer-events:none">'+inner+'</div>';
 }
 
+function applyPreset(id){
+  const p=PRESETS.find(x=>x.id===id); if(!p) return;
+  // deep copy sections so editing doesn't mutate the preset
+  comp.sections=p.sections.map(s=>({id:s.id,axes:{...s.axes}}));
+  if(p.tokens) comp.tokens={...DEFAULT_TOKENS,...p.tokens};
+  selIdx=0;
+  buildRender(); saveHash();
+}
 function addSection(id){
   const s=SECTIONS.find(x=>x.id===id); if(!s) return;
   const axes={}; s.axes.forEach(a=>axes[a.id]=a.def);
@@ -1923,10 +2621,15 @@ function pageDoc(tokens,sections,forExport){
     .sec-wrap .secbar button[data-a="del"]:hover{background:#e0473f}`;
   return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${fonts}
     <style>
-      :root{--accent:${tokens.accent};--radius:${rad};--sp:${tokens.space};--head:${T.head};--body:${T.body}}
+      :root{--accent:${tokens.accent};--radius:${rad};--sp:${tokens.space};--head:${T.head};--body:${T.body};
+        --bord:${tokens.bord!=null?tokens.bord:1}px;--shadow:${tokens.shadow!=null?tokens.shadow:0};--track:${tokens.track!=null?tokens.track:0}em}
       *{box-sizing:border-box;margin:0}
       body{font-family:${T.body};color:#16161a;background:#fff;overflow-x:hidden}
       section,nav,footer{transition:background .35s ease,color .35s ease}
+      /* style tokens that morph with the A⇄B scrubber */
+      section [style*="border:1px"],nav,footer{border-width:var(--bord)!important}
+      h1,h2,h3{letter-spacing:var(--track)}
+      section [style*="border-radius"]{box-shadow:0 calc(var(--shadow)*14px) calc(var(--shadow)*40px) rgba(0,0,0,calc(var(--shadow)*.18))}
       @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
       ${selCss}
     </style></head><body>${body}</body></html>`;
@@ -2068,62 +2771,115 @@ function rgbToHex(rgb){
 /* ===================================================================
    TOKENS · A ⇄ B scrubber
    =================================================================== */
-let tokState={A:{pair:"inter-fraunces",accent:"#ff7950",radius:8,space:1},
-              B:{pair:"instrument-inter",accent:"#3b82f6",radius:16,space:1.15}},
-    tokActive="A", tokPos=0;
+/* Uno "stile" = tutte le dimensioni che lo scrubber morpha con continuità */
+const TOK_FONTS=Object.keys(PAIRS);
+function styleFromTokens(tk){
+  return {pair:tk.pair||"inter-fraunces",accent:tk.accent||"#ff7950",
+    radius:(tk.radius!=null?tk.radius:8), space:(tk.space!=null?tk.space:1),
+    bord:1, shadow:0, track:0};
+}
+/* due direzioni predefinite, poi l'utente varia */
+let tokState={
+  A:{pair:"inter-fraunces",accent:"#ff7950",radius:6,space:1,bord:1,shadow:0.15,track:0},
+  B:{pair:"space-inter",accent:"#3b82f6",radius:18,space:1.2,bord:2,shadow:0.9,track:0.02},
+};
+let tokActive="A", tokPos=0, tokBaseId="p-portfolio";
+/* le sezioni su cui si applica il morphing = quelle del preset base scelto */
+function tokSections(){
+  const p=PRESETS.find(x=>x.id===tokBaseId);
+  return p?p.sections.map(s=>({id:s.id,axes:{...s.axes}})):DEMO_SECTIONS;
+}
+/* micro-layout che varia con lo scrubber: densità (space) è già inclusa;
+   qui aggiungiamo variazioni di stile guidate dai numeri A/B */
+const STYLE_DIMS=[
+  {id:"radius",label:"Radius",min:0,max:28,step:1,unit:"px"},
+  {id:"space",label:"Spaziatura",min:0.7,max:1.5,step:0.05,unit:"×"},
+  {id:"bord",label:"Bordi",min:0,max:3,step:0.5,unit:"px"},
+  {id:"shadow",label:"Ombre",min:0,max:1,step:0.05,unit:""},
+  {id:"track",label:"Tracking",min:-0.03,max:0.06,step:0.005,unit:"em"},
+];
 function tokInit(){
+  // base preset selector
+  const base=$("#tokBase");
+  PRESETS.forEach(p=>{ const o=document.createElement("option"); o.value=p.id; o.textContent=p.name; base.appendChild(o); });
+  base.value=tokBaseId;
+  base.addEventListener("change",()=>{ tokBaseId=base.value; tokRender(); });
+  // font pair for active style
   const sel=$("#tokPairAB");
-  Object.keys(PAIRS).forEach(k=>{ const o=document.createElement("option"); o.value=k; o.textContent=PAIRS[k].label; sel.appendChild(o); });
+  TOK_FONTS.forEach(k=>{ const o=document.createElement("option"); o.value=k; o.textContent=PAIRS[k].label; sel.appendChild(o); });
+  sel.addEventListener("change",()=>{ tokState[tokActive].pair=sel.value; tokRender(); });
+  // accent for active style
   const acc=$("#tokAccentAB");
   ACCENTS.forEach(col=>{ const sw=document.createElement("button"); sw.className="swatch"; sw.style.background=col;
     sw.addEventListener("click",()=>{ tokState[tokActive].accent=col; syncTokControls(); tokRender(); });
     acc.appendChild(sw); });
-  const rad=$("#tokRadiusAB");
-  [["0","0"],["8","8"],["16","16"],["pill","999"]].forEach(([lab,val])=>{
-    const b=document.createElement("button"); b.textContent=lab; b.dataset.v=val;
-    b.addEventListener("click",()=>{ tokState[tokActive].radius=parseInt(val); syncTokControls(); tokRender(); });
-    rad.appendChild(b);
-  });
-  sel.addEventListener("change",()=>{ tokState[tokActive].pair=sel.value; tokRender(); });
+  // A/B toggle
   $("#tokA").addEventListener("click",()=>{ tokActive="A"; setTokAB(); });
   $("#tokB").addEventListener("click",()=>{ tokActive="B"; setTokAB(); });
+  // randomize active style
+  $("#tokDice").addEventListener("click",()=>{ randomizeStyle(tokActive); syncTokControls(); buildStyleRow(); tokRender(); });
+  // scrubber
   $("#tokScrub").addEventListener("input",e=>{ tokPos=parseFloat(e.target.value); tokRender(); });
+  buildStyleRow();
   setTokAB();
 }
+function randomizeStyle(which){
+  const s=tokState[which];
+  s.radius=[0,2,4,8,12,18,24][Math.floor(Math.random()*7)];
+  s.space=+(0.85+Math.random()*0.5).toFixed(2);
+  s.bord=[0.5,1,1.5,2,3][Math.floor(Math.random()*5)];
+  s.shadow=+(Math.random()).toFixed(2);
+  s.track=+(-0.02+Math.random()*0.07).toFixed(3);
+  s.pair=TOK_FONTS[Math.floor(Math.random()*TOK_FONTS.length)];
+  s.accent=ACCENTS[Math.floor(Math.random()*ACCENTS.length)];
+}
+function buildStyleRow(){
+  const row=$("#tokStyleRow"); if(!row) return;
+  row.innerHTML="";
+  STYLE_DIMS.forEach(d=>{
+    const wrap=document.createElement("div"); wrap.className="tok-dim";
+    const s=tokState[tokActive];
+    const lab=document.createElement("label");
+    lab.innerHTML=d.label+' <b>'+fmtDim(s[d.id],d)+'</b>';
+    const r=document.createElement("input"); r.type="range"; r.min=d.min; r.max=d.max; r.step=d.step; r.value=s[d.id];
+    r.addEventListener("input",()=>{ tokState[tokActive][d.id]=parseFloat(r.value);
+      lab.querySelector("b").textContent=fmtDim(parseFloat(r.value),d); tokRender(); });
+    wrap.appendChild(lab); wrap.appendChild(r); row.appendChild(wrap);
+  });
+}
+function fmtDim(v,d){ return (d.step<1&&d.id!=="space"?(+v).toFixed(d.id==="track"?3:2):(+v).toFixed(d.id==="space"?2:0))+d.unit; }
 function setTokAB(){
   $("#tokA").setAttribute("aria-pressed",String(tokActive==="A"));
   $("#tokB").setAttribute("aria-pressed",String(tokActive==="B"));
-  syncTokControls();
+  syncTokControls(); buildStyleRow();
 }
 function syncTokControls(){
   const s=tokState[tokActive];
   $("#tokPairAB").value=s.pair;
   $$("#tokAccentAB .swatch").forEach(sw=>sw.setAttribute("aria-pressed",String(rgbToHex(sw.style.background)===s.accent)));
-  $$("#tokRadiusAB button").forEach(b=>b.setAttribute("aria-pressed",String(parseInt(b.dataset.v)===s.radius)));
 }
-/* OKLCH-ish interpolation done simply in RGB for the demo (graceful, gradual) */
 function lerp(a,b,t){ return a+(b-a)*t; }
 function hexRGB(h){ h=rgbToHex(h).replace("#",""); return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; }
 function mixHex(a,b,t){ const A=hexRGB(a),B=hexRGB(b);
   return "#"+A.map((v,i)=>Math.round(lerp(v,B[i],t)).toString(16).padStart(2,"0")).join(""); }
 function tokRender(){
-  // interpolated tokens
   const A=tokState.A,B=tokState.B,t=tokPos;
   const tokens={
-    pair: t<0.5?A.pair:B.pair,               // discrete → crossfade approximated by switch at 50 + opacity
+    pair: t<0.5?A.pair:B.pair,
     accent: mixHex(A.accent,B.accent,t),
-    radius: Math.round(lerp(A.radius>=999?40:A.radius, B.radius>=999?40:B.radius, t)),
-    space: lerp(A.space,B.space,t),
+    radius: Math.round(lerp(A.radius,B.radius,t)),
+    space: +lerp(A.space,B.space,t).toFixed(3),
+    bord: +lerp(A.bord,B.bord,t).toFixed(2),
+    shadow: +lerp(A.shadow,B.shadow,t).toFixed(3),
+    track: +lerp(A.track,B.track,t).toFixed(4),
   };
-  // sample bozza: reuse current BUILD comp if it has sections, else a default 4-section demo
-  const sections = comp.sections.length ? comp.sections : DEMO_SECTIONS;
+  const sections=tokSections();
   const frame=$("#tokFrame");
-  const doc=pageDoc(tokens,sections,true);
-  frame.srcdoc=doc;
-  frame.onload=()=>{ frame.style.height=frame.contentDocument.body.scrollHeight+"px"; };
-  // font crossfade cue: fade the whole preview slightly at the switch point
+  frame.srcdoc=pageDoc(tokens,sections,true);
+  frame.onload=()=>{ try{ frame.style.height=frame.contentDocument.body.scrollHeight+"px"; }catch(e){} };
+  // font crossfade cue near the switch point
   const dev=frame.closest(".device");
-  if(dev){ const near=Math.abs(t-0.5); dev.style.opacity=(0.82+0.18*(near*2)).toFixed(2); }
+  if(dev){ const near=Math.abs(t-0.5); dev.style.opacity=(0.86+0.14*(near*2)).toFixed(2); }
   $("#tokScrub").style.background=`linear-gradient(90deg,${A.accent} 0%,${mixHex(A.accent,B.accent,.5)} 50%,${B.accent} 100%)`;
 }
 const DEMO_SECTIONS=[
@@ -2203,6 +2959,16 @@ const M={
 "Nessun termine trovato.":"No terms found.","Tutti":"All",
 "Tipografia":"Typography","Colore":"Color","Layout":"Layout","UI pattern":"UI patterns",
 "UX":"UX","Accessibilità":"Accessibility","Front-end":"Front-end","Design system":"Design system","Workflow":"Workflow",
+"Back-end":"Back-end","Hosting":"Hosting","Debugging":"Debugging","Programmazione":"Programming",
+"Back-end & API":"Back-end & API","Hosting & deploy":"Hosting & deploy","Debugging & errori":"Debugging & errors",
+"Ciò che gira sul server, lontano dagli occhi: dati, autenticazione, logica. Il front-end è la vetrina, il back-end è il magazzino e la cassa.":
+ "What runs on the server, out of sight: data, authentication, logic. The front-end is the shopfront, the back-end is the warehouse and the till.",
+"Come il codice passa dal tuo computer al mondo. Dominî, build, ambienti, CDN: il ponte tra 'funziona da me' e 'è online'.":
+ "How code goes from your computer to the world. Domains, builds, environments, CDN: the bridge between 'works on my machine' and 'it's live'.",
+"Il mestiere vero non è scrivere codice, è capire perché non funziona. Leggere errori, isolare, correggere: metà del tempo di chi sviluppa passa qui.":
+ "The real craft isn't writing code, it's figuring out why it doesn't work. Reading errors, isolating, fixing: half a developer's time is spent here.",
+"I concetti trasversali a ogni linguaggio: variabili, funzioni, cicli, tipi. Il vocabolario minimo per parlare con chi scrive codice senza sentirsi persi.":
+ "The concepts common to every language: variables, functions, loops, types. The minimum vocabulary to talk with people who write code without feeling lost.",
 /* --- BUILD ui --- */
 "Libreria — trascina o clicca":"Library — drag or click",
 "La bozza compare qui. Trascina una sezione dalla libreria, oppure cliccala per aggiungerla in fondo.":
@@ -2229,6 +2995,26 @@ const M={
 "FAQ accordion":"FAQ accordion","CTA band":"CTA band","Form contatti":"Contact form",
 "Newsletter":"Newsletter","Footer compatto":"Compact footer","Footer esteso":"Extended footer",
 "Navigazione":"Navigation","Hero":"Hero","Contenuto":"Content","Conversione":"Conversion","Chiusura":"Closing",
+"Componenti & FX":"Components & FX","Blocchi per settore":"Sector blocks",
+"⚡ Preset di pagina…":"⚡ Page presets…",
+"Tokens · morphing A ⇄ B":"Tokens · A ⇄ B morphing",
+"Parti da un preset, gioca fino a convincerti":"Start from a preset, play until it clicks",
+"Scegli una pagina di partenza, fissa due direzioni stilistiche (A e B) e trascina lo scrubber: radius, spaziatura, bordi, ombre, spaziatura tra lettere, coppia tipografica e micro-layout si trasformano con continuità. Ti fermi dove ti convince.":
+ "Pick a starting page, set two stylistic directions (A and B) and drag the scrubber: radius, spacing, borders, shadows, letter-spacing, type pairing and micro-layout transform continuously. Stop where it convinces you.",
+"Pagina":"Page","Stile A":"Style A","Stile B":"Style B","🎲 Varia":"🎲 Vary",
+"Radius":"Radius","Spaziatura":"Spacing","Bordi":"Borders","Ombre":"Shadows","Tracking":"Tracking",
+"Lo scrubber interpola tutto con continuità: numeri (radius, spaziatura, bordi, ombre, tracking) linearmente, i font con un crossfade a metà corsa. Nessuno scatto.":
+ "The scrubber interpolates everything continuously: numbers (radius, spacing, borders, shadows, tracking) linearly, fonts with a mid-run crossfade. No jumps.",
+/* nomi nuove sezioni */
+"Slider / carosello":"Slider / carousel","Cards grid":"Cards grid","Chips / filtri":"Chips / filters",
+"Video player (YouTube)":"Video player (YouTube)","Store card (Steam)":"Store card (Steam)",
+"Banda parallax":"Parallax band","Scroll FX — reveal":"Scroll FX — reveal","Blocco grafico":"Graphic block",
+"Hospitality — camere":"Hospitality — rooms","Ristorazione — menù":"Restaurant — menu",
+"Assicurazione — preventivo":"Insurance — quote","Blog — articolo":"Blog — article","App — download":"App — download",
+"Colonne":"Columns",
+"Fondamenta":"Fundamentals","API":"API","Dati":"Data","Auth":"Auth","Basi":"Basics","Ambienti":"Environments",
+"Build":"Build","Distribuzione":"Distribution","Metodo":"Method","Errori comuni":"Common errors","Strumenti":"Tools",
+"Concetti":"Concepts","Flusso":"Flow","Pratiche":"Practices","Versionamento":"Versioning","Comandi dev":"Dev commands",
 /* descrizioni sezioni */
 "Logo a sinistra, poche voci a destra. Essenziale.":"Logo left, a few items right. Essential.",
 "Come la minimale, con un pulsante d'azione a destra.":"Like the minimal one, with an action button on the right.",
@@ -2395,7 +3181,7 @@ function setLang(l){
   if(be) be.setAttribute("aria-pressed",String(l==="en"));
   try{ localStorage.setItem("mdr_lang",l); }catch(e){}
   /* re-render the BUILD preview so the iframe draft picks up the language too */
-  try{ if(typeof buildRender==="function") buildRender(); if(typeof tokRender==="function") tokRender(); }catch(e){}
+  try{ if(typeof buildRender==="function") buildRender(); if(typeof tokRender==="function") tokRender(); if(typeof defRender==="function") defRender(); }catch(e){}
 }
 window.__i18nApply=root=>{ if(lang==="en") walk(root||document.body); };
 window.__i18nDict=M;   /* used by iframe draft translation */
