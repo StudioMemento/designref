@@ -300,32 +300,31 @@
     border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
   .tok-bar{display:flex;gap:10px;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line);
     flex-wrap:wrap;background:var(--panel)}
-  .tok-ab{display:flex;gap:6px}
-  .tok-ab button{appearance:none;border:1px solid var(--line-2);border-radius:7px;background:transparent;
-    color:var(--txt-2);padding:6px 14px;font-family:var(--mono);font-size:11px;cursor:pointer;letter-spacing:.1em}
-  .tok-ab button:hover{color:var(--txt)}
-  .tok-ab button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:#17130f}
-  .tok-preview{flex:1;overflow:auto;padding:22px;display:flex;justify-content:center;align-items:flex-start;
+  .tbtn.pri{border-color:var(--accent);color:var(--accent);background:#17130f}
+  .tbtn.pri:hover{background:var(--accent);color:#fff}
+  /* galleria di proposte */
+  .tok-gallery{flex:1;overflow:auto;padding:20px;display:grid;gap:18px;align-content:start;
+    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
     background:radial-gradient(140% 120% at 50% 0%,#0a0a0c 0%,#050505 80%)}
-  .tok-scrub{padding:16px 20px;border-top:1px solid var(--line);background:var(--panel)}
-  .tok-scrub .srow{display:flex;align-items:center;gap:14px}
-  .tok-stylerow{display:flex;gap:18px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line);
-    background:var(--panel-2)}
-  .tok-dim{flex:1;min-width:130px}
-  .tok-dim label{display:flex;justify-content:space-between;font-size:11px;color:var(--txt-2);margin-bottom:6px}
-  .tok-dim label b{color:var(--accent);font-family:var(--mono);font-weight:500;font-size:11px}
-  .tok-dim input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:3px;background:var(--line-2);border-radius:2px;outline:none}
-  .tok-dim input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--void)}
-  .tok-dim input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--void)}
-  .tok-scrub .send{font-family:var(--mono);font-size:11px;color:var(--txt-3);letter-spacing:.1em}
-  .tok-scrub .send b{color:var(--accent)}
-  #tokScrub{-webkit-appearance:none;appearance:none;flex:1;height:4px;border-radius:2px;
-    background:linear-gradient(90deg,var(--accent-dim),var(--line-2));outline:none}
-  #tokScrub::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;
-    background:var(--accent);cursor:pointer;border:3px solid var(--void)}
-  #tokScrub::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--accent);
-    cursor:pointer;border:3px solid var(--void)}
-  .tok-hint{font-size:11.5px;color:var(--txt-2);margin-top:10px;line-height:1.5}
+  .tok-card{border:1px solid var(--line-2);border-radius:12px;overflow:hidden;background:var(--panel-2);
+    cursor:pointer;transition:border-color .18s,transform .18s,box-shadow .18s;display:flex;flex-direction:column}
+  .tok-card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 14px 34px rgba(0,0,0,.5)}
+  .tok-card .thumb{position:relative;height:260px;overflow:hidden;background:#fff;border-bottom:1px solid var(--line)}
+  .tok-card .thumb iframe{position:absolute;top:0;left:0;width:200%;height:520px;border:0;
+    transform:scale(.5);transform-origin:top left;pointer-events:none;background:#fff}
+  .tok-card .meta{padding:11px 13px;display:flex;flex-direction:column;gap:3px}
+  .tok-card .meta .nm{font-family:var(--disp);font-size:14px;font-weight:600;color:var(--txt)}
+  .tok-card .meta .sub{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt-3)}
+  .tok-card .meta .tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+  .tok-card .meta .tag{font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--accent);border:1px solid var(--accent-dim);border-radius:4px;padding:2px 6px}
+  .tok-empty{grid-column:1/-1;text-align:center;color:var(--txt-3);font-size:13px;line-height:1.7;padding:60px 20px}
+  /* dettaglio proposta */
+  .tok-detail{flex:1;display:flex;flex-direction:column;min-height:0}
+  .tok-detail-head{display:flex;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+  .tok-detail-preview{flex:1;overflow:auto;padding:22px;display:flex;justify-content:center;align-items:flex-start;
+    background:radial-gradient(140% 120% at 50% 0%,#0a0a0c 0%,#050505 80%)}
+
 
   /* ---------- responsive ---------- */
   @media(max-width:900px){
@@ -503,42 +502,32 @@
     <!-- ===================== TOKENS ===================== -->
     <section class="view" id="vTokens">
       <div class="vhead">
-        <p class="eyebrow">Tokens · morphing A ⇄ B</p>
-        <h1>Parti da un preset, gioca fino a convincerti</h1>
-        <p>Scegli una pagina di partenza, fissa due direzioni stilistiche (A e B) e trascina lo scrubber: radius, spaziatura, bordi, ombre, spaziatura tra lettere, coppia tipografica e micro-layout si trasformano con continuità. Ti fermi dove ti convince.</p>
+        <p class="eyebrow">Tokens · generatore di proposte</p>
+        <h1>Proposte di pagina, infinite e coerenti</h1>
+        <p>Parte dalla tua bozza di BUILD e ne genera varianti complete — struttura, ordine sezioni, layout, tipografia, stile e interazioni — sempre coerenti con la categoria. Sfoglia la galleria, apri quella che ti convince e portala in BUILD.</p>
       </div>
       <div class="tok-wrap">
         <div class="tok-bar">
-          <label style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt-3)">Pagina</label>
-          <select class="pairsel" id="tokBase" style="width:auto;max-width:200px"></select>
-          <div class="tok-ab" role="group" aria-label="Direzione" style="margin-left:14px">
-            <button id="tokA" aria-pressed="true">Stile A</button>
-            <button id="tokB" aria-pressed="false">Stile B</button>
-          </div>
-          <button class="tbtn" id="tokDice" title="Cambia stile della direzione attiva (nuovo archetipo)" style="margin-left:6px">🎲 Varia</button>
-          <button class="tbtn" id="tokDiceBoth" title="Genera due stili diversi per A e B" style="margin-left:4px">🎲🎲 A+B</button>
-          <button class="tbtn" id="tokUndo" title="Torna allo stile precedente" style="margin-left:4px" disabled>↶</button>
-          <button class="tbtn" id="tokRedo" title="Rifai" disabled>↷</button>
-          <button class="tbtn" id="tokImgShuffle" title="Rigenera le immagini" style="margin-left:4px">🔀 Img</button>
-          <span id="tokArchName" style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-left:10px"></span>
-          <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
-            <select class="pairsel" id="tokPairAB" style="width:auto" title="Coppia tipografica"></select>
-            <div class="accent-row" id="tokAccentAB"></div>
-          </div>
+          <label style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt-3)">Sorgente</label>
+          <select class="pairsel" id="tokSource" style="width:auto;max-width:220px" title="Da cosa partire"></select>
+          <button class="tbtn pri" id="tokGen" title="Genera una nuova serie di proposte" style="margin-left:8px">✨ Genera proposte</button>
+          <button class="tbtn" id="tokMore" title="Aggiungi altre proposte">＋ Altre</button>
+          <span id="tokCount" style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt-3);margin-left:6px"></span>
+          <button class="tbtn" id="tokImgShuffle" title="Rigenera le immagini" style="margin-left:auto">🔀 Immagini</button>
         </div>
-        <div class="tok-stylerow" id="tokStyleRow"></div>
-        <div class="tok-preview" id="tokPreview">
-          <div class="device" style="width:1000px;transform:scale(.8);transform-origin:top center">
-            <iframe id="tokFrame" title="Anteprima token" style="width:100%;border:0;display:block;background:#fff"></iframe>
+        <div class="tok-gallery" id="tokGallery"></div>
+        <div class="tok-detail" id="tokDetail" style="display:none">
+          <div class="tok-detail-head">
+            <button class="tbtn" id="tokBack">← Galleria</button>
+            <span id="tokDetailName" style="font-family:var(--disp);font-size:16px;font-weight:600;color:var(--txt)"></span>
+            <span id="tokDetailMeta" style="font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--txt-3)"></span>
+            <button class="tbtn pri" id="tokUse" style="margin-left:auto" title="Sostituisce la bozza di BUILD con questa proposta">✓ Usa in BUILD</button>
           </div>
-        </div>
-        <div class="tok-scrub">
-          <div class="srow">
-            <span class="send">STILE <b>A</b></span>
-            <input type="range" id="tokScrub" min="0" max="1" step="0.01" value="0">
-            <span class="send">STILE <b>B</b></span>
+          <div class="tok-detail-preview" id="tokDetailPreview">
+            <div class="device" style="width:1100px;transform-origin:top center">
+              <iframe id="tokFrame" title="Anteprima proposta" style="width:100%;border:0;display:block;background:#fff"></iframe>
+            </div>
           </div>
-          <p class="tok-hint" id="tokHint">Lo scrubber interpola tutto con continuità: numeri (radius, spaziatura, bordi, ombre, tracking) linearmente, i font con un crossfade a metà corsa. Nessuno scatto.</p>
         </div>
       </div>
     </section>
@@ -2401,7 +2390,7 @@ function showView(id){
   Object.keys(VIEWS).forEach(b=>$("#"+b).setAttribute("aria-pressed",String(VIEWS[b]===id)));
   $("#"+id).classList.add("on");
   if(id==="vBuild") buildRender();
-  if(id==="vTokens") tokRender();
+  if(id==="vTokens"){ if(typeof renderGallery==="function"&&tokProps.length) renderGallery(); }
 }
 Object.keys(VIEWS).forEach(b=>$("#"+b).addEventListener("click",()=>showView(VIEWS[b])));
 
@@ -2936,101 +2925,13 @@ function rgbToHex(rgb){
 }
 
 /* ===================================================================
-   TOKENS · A ⇄ B scrubber
+   TOKENS · generatore di proposte di pagina
+   Parte dalla bozza di BUILD (o da un preset), rielabora struttura,
+   ordine, varianti di sezione, stile, tipografia e interazioni in più
+   proposte complete e coerenti con la categoria. Galleria + dettaglio.
    =================================================================== */
-/* Uno "stile" = tutte le dimensioni che lo scrubber morpha con continuità */
-const TOK_FONTS=Object.keys(PAIRS);
-function styleFromTokens(tk){
-  return {pair:tk.pair||"inter-fraunces",accent:tk.accent||"#ff7950",
-    radius:(tk.radius!=null?tk.radius:8), space:(tk.space!=null?tk.space:1),
-    bord:1, shadow:0, track:0};
-}
-/* due direzioni predefinite (archetipi distinti), poi l'utente varia */
-let tokState={
-  A:{arch:"editorial",archName:"Editorial",pair:"inter-fraunces",accent:"#ff7950",radius:4,space:1.2,bord:1,shadow:0.12,track:0.01},
-  B:{arch:"tech",archName:"Tech / Neon",pair:"space-inter",accent:"#7c5cff",radius:14,space:1,bord:0.5,shadow:0.7,track:0.01},
-};
-let tokActive="A", tokPos=0, tokBaseId="p-portfolio";
-/* --- cronologia stili A/B: undo/redo per tornare a una combinazione piaciuta --- */
-let tokHist=[], tokHistI=-1, _histLock=false;
-function snapshot(){ return JSON.stringify({A:tokState.A,B:tokState.B}); }
-function pushHistory(){
-  if(_histLock) return;
-  const snap=snapshot();
-  if(tokHist[tokHistI]===snap) return;           // niente doppioni
-  tokHist=tokHist.slice(0,tokHistI+1);           // taglia il "futuro" se avevo fatto undo
-  tokHist.push(snap); tokHistI=tokHist.length-1;
-  if(tokHist.length>60){ tokHist.shift(); tokHistI--; }  // cap
-  updateHistBtns();
-}
-function applySnapshot(snap){
-  const o=JSON.parse(snap); tokState.A={...o.A}; tokState.B={...o.B};
-  syncTokControls(); buildStyleRow(); tokRender();
-}
-function tokUndo(){ if(tokHistI>0){ tokHistI--; _histLock=true; applySnapshot(tokHist[tokHistI]); _histLock=false; updateHistBtns(); } }
-function tokRedo(){ if(tokHistI<tokHist.length-1){ tokHistI++; _histLock=true; applySnapshot(tokHist[tokHistI]); _histLock=false; updateHistBtns(); } }
-function updateHistBtns(){
-  const u=$("#tokUndo"), r=$("#tokRedo");
-  if(u) u.disabled = tokHistI<=0;
-  if(r) r.disabled = tokHistI>=tokHist.length-1;
-}
-/* le sezioni su cui si applica il morphing = quelle del preset base scelto */
-function tokSections(){
-  const p=PRESETS.find(x=>x.id===tokBaseId);
-  return p?p.sections.map(s=>({id:s.id,axes:{...s.axes}})):DEMO_SECTIONS;
-}
-/* micro-layout che varia con lo scrubber: densità (space) è già inclusa;
-   qui aggiungiamo variazioni di stile guidate dai numeri A/B */
-const STYLE_DIMS=[
-  {id:"radius",label:"Radius",min:0,max:28,step:1,unit:"px"},
-  {id:"space",label:"Spaziatura",min:0.7,max:1.5,step:0.05,unit:"×"},
-  {id:"bord",label:"Bordi",min:0,max:3,step:0.5,unit:"px"},
-  {id:"shadow",label:"Ombre",min:0,max:1,step:0.05,unit:""},
-  {id:"track",label:"Tracking",min:-0.03,max:0.06,step:0.005,unit:"em"},
-];
-function tokInit(){
-  // base preset selector
-  const base=$("#tokBase");
-  PRESETS.forEach(p=>{ const o=document.createElement("option"); o.value=p.id; o.textContent=p.name; base.appendChild(o); });
-  base.value=tokBaseId;
-  base.addEventListener("change",()=>{ tokBaseId=base.value; tokRender(); });
-  // font pair for active style
-  const sel=$("#tokPairAB");
-  TOK_FONTS.forEach(k=>{ const o=document.createElement("option"); o.value=k; o.textContent=PAIRS[k].label; sel.appendChild(o); });
-  sel.addEventListener("change",()=>{ tokState[tokActive].pair=sel.value; tokState[tokActive].arch=""; tokState[tokActive].archName="Personalizzato"; pushHistory(); syncTokControls(); buildStyleRow(); tokRender(); });
-  // accent for active style
-  const acc=$("#tokAccentAB");
-  ACCENTS.forEach(col=>{ const sw=document.createElement("button"); sw.className="swatch"; sw.style.background=col;
-    sw.addEventListener("click",()=>{ tokState[tokActive].accent=col; tokState[tokActive].arch=""; tokState[tokActive].archName="Personalizzato"; pushHistory(); syncTokControls(); tokRender(); });
-    acc.appendChild(sw); });
-  // A/B toggle
-  $("#tokA").addEventListener("click",()=>{ tokActive="A"; setTokAB(); });
-  $("#tokB").addEventListener("click",()=>{ tokActive="B"; setTokAB(); });
-  // randomize active style — cambia archetipo
-  $("#tokDice").addEventListener("click",()=>{ randomizeStyle(tokActive); syncTokControls(); buildStyleRow(); tokRender(); });
-  // randomizza ENTRAMBE le direzioni con due archetipi diversi
-  const dice2=$("#tokDiceBoth"); if(dice2) dice2.addEventListener("click",()=>{
-    _histLock=true; randomizeStyle("A"); randomizeStyle("B"); _histLock=false; pushHistory();
-    syncTokControls(); buildStyleRow(); tokRender(); });
-  // undo / redo
-  const u=$("#tokUndo"), rd=$("#tokRedo");
-  if(u) u.addEventListener("click",tokUndo);
-  if(rd) rd.addEventListener("click",tokRedo);
-  const tokImg=$("#tokImgShuffle"); if(tokImg) tokImg.addEventListener("click",()=>{ imgSeed(Math.floor(Math.random()*99999)+1); tokRender(); });
-  // scrubber
-  $("#tokScrub").addEventListener("input",e=>{ tokPos=parseFloat(e.target.value); tokRender(); });
-  buildStyleRow();
-  setTokAB();
-  pushHistory();   // stato iniziale in cronologia
-  updateHistBtns();
-}
-/* DNA stilistico per categoria — vincola la casualità a restare coerente e premium.
-   Ogni voce: range di radius/space/bord/shadow/track + set di font e accent adatti. */
-/* ===================================================================
-   STYLE ARCHETYPES — personalità di design distinte e riconoscibili.
-   "Varia" pesca un archetipo DIVERSO ogni volta: cambia davvero stile,
-   non micro-varia lo stesso. Ogni archetipo è una combinazione completa.
-   =================================================================== */
+
+/* ---- Libreria archetipi di stile (riusata per la "pelle" delle proposte) ---- */
 const ARCHETYPES=[
   {id:"swiss",   name:"Swiss / Minimal",   radius:[0,3],   space:[1.05,1.2],  bord:[0.5,1], shadow:[0,0.1],  track:[-0.01,0.005], fonts:["inter-inter","space-inter"]},
   {id:"editorial",name:"Editorial",        radius:[0,4],   space:[1.1,1.3],   bord:[0.5,1], shadow:[0,0.15], track:[-0.005,0.02], fonts:["inter-fraunces","instrument-inter"]},
@@ -3045,7 +2946,6 @@ const ARCHETYPES=[
   {id:"futuristic",name:"Futuristico",      radius:[10,20], space:[0.9,1.1],   bord:[0,1.5], shadow:[0.3,0.9], track:[0,0.03],      fonts:["space-inter","inter-inter"]},
   {id:"vintage", name:"Vintage / Retrò",    radius:[2,6],   space:[1.05,1.25], bord:[1.5,2.5],shadow:[0.1,0.3],track:[0.01,0.04],   fonts:["inter-fraunces","instrument-inter"]},
 ];
-/* accent per archetipo — set ampi ma coerenti col mood */
 const ARCH_ACC={
   swiss:["#16161a","#e0473f","#2f6fed","#111111"],
   editorial:["#ff7950","#16161a","#3b82f6","#b0784f"],
@@ -3060,90 +2960,168 @@ const ARCH_ACC={
   futuristic:["#00e0ff","#7c5cff","#ff2d78","#0af0c0"],
   vintage:["#b0784f","#7a5c3a","#c1543a","#5a6c57","#8a6d3b"],
 };
+/* quali archetipi "stanno bene" per categoria immagine (coerenza) */
+const CAT_ARCH={
+  room:["luxury","editorial","warm","soft","corporate"],
+  food:["warm","editorial","bold","vintage","luxury"],
+  product:["swiss","corporate","tech","bold","soft"],
+  editorial:["editorial","swiss","luxury","vintage","corporate"],
+  tech:["tech","futuristic","bold","swiss","corporate"],
+  landscape:["bold","futuristic","tech","editorial","soft"],
+  abstract:ARCHETYPES.map(a=>a.id),
+};
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 function inRange(a){ return a[0]+Math.random()*(a[1]-a[0]); }
 function styleFromArchetype(A){
-  return {
-    arch:A.id, archName:A.name,
-    pair:pick(A.fonts),
-    accent:pick(ARCH_ACC[A.id]||ACCENTS),
-    radius:Math.round(inRange(A.radius)),
-    space:+inRange(A.space).toFixed(2),
-    bord:+inRange(A.bord).toFixed(1),
-    shadow:+inRange(A.shadow).toFixed(2),
-    track:+inRange(A.track).toFixed(3),
-  };
+  return { arch:A.id, archName:A.name, pair:pick(A.fonts), accent:pick(ARCH_ACC[A.id]||ACCENTS),
+    radius:Math.round(inRange(A.radius)), space:+inRange(A.space).toFixed(2),
+    bord:+inRange(A.bord).toFixed(1), shadow:+inRange(A.shadow).toFixed(2), track:+inRange(A.track).toFixed(3) };
 }
-/* randomizza: sceglie un archetipo DIVERSO da quello attuale della direzione */
-function randomizeStyle(which){
-  const cur=tokState[which]&&tokState[which].arch;
-  let pool=ARCHETYPES.filter(a=>a.id!==cur);
-  const A=pick(pool.length?pool:ARCHETYPES);
-  const st=styleFromArchetype(A);
-  Object.assign(tokState[which],st);
-  pushHistory();
+
+/* ---- Varianti STRUTTURALI per ruolo di sezione ----
+   Per ogni sezione della bozza conosciamo la sua categoria (nav/hero/…).
+   Una proposta può sostituire una sezione con un'altra dello stesso ruolo,
+   riordinare, cambiare gli assi (tone/allineamento/densità) e attivare FX. */
+function sectionsByCat(cat){ return SECTIONS.filter(s=>s.cat===cat).map(s=>s.id); }
+function catOf(id){ const s=SECTIONS.find(x=>x.id===id); return s?s.cat:""; }
+/* assi plausibili per una sezione, scelti a caso ma validi */
+function randomAxes(id,toneBias){
+  const s=SECTIONS.find(x=>x.id===id); if(!s) return {};
+  const ax={};
+  s.axes.forEach(a=>{
+    if(a.id==="tone" && toneBias && a.opts.includes(toneBias) && Math.random()<0.6){ ax[a.id]=toneBias; }
+    else ax[a.id]=pick(a.opts);
+  });
+  return ax;
 }
-/* categoria immagine della pagina base scelta in TOKENS (solo per le immagini) */
-function tokPageCat(){ const p=PRESETS.find(x=>x.id===tokBaseId); return (p&&p.cat)||"abstract"; }
-function buildStyleRow(){
-  const row=$("#tokStyleRow"); if(!row) return;
-  row.innerHTML="";
-  STYLE_DIMS.forEach(d=>{
-    const wrap=document.createElement("div"); wrap.className="tok-dim";
-    const s=tokState[tokActive];
-    const lab=document.createElement("label");
-    lab.innerHTML=d.label+' <b>'+fmtDim(s[d.id],d)+'</b>';
-    const r=document.createElement("input"); r.type="range"; r.min=d.min; r.max=d.max; r.step=d.step; r.value=s[d.id];
-    r.addEventListener("input",()=>{ tokState[tokActive][d.id]=parseFloat(r.value);
-      tokState[tokActive].arch=""; tokState[tokActive].archName="Personalizzato";
-      lab.querySelector("b").textContent=fmtDim(parseFloat(r.value),d); tokRender(); });
-    r.addEventListener("change",()=>{ pushHistory(); });
-    wrap.appendChild(lab); wrap.appendChild(r); row.appendChild(wrap);
+/* FX coerenti: reveal quasi sempre gradevole; parallax/zoom su hero/banner */
+function randomFx(id){
+  const fx={}; const c=catOf(id);
+  if(Math.random()<0.55) fx.reveal=true;
+  if((c==="hero"||id.indexOf("parallax")>=0) && Math.random()<0.5) fx.parallax=true;
+  if((c==="component"||c==="content") && Math.random()<0.3) fx.float=true;
+  if(c==="convert" && Math.random()<0.3) fx.zoom=true;
+  return Object.keys(fx).length?fx:undefined;
+}
+
+/* sorgente: bozza di BUILD attuale, o un preset scelto */
+let tokSourceId="__draft__";
+function tokBaseSections(){
+  if(tokSourceId==="__draft__"){
+    if(comp.sections&&comp.sections.length) return {sections:comp.sections.map(s=>({id:s.id,axes:{...s.axes},fx:s.fx?{...s.fx}:undefined})), cat:comp.imgcat||"abstract", tokens:{...comp.tokens}};
+    // se la bozza è vuota, fallback su un preset portfolio
+    const p=PRESETS.find(x=>x.id==="p-portfolio");
+    return {sections:p.sections.map(s=>({id:s.id,axes:{...s.axes}})), cat:p.cat, tokens:{...DEFAULT_TOKENS,...p.tokens}};
+  }
+  const p=PRESETS.find(x=>x.id===tokSourceId)||PRESETS[0];
+  return {sections:p.sections.map(s=>({id:s.id,axes:{...s.axes}})), cat:p.cat||"abstract", tokens:{...DEFAULT_TOKENS,...p.tokens}};
+}
+
+/* genera UNA proposta rielaborando la base */
+function makeProposal(base,idx,forceArch){
+  const cat=base.cat||"abstract";
+  const archPool=CAT_ARCH[cat]||CAT_ARCH.abstract;
+  const arch=ARCHETYPES.find(a=>a.id===(forceArch||pick(archPool)))||pick(ARCHETYPES);
+  const style=styleFromArchetype(arch);
+  const tokens={pair:style.pair,accent:style.accent,radius:style.radius,space:style.space,bord:style.bord,shadow:style.shadow,track:style.track};
+  // struttura: parti dalle sezioni base, poi applica mutazioni
+  let secs=base.sections.map(s=>({id:s.id,axes:{...s.axes},fx:s.fx?{...s.fx}:undefined}));
+  const toneBias = style.shadow>0.5||["tech","bold","futuristic","brutal"].includes(arch.id) ? "dark" : (["luxury","editorial","corporate","swiss"].includes(arch.id)?"light":null);
+  // 1) sostituzione variante: per alcune sezioni, scegli un'altra dello stesso ruolo
+  secs=secs.map(sec=>{
+    const role=catOf(sec.id);
+    const alts=sectionsByCat(role).filter(x=>x!==sec.id);
+    let id=sec.id;
+    if(alts.length && Math.random()<0.5) id=pick(alts);        // cambia variante strutturale
+    return {id, axes:randomAxes(id,toneBias), fx:randomFx(id)};
+  });
+  // 2) riordino leggero del corpo centrale (mantiene nav in testa e footer in coda)
+  if(secs.length>3 && Math.random()<0.6){
+    const head=secs[0], foot=secs[secs.length-1], mid=secs.slice(1,-1);
+    for(let i=mid.length-1;i>0;i--){ if(Math.random()<0.4){ const j=Math.floor(Math.random()*(i+1)); [mid[i],mid[j]]=[mid[j],mid[i]]; } }
+    secs=[head,...mid,foot];
+  }
+  // 3) densità: a volte inserisci una sezione componente extra coerente
+  if(Math.random()<0.5){
+    const extras=["comp-scrollfx","comp-cards","comp-slider","comp-graphic","stats","testimonial","logowall"].filter(x=>SECTIONS.find(s=>s.id===x));
+    const ex=pick(extras);
+    const pos=Math.min(secs.length-1,Math.max(1,Math.floor(secs.length*0.5)));
+    secs.splice(pos,0,{id:ex,axes:randomAxes(ex,toneBias),fx:randomFx(ex)});
+  }
+  return { id:"prop-"+Date.now()+"-"+idx, name:arch.name, archId:arch.id, cat,
+    tokens, sections:secs,
+    tags:[ tokens.radius>=16?"morbido":(tokens.radius<=2?"squadrato":"medio"),
+           tokens.space>=1.2?"arioso":(tokens.space<=0.95?"denso":"bilanciato"),
+           (PAIRS[tokens.pair]&&PAIRS[tokens.pair].label)||tokens.pair ] };
+}
+
+let tokProps=[];       // proposte correnti
+function generateProposals(n){
+  const base=tokBaseSections();
+  const cat=base.cat||"abstract";
+  const pool=(CAT_ARCH[cat]||CAT_ARCH.abstract).slice();
+  const out=[];
+  // ciclo sul pool mescolato così gli archetipi non si ripetono finché il pool non finisce
+  let bag=shuffle(pool.slice());
+  for(let i=0;i<n;i++){
+    if(!bag.length) bag=shuffle(pool.slice());
+    const archId=bag.pop();
+    out.push(makeProposal(base,i,archId));
+  }
+  return out;
+}
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function tokInit(){
+  const src=$("#tokSource");
+  const optDraft=document.createElement("option"); optDraft.value="__draft__"; optDraft.textContent="Bozza di BUILD attuale"; src.appendChild(optDraft);
+  PRESETS.forEach(p=>{ const o=document.createElement("option"); o.value=p.id; o.textContent=p.name; src.appendChild(o); });
+  src.addEventListener("change",()=>{ tokSourceId=src.value; });
+  $("#tokGen").addEventListener("click",()=>{ tokProps=generateProposals(6); renderGallery(); showGallery(); });
+  $("#tokMore").addEventListener("click",()=>{ tokProps=tokProps.concat(generateProposals(3)); renderGallery(); });
+  $("#tokImgShuffle").addEventListener("click",()=>{ imgSeed(Math.floor(Math.random()*99999)+1); renderGallery(); if($("#tokDetail").style.display!=="none") renderDetail(_curProp); });
+  $("#tokBack").addEventListener("click",showGallery);
+  $("#tokUse").addEventListener("click",()=>{ if(_curProp) useProposal(_curProp); });
+  // prime proposte al primo ingresso
+  tokProps=generateProposals(6);
+  renderGallery();
+}
+function showGallery(){ $("#tokGallery").style.display="grid"; $("#tokDetail").style.display="none"; }
+function renderGallery(){
+  const g=$("#tokGallery"); g.innerHTML="";
+  $("#tokCount").textContent=tokProps.length?tokProps.length+" proposte":"";
+  if(!tokProps.length){ g.innerHTML='<div class="tok-empty">Nessuna proposta.<br>Premi «Genera proposte» per esplorare nuove soluzioni.</div>'; return; }
+  tokProps.forEach(p=>{
+    const card=document.createElement("div"); card.className="tok-card";
+    const thumb=document.createElement("div"); thumb.className="thumb";
+    const f=document.createElement("iframe"); f.setAttribute("scrolling","no"); f.setAttribute("tabindex","-1");
+    f.srcdoc=pageDoc(p.tokens,p.sections,true);
+    thumb.appendChild(f);
+    const meta=document.createElement("div"); meta.className="meta";
+    meta.innerHTML='<div class="nm">'+p.name+'</div>'
+      +'<div class="sub">'+p.sections.length+' sezioni · '+(p.cat||"—")+'</div>'
+      +'<div class="tags">'+p.tags.map(t=>'<span class="tag">'+t+'</span>').join("")+'</div>';
+    card.appendChild(thumb); card.appendChild(meta);
+    card.addEventListener("click",()=>openDetail(p));
+    g.appendChild(card);
   });
 }
-function fmtDim(v,d){ return (d.step<1&&d.id!=="space"?(+v).toFixed(d.id==="track"?3:2):(+v).toFixed(d.id==="space"?2:0))+d.unit; }
-function setTokAB(){
-  $("#tokA").setAttribute("aria-pressed",String(tokActive==="A"));
-  $("#tokB").setAttribute("aria-pressed",String(tokActive==="B"));
-  syncTokControls(); buildStyleRow();
+let _curProp=null;
+function openDetail(p){ _curProp=p; $("#tokGallery").style.display="none"; $("#tokDetail").style.display="flex"; renderDetail(p); }
+function renderDetail(p){
+  if(!p) return;
+  $("#tokDetailName").textContent=p.name;
+  $("#tokDetailMeta").textContent=p.sections.length+" sezioni · "+(p.cat||"—")+" · "+p.tags.join(" · ");
+  const f=$("#tokFrame"); f.srcdoc=pageDoc(p.tokens,p.sections,false);
+  f.onload=()=>{ try{ f.style.height=f.contentDocument.body.scrollHeight+"px"; }catch(e){} };
 }
-function syncTokControls(){
-  const s=tokState[tokActive];
-  $("#tokPairAB").value=s.pair;
-  $$("#tokAccentAB .swatch").forEach(sw=>sw.setAttribute("aria-pressed",String(rgbToHex(sw.style.background)===s.accent)));
-  const nm=$("#tokArchName"); if(nm) nm.textContent=(tokActive+" · "+(s.archName||"Personalizzato"));
+function useProposal(p){
+  comp.sections=p.sections.map(s=>({id:s.id,axes:{...s.axes},fx:s.fx?{...s.fx}:undefined}));
+  comp.tokens={...DEFAULT_TOKENS,...p.tokens};
+  comp.imgcat=p.cat||"";
+  selIdx=comp.sections.length?0:-1;
+  showView("vBuild");
+  buildRender(); saveHash();
 }
-function lerp(a,b,t){ return a+(b-a)*t; }
-function hexRGB(h){ h=rgbToHex(h).replace("#",""); return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; }
-function mixHex(a,b,t){ const A=hexRGB(a),B=hexRGB(b);
-  return "#"+A.map((v,i)=>Math.round(lerp(v,B[i],t)).toString(16).padStart(2,"0")).join(""); }
-function tokRender(){
-  if(typeof setPageCat==="function") setPageCat(tokPageCat());
-  const A=tokState.A,B=tokState.B,t=tokPos;
-  const tokens={
-    pair: t<0.5?A.pair:B.pair,
-    accent: mixHex(A.accent,B.accent,t),
-    radius: Math.round(lerp(A.radius,B.radius,t)),
-    space: +lerp(A.space,B.space,t).toFixed(3),
-    bord: +lerp(A.bord,B.bord,t).toFixed(2),
-    shadow: +lerp(A.shadow,B.shadow,t).toFixed(3),
-    track: +lerp(A.track,B.track,t).toFixed(4),
-  };
-  const sections=tokSections();
-  const frame=$("#tokFrame");
-  frame.srcdoc=pageDoc(tokens,sections,true);
-  frame.onload=()=>{ try{ frame.style.height=frame.contentDocument.body.scrollHeight+"px"; }catch(e){} };
-  // font crossfade cue near the switch point
-  const dev=frame.closest(".device");
-  if(dev){ const near=Math.abs(t-0.5); dev.style.opacity=(0.86+0.14*(near*2)).toFixed(2); }
-  $("#tokScrub").style.background=`linear-gradient(90deg,${A.accent} 0%,${mixHex(A.accent,B.accent,.5)} 50%,${B.accent} 100%)`;
-}
-const DEMO_SECTIONS=[
-  {id:"nav-min",axes:{tone:"light"}},
-  {id:"hero-center",axes:{tone:"dark",dens:"air"}},
-  {id:"feature-grid",axes:{tone:"light",media:"si"}},
-  {id:"cta-band",axes:{tone:"accent"}},
-];
 
 /* ===================================================================
    BOOT
@@ -3253,18 +3231,18 @@ const M={
 "Navigazione":"Navigation","Hero":"Hero","Contenuto":"Content","Conversione":"Conversion","Chiusura":"Closing",
 "Componenti & FX":"Components & FX","Blocchi per settore":"Sector blocks",
 "⚡ Preset di pagina…":"⚡ Page presets…",
-"Tokens · morphing A ⇄ B":"Tokens · A ⇄ B morphing",
-"Parti da un preset, gioca fino a convincerti":"Start from a preset, play until it clicks",
-"Scegli una pagina di partenza, fissa due direzioni stilistiche (A e B) e trascina lo scrubber: radius, spaziatura, bordi, ombre, spaziatura tra lettere, coppia tipografica e micro-layout si trasformano con continuità. Ti fermi dove ti convince.":
- "Pick a starting page, set two stylistic directions (A and B) and drag the scrubber: radius, spacing, borders, shadows, letter-spacing, type pairing and micro-layout transform continuously. Stop where it convinces you.",
-"Pagina":"Page","Stile A":"Style A","Stile B":"Style B","🎲 Varia":"🎲 Vary","🎲🎲 A+B":"🎲🎲 A+B","🔀 Img":"🔀 Img","Personalizzato":"Custom",
+"Tokens · generatore di proposte":"Tokens · proposal generator",
+"Proposte di pagina, infinite e coerenti":"Page proposals, infinite and coherent",
+"Parte dalla tua bozza di BUILD e ne genera varianti complete — struttura, ordine sezioni, layout, tipografia, stile e interazioni — sempre coerenti con la categoria. Sfoglia la galleria, apri quella che ti convince e portala in BUILD.":
+ "It starts from your BUILD draft and generates complete variants — structure, section order, layout, typography, style and interactions — always coherent with the category. Browse the gallery, open the one you like and take it into BUILD.",
+"Sorgente":"Source","Da cosa partire":"What to start from","Bozza di BUILD attuale":"Current BUILD draft",
+"✨ Genera proposte":"✨ Generate proposals","＋ Altre":"＋ More","🔀 Immagini":"🔀 Images",
+"← Galleria":"← Gallery","✓ Usa in BUILD":"✓ Use in BUILD",
+"Nessuna proposta.":"No proposals.","Personalizzato":"Custom",
 "Swiss / Minimal":"Swiss / Minimal","Elegante / Luxury":"Elegant / Luxury",
 "Soft / Morbido":"Soft","Bold / Maximalist":"Bold / Maximalist","Tech / Neon":"Tech / Neon",
 "Playful / Pop":"Playful / Pop","Brutalist":"Brutalist","Caldo / Artigianale":"Warm / Crafted",
 "Corporate / Clean":"Corporate / Clean","Futuristico":"Futuristic","Vintage / Retrò":"Vintage / Retro",
-"Radius":"Radius","Spaziatura":"Spacing","Bordi":"Borders","Ombre":"Shadows","Tracking":"Tracking",
-"Lo scrubber interpola tutto con continuità: numeri (radius, spaziatura, bordi, ombre, tracking) linearmente, i font con un crossfade a metà corsa. Nessuno scatto.":
- "The scrubber interpolates everything continuously: numbers (radius, spacing, borders, shadows, tracking) linearly, fonts with a mid-run crossfade. No jumps.",
 /* nomi nuove sezioni */
 "Slider / carosello":"Slider / carousel","Cards grid":"Cards grid","Chips / filtri":"Chips / filters",
 "Video player (YouTube)":"Video player (YouTube)","Store card (Steam)":"Store card (Steam)",
