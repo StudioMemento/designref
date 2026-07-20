@@ -502,15 +502,20 @@
     <!-- ===================== TOKENS ===================== -->
     <section class="view" id="vTokens">
       <div class="vhead">
-        <p class="eyebrow">Tokens · generatore di proposte</p>
-        <h1>Proposte di pagina, infinite e coerenti</h1>
-        <p>Parte dalla tua bozza di BUILD e ne genera varianti complete — struttura, ordine sezioni, layout, tipografia, stile e interazioni — sempre coerenti con la categoria. Sfoglia la galleria, apri quella che ti convince e portala in BUILD.</p>
+        <p class="eyebrow">Tokens · sistemi di design</p>
+        <h1>Sistemi di design profondi, pronti da indossare</h1>
+        <p>Prende la tua bozza di BUILD e la veste con sistemi di design completi — palette semantica, coppie tipografiche, elevazione, tema chiaro/scuro — nello spirito di Refero. Sfoglia, apri quello che ti convince e portalo in BUILD.</p>
       </div>
       <div class="tok-wrap">
         <div class="tok-bar">
           <label style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt-3)">Sorgente</label>
-          <select class="pairsel" id="tokSource" style="width:auto;max-width:220px" title="Da cosa partire"></select>
-          <button class="tbtn pri" id="tokGen" title="Genera una nuova serie di proposte" style="margin-left:8px">✨ Genera proposte</button>
+          <select class="pairsel" id="tokSource" style="width:auto;max-width:200px" title="Da cosa partire"></select>
+          <div class="tok-ab" role="group" aria-label="Tema" style="margin-left:8px">
+            <button id="tokFAll" aria-pressed="true">Tutti</button>
+            <button id="tokFLight" aria-pressed="false">Chiari</button>
+            <button id="tokFDark" aria-pressed="false">Scuri</button>
+          </div>
+          <button class="tbtn pri" id="tokGen" title="Genera una nuova serie di proposte" style="margin-left:8px">✨ Genera</button>
           <button class="tbtn" id="tokMore" title="Aggiungi altre proposte">＋ Altre</button>
           <span id="tokCount" style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--txt-3);margin-left:6px"></span>
           <button class="tbtn" id="tokImgShuffle" title="Rigenera le immagini" style="margin-left:auto">🔀 Immagini</button>
@@ -1509,6 +1514,292 @@ function ph(h,c,accent,cat){
 }
 
 /* ===================================================================
+   DESIGN SYSTEMS — libreria curata di sistemi profondi (stile Refero)
+   Ogni sistema definisce un LINGUAGGIO completo, non solo un accento:
+   - theme: light|dark  (controlla il tema dell'intera pagina generata)
+   - vars: mappa di variabili semantiche che pageDoc inietta in :root
+       --ds-canvas    superficie pagina (tono "light" delle sezioni)
+       --ds-surface   card/pannello su canvas
+       --ds-elev      superficie elevata / input
+       --ds-ink       testo primario / heading
+       --ds-body      testo corpo
+       --ds-muted     testo attenuato
+       --ds-helper    testo di servizio
+       --ds-hairline  bordi sottili
+       --ds-inkbg     superficie del tono "dark" (banda scura)
+       --ds-inkfg / --ds-inkmut / --ds-inkcard / --ds-inkline  testo/superfici su dark
+       --ds-onaccent / --ds-onaccent-mut / --ds-accent-card / --ds-accent-line
+       --ds-elev / --ds-inkelev  ombre (filosofia di elevazione)
+   - accent: accento cromatico unico
+   - disp / body: coppie tipografiche (famiglie Google) + fallback
+   - dispW / bodyW: pesi display/body
+   - radius: raggio card; radiusBtn: raggio bottoni (pill vs squadrato)
+   - space: moltiplicatore ritmo verticale; track: tracking display (em)
+   - note: sintesi del carattere (mostrata nella card)
+   =================================================================== */
+const DS=[
+ {
+   id:"glass-midnight", name:"Frosted Glass Midnight", theme:"dark",
+   note:"Vetro smerigliato a mezzanotte · un solo viola",
+   accent:"#663af3",
+   disp:"'Space Grotesk'", body:"'Inter'", dispW:500, bodyW:400,
+   radius:16, radiusBtn:999, space:1.35, track:-0.01,
+   vars:{
+     "--ds-canvas":"#05060f","--ds-surface":"rgba(186,214,247,.04)","--ds-elev":"rgba(199,211,234,.06)",
+     "--ds-ink":"#d8ecf8","--ds-body":"#d1e4fa","--ds-muted":"#c7d3ea","--ds-helper":"#9da7ba",
+     "--ds-hairline":"rgba(186,215,247,.14)",
+     "--ds-inkbg":"#0a0b16","--ds-inkfg":"#d8ecf8","--ds-inkmut":"#9da7ba","--ds-inkcard":"rgba(186,214,247,.05)","--ds-inkline":"rgba(186,215,247,.14)",
+     "--ds-onaccent":"#fff","--ds-onaccent-mut":"rgba(255,255,255,.8)","--ds-accent-card":"rgba(255,255,255,.14)","--ds-accent-line":"rgba(255,255,255,.28)",
+     "--ds-elev":"inset 0 1px 1px rgba(216,236,248,.2),0 16px 40px rgba(0,0,0,.5)",
+     "--ds-inkelev":"inset 0 1px 1px rgba(216,236,248,.2),0 16px 40px rgba(0,0,0,.6)"
+   }
+ },
+ {
+   id:"apple-light", name:"White Room", theme:"light",
+   note:"Stanza bianca, un solo interruttore blu",
+   accent:"#0071e3",
+   disp:"'Inter'", body:"'Inter'", dispW:600, bodyW:400,
+   radius:8, radiusBtn:980, space:1, track:-0.02,
+   vars:{
+     "--ds-canvas":"#f5f5f7","--ds-surface":"#ffffff","--ds-elev":"#f4f8fb",
+     "--ds-ink":"#1d1d1f","--ds-body":"#1d1d1f","--ds-muted":"#6e6e73","--ds-helper":"#86868b",
+     "--ds-hairline":"#d2d2d7",
+     "--ds-inkbg":"#1d1d1f","--ds-inkfg":"#f5f5f7","--ds-inkmut":"#a1a1a6","--ds-inkcard":"#2a2a2c","--ds-inkline":"#3a3a3c",
+     "--ds-onaccent":"#fff","--ds-onaccent-mut":"rgba(255,255,255,.86)","--ds-accent-card":"rgba(255,255,255,.16)","--ds-accent-line":"rgba(255,255,255,.3)",
+     "--ds-elev":"none","--ds-inkelev":"none"
+   }
+ },
+ {
+   id:"fintech-serif", name:"Midnight Ledger", theme:"dark",
+   note:"Caveau di mezzanotte, righe dorate · serif didone",
+   accent:"#cc9166",
+   disp:"'Playfair Display'", body:"'Inter'", dispW:400, bodyW:400,
+   radius:10, radiusBtn:999, space:1.5, track:0.01,
+   vars:{
+     "--ds-canvas":"#08080a","--ds-surface":"#040406","--ds-elev":"#121317",
+     "--ds-ink":"#ffffff","--ds-body":"#e2e3e9","--ds-muted":"#9194a1","--ds-helper":"#5e616e",
+     "--ds-hairline":"#1c1d22",
+     "--ds-inkbg":"#040406","--ds-inkfg":"#ffffff","--ds-inkmut":"#9194a1","--ds-inkcard":"#121317","--ds-inkline":"#2e3038",
+     "--ds-onaccent":"#000","--ds-onaccent-mut":"rgba(0,0,0,.7)","--ds-accent-card":"rgba(0,0,0,.14)","--ds-accent-line":"rgba(0,0,0,.24)",
+     "--ds-elev":"0 0 0 1px rgba(255,255,255,.06)","--ds-inkelev":"0 0 0 1px rgba(255,255,255,.08)"
+   }
+ },
+ {
+   id:"mono-workshop", name:"Clinical Blueprint", theme:"light",
+   note:"Blueprint clinico su carta smerigliata · mono",
+   accent:"#e7000b",
+   disp:"'Inter'", body:"'Inter'", dispW:600, bodyW:400,
+   radius:24, radiusBtn:18, space:1, track:-0.03,
+   vars:{
+     "--ds-canvas":"#f5f5f5","--ds-surface":"#ffffff","--ds-elev":"#fafafa",
+     "--ds-ink":"#0a0a0a","--ds-body":"#0a0a0a","--ds-muted":"#737373","--ds-helper":"#a1a1a1",
+     "--ds-hairline":"#e5e5e5",
+     "--ds-inkbg":"#0a0a0a","--ds-inkfg":"#fafafa","--ds-inkmut":"#a1a1a1","--ds-inkcard":"#171717","--ds-inkline":"#2a2a2a",
+     "--ds-onaccent":"#fff","--ds-onaccent-mut":"rgba(255,255,255,.85)","--ds-accent-card":"rgba(255,255,255,.15)","--ds-accent-line":"rgba(255,255,255,.28)",
+     "--ds-elev":"0 0 0 1px rgba(23,23,23,.05),0 1px 3px rgba(0,0,0,.1),0 1px 2px -1px rgba(0,0,0,.1)","--ds-inkelev":"none"
+   }
+ },
+ {
+   id:"editorial-warm", name:"Warm Editorial", theme:"light",
+   note:"Rivista su carta panna · serif caldo",
+   accent:"#b5502f",
+   disp:"'Fraunces'", body:"'Inter'", dispW:500, bodyW:400,
+   radius:4, radiusBtn:4, space:1.25, track:0,
+   vars:{
+     "--ds-canvas":"#f4efe6","--ds-surface":"#fbf8f2","--ds-elev":"#ffffff",
+     "--ds-ink":"#2a2420","--ds-body":"#43392f","--ds-muted":"#7c7266","--ds-helper":"#a1978a",
+     "--ds-hairline":"#e0d6c6",
+     "--ds-inkbg":"#2a2420","--ds-inkfg":"#f4efe6","--ds-inkmut":"#b8ac9c","--ds-inkcard":"#38302a","--ds-inkline":"#4a4038",
+     "--ds-onaccent":"#fff","--ds-onaccent-mut":"rgba(255,255,255,.85)","--ds-accent-card":"rgba(255,255,255,.16)","--ds-accent-line":"rgba(255,255,255,.3)",
+     "--ds-elev":"none","--ds-inkelev":"none"
+   }
+ },
+ {
+   id:"neon-terminal", name:"Neon Terminal", theme:"dark",
+   note:"Terminale al neon su nero · mono cyber",
+   accent:"#00e0a0",
+   disp:"'Space Grotesk'", body:"'Space Grotesk'", dispW:600, bodyW:400,
+   radius:6, radiusBtn:6, space:1.05, track:0,
+   vars:{
+     "--ds-canvas":"#0a0e0d","--ds-surface":"#0f1513","--ds-elev":"#141b19",
+     "--ds-ink":"#e6fff6","--ds-body":"#b8d8ce","--ds-muted":"#6d8a80","--ds-helper":"#4a5f58",
+     "--ds-hairline":"#1d2b26",
+     "--ds-inkbg":"#0f1513","--ds-inkfg":"#e6fff6","--ds-inkmut":"#6d8a80","--ds-inkcard":"#141b19","--ds-inkline":"#243430",
+     "--ds-onaccent":"#00120c","--ds-onaccent-mut":"rgba(0,18,12,.72)","--ds-accent-card":"rgba(0,18,12,.14)","--ds-accent-line":"rgba(0,18,12,.24)",
+     "--ds-elev":"0 0 0 1px rgba(0,224,160,.14),0 0 24px rgba(0,224,160,.08)","--ds-inkelev":"0 0 0 1px rgba(0,224,160,.14)"
+   }
+ },
+ {
+   id:"soft-pastel", name:"Soft Pastel", theme:"light",
+   note:"Morbido, arrotondato, pastello · giocoso e gentile",
+   accent:"#7c5cff",
+   disp:"'Space Grotesk'", body:"'Inter'", dispW:600, bodyW:400,
+   radius:24, radiusBtn:999, space:1.15, track:-0.01,
+   vars:{
+     "--ds-canvas":"#f6f4ff","--ds-surface":"#ffffff","--ds-elev":"#fbfaff",
+     "--ds-ink":"#241d3d","--ds-body":"#3d3559","--ds-muted":"#7d76a0","--ds-helper":"#a8a2c4",
+     "--ds-hairline":"#e8e3f7",
+     "--ds-inkbg":"#241d3d","--ds-inkfg":"#f6f4ff","--ds-inkmut":"#b0a8d0","--ds-inkcard":"#312a4f","--ds-inkline":"#433a63",
+     "--ds-onaccent":"#fff","--ds-onaccent-mut":"rgba(255,255,255,.85)","--ds-accent-card":"rgba(255,255,255,.18)","--ds-accent-line":"rgba(255,255,255,.32)",
+     "--ds-elev":"0 8px 24px rgba(124,92,255,.12)","--ds-inkelev":"0 8px 24px rgba(0,0,0,.3)"
+   }
+ },
+ {
+   id:"brutalist-mono", name:"Brutalist Paper", theme:"light",
+   note:"Brutalista su carta · bordi spessi, zero raggio",
+   accent:"#ff3b00",
+   disp:"'Space Grotesk'", body:"'Inter'", dispW:700, bodyW:400,
+   radius:0, radiusBtn:0, space:0.95, track:-0.02,
+   vars:{
+     "--ds-canvas":"#f2f0eb","--ds-surface":"#ffffff","--ds-elev":"#ffffff",
+     "--ds-ink":"#0a0a0a","--ds-body":"#1a1a1a","--ds-muted":"#5a5a5a","--ds-helper":"#8a8a8a",
+     "--ds-hairline":"#0a0a0a",
+     "--ds-inkbg":"#0a0a0a","--ds-inkfg":"#f2f0eb","--ds-inkmut":"#9a9a9a","--ds-inkcard":"#141414","--ds-inkline":"#f2f0eb",
+     "--ds-onaccent":"#fff","--ds-onaccent-mut":"rgba(255,255,255,.85)","--ds-accent-card":"rgba(255,255,255,.14)","--ds-accent-line":"#0a0a0a",
+     "--ds-elev":"4px 4px 0 #0a0a0a","--ds-inkelev":"4px 4px 0 #ff3b00"
+   }
+ },
+ {
+   id:"luxury-serif", name:"Quiet Luxury", theme:"light",
+   note:"Lusso silenzioso · serif alto, oro tenue, spazi ampi",
+   accent:"#9a7b4f",
+   disp:"'Cormorant Garamond'", body:"'Inter'", dispW:600, bodyW:400,
+   radius:2, radiusBtn:0, space:1.5, track:0.01,
+   vars:{
+     "--ds-canvas":"#faf8f4","--ds-surface":"#ffffff","--ds-elev":"#f5f2eb",
+     "--ds-ink":"#1c1a17","--ds-body":"#3a352e","--ds-muted":"#7a7266","--ds-helper":"#a59d8f",
+     "--ds-hairline":"#e6e0d5",
+     "--ds-inkbg":"#1c1a17","--ds-inkfg":"#faf8f4","--ds-inkmut":"#b0a898","--ds-inkcard":"#2a2620","--ds-inkline":"#3c362d",
+     "--ds-onaccent":"#fff","--ds-onaccent-mut":"rgba(255,255,255,.85)","--ds-accent-card":"rgba(255,255,255,.16)","--ds-accent-line":"rgba(255,255,255,.3)",
+     "--ds-elev":"none","--ds-inkelev":"none"
+   }
+ },
+ {
+   id:"corporate-blue", name:"Corporate Clarity", theme:"light",
+   note:"Aziendale pulito · blu fiducia, griglie ordinate",
+   accent:"#2f6fed",
+   disp:"'Inter'", body:"'Inter'", dispW:600, bodyW:400,
+   radius:10, radiusBtn:8, space:1.05, track:-0.01,
+   vars:{
+     "--ds-canvas":"#f7f9fc","--ds-surface":"#ffffff","--ds-elev":"#eef3fb",
+     "--ds-ink":"#0f1a2e","--ds-body":"#33405a","--ds-muted":"#6b7688","--ds-helper":"#9aa3b2",
+     "--ds-hairline":"#e2e8f2",
+     "--ds-inkbg":"#0f1a2e","--ds-inkfg":"#f7f9fc","--ds-inkmut":"#9aa8c0","--ds-inkcard":"#1a2740","--ds-inkline":"#2b3a58",
+     "--ds-onaccent":"#fff","--ds-onaccent-mut":"rgba(255,255,255,.86)","--ds-accent-card":"rgba(255,255,255,.16)","--ds-accent-line":"rgba(255,255,255,.3)",
+     "--ds-elev":"0 1px 3px rgba(15,26,46,.08),0 1px 2px rgba(15,26,46,.06)","--ds-inkelev":"none"
+   }
+ },
+ {
+   id:"aurora-dark", name:"Aurora Command", theme:"dark",
+   note:"Aurora su obsidiana · gradienti freddi, hi-tech",
+   accent:"#7c5cff",
+   disp:"'Space Grotesk'", body:"'Inter'", dispW:600, bodyW:400,
+   radius:14, radiusBtn:12, space:1.1, track:-0.01,
+   vars:{
+     "--ds-canvas":"#0b0d16","--ds-surface":"#12141f","--ds-elev":"#181b2a",
+     "--ds-ink":"#eef0ff","--ds-body":"#c4c8e0","--ds-muted":"#8489a8","--ds-helper":"#5a5f7a",
+     "--ds-hairline":"#232738",
+     "--ds-inkbg":"#12141f","--ds-inkfg":"#eef0ff","--ds-inkmut":"#8489a8","--ds-inkcard":"#181b2a","--ds-inkline":"#2b3048",
+     "--ds-onaccent":"#fff","--ds-onaccent-mut":"rgba(255,255,255,.84)","--ds-accent-card":"rgba(255,255,255,.14)","--ds-accent-line":"rgba(255,255,255,.28)",
+     "--ds-elev":"0 0 0 1px rgba(124,92,255,.14),0 20px 50px rgba(0,0,0,.5)","--ds-inkelev":"0 20px 50px rgba(0,0,0,.6)"
+   }
+ },
+ {
+   id:"paper-vintage", name:"Vintage Print", theme:"light",
+   note:"Stampa vintage · carta ingiallita, rosso mattone",
+   accent:"#c1442e",
+   disp:"'Fraunces'", body:"'Inter'", dispW:600, bodyW:400,
+   radius:3, radiusBtn:3, space:1.2, track:0,
+   vars:{
+     "--ds-canvas":"#efe7d6","--ds-surface":"#f8f2e5","--ds-elev":"#fffbf0",
+     "--ds-ink":"#2e2620","--ds-body":"#4a3f34","--ds-muted":"#7d7062","--ds-helper":"#a89a86",
+     "--ds-hairline":"#d8cbb2",
+     "--ds-inkbg":"#2e2620","--ds-inkfg":"#efe7d6","--ds-inkmut":"#baac96","--ds-inkcard":"#3a312a","--ds-inkline":"#4c4136",
+     "--ds-onaccent":"#fff","--ds-onaccent-mut":"rgba(255,255,255,.85)","--ds-accent-card":"rgba(255,255,255,.15)","--ds-accent-line":"rgba(255,255,255,.28)",
+     "--ds-elev":"none","--ds-inkelev":"none"
+   }
+ },
+ {
+   id:"swiss-grid", name:"Swiss Grid", theme:"light",
+   note:"Griglia svizzera · rosso segnale, tipografia pura",
+   accent:"#e2231a",
+   disp:"'Inter'", body:"'Inter'", dispW:700, bodyW:400,
+   radius:0, radiusBtn:0, space:1.1, track:-0.02,
+   vars:{
+     "--ds-canvas":"#ffffff","--ds-surface":"#f4f4f4","--ds-elev":"#ffffff",
+     "--ds-ink":"#111111","--ds-body":"#2a2a2a","--ds-muted":"#666666","--ds-helper":"#999999",
+     "--ds-hairline":"#111111",
+     "--ds-inkbg":"#111111","--ds-inkfg":"#ffffff","--ds-inkmut":"#aaaaaa","--ds-inkcard":"#1c1c1c","--ds-inkline":"#333333",
+     "--ds-onaccent":"#fff","--ds-onaccent-mut":"rgba(255,255,255,.85)","--ds-accent-card":"rgba(255,255,255,.14)","--ds-accent-line":"rgba(255,255,255,.28)",
+     "--ds-elev":"none","--ds-inkelev":"none"
+   }
+ },
+ {
+   id:"forest-calm", name:"Forest Calm", theme:"light",
+   note:"Calma boschiva · verde profondo, naturale",
+   accent:"#3f7d5a",
+   disp:"'Fraunces'", body:"'Inter'", dispW:500, bodyW:400,
+   radius:12, radiusBtn:999, space:1.2, track:0,
+   vars:{
+     "--ds-canvas":"#f2f5f0","--ds-surface":"#ffffff","--ds-elev":"#e9f0ea",
+     "--ds-ink":"#18271e","--ds-body":"#35453b","--ds-muted":"#6b7a70","--ds-helper":"#9aa89e",
+     "--ds-hairline":"#dce6dd",
+     "--ds-inkbg":"#18271e","--ds-inkfg":"#f2f5f0","--ds-inkmut":"#a3b3a8","--ds-inkcard":"#22342a","--ds-inkline":"#324539",
+     "--ds-onaccent":"#fff","--ds-onaccent-mut":"rgba(255,255,255,.86)","--ds-accent-card":"rgba(255,255,255,.16)","--ds-accent-line":"rgba(255,255,255,.3)",
+     "--ds-elev":"0 4px 16px rgba(24,39,30,.08)","--ds-inkelev":"none"
+   }
+ },
+ {
+   id:"sunset-bold", name:"Sunset Bold", theme:"dark",
+   note:"Tramonto audace · arancio caldo su carbone",
+   accent:"#ff6a3d",
+   disp:"'Space Grotesk'", body:"'Inter'", dispW:700, bodyW:400,
+   radius:18, radiusBtn:999, space:1.1, track:-0.02,
+   vars:{
+     "--ds-canvas":"#161210","--ds-surface":"#1f1a17","--ds-elev":"#282019",
+     "--ds-ink":"#fff4ec","--ds-body":"#e0d0c4","--ds-muted":"#a08e80","--ds-helper":"#6e5f54",
+     "--ds-hairline":"#332821",
+     "--ds-inkbg":"#1f1a17","--ds-inkfg":"#fff4ec","--ds-inkmut":"#a08e80","--ds-inkcard":"#282019","--ds-inkline":"#3d3128",
+     "--ds-onaccent":"#1a0d06","--ds-onaccent-mut":"rgba(26,13,6,.72)","--ds-accent-card":"rgba(26,13,6,.14)","--ds-accent-line":"rgba(26,13,6,.24)",
+     "--ds-elev":"0 12px 32px rgba(0,0,0,.5)","--ds-inkelev":"0 12px 32px rgba(0,0,0,.6)"
+   }
+ },
+ {
+   id:"ivory-fashion", name:"Ivory Fashion", theme:"light",
+   note:"Moda avorio · magenta, serif alto, minimale",
+   accent:"#d6336c",
+   disp:"'Cormorant Garamond'", body:"'Inter'", dispW:600, bodyW:400,
+   radius:0, radiusBtn:999, space:1.35, track:0.005,
+   vars:{
+     "--ds-canvas":"#faf7f4","--ds-surface":"#ffffff","--ds-elev":"#f4eeea",
+     "--ds-ink":"#1a1518","--ds-body":"#3a3236","--ds-muted":"#7a7076","--ds-helper":"#a89ea4",
+     "--ds-hairline":"#e8e0da",
+     "--ds-inkbg":"#1a1518","--ds-inkfg":"#faf7f4","--ds-inkmut":"#b0a6ac","--ds-inkcard":"#2620230","--ds-inkline":"#3c3238",
+     "--ds-onaccent":"#fff","--ds-onaccent-mut":"rgba(255,255,255,.86)","--ds-accent-card":"rgba(255,255,255,.16)","--ds-accent-line":"rgba(255,255,255,.3)",
+     "--ds-elev":"none","--ds-inkelev":"none"
+   }
+ },
+ {
+   id:"cobalt-saas", name:"Cobalt SaaS", theme:"dark",
+   note:"SaaS cobalto · blu elettrico, superfici pulite",
+   accent:"#3b82f6",
+   disp:"'Inter'", body:"'Inter'", dispW:600, bodyW:400,
+   radius:12, radiusBtn:10, space:1.05, track:-0.02,
+   vars:{
+     "--ds-canvas":"#0c1017","--ds-surface":"#141a24","--ds-elev":"#1b2330",
+     "--ds-ink":"#eef2f8","--ds-body":"#c0c9d6","--ds-muted":"#7f8a9c","--ds-helper":"#525d70",
+     "--ds-hairline":"#232c3a",
+     "--ds-inkbg":"#141a24","--ds-inkfg":"#eef2f8","--ds-inkmut":"#7f8a9c","--ds-inkcard":"#1b2330","--ds-inkline":"#2b3646",
+     "--ds-onaccent":"#fff","--ds-onaccent-mut":"rgba(255,255,255,.86)","--ds-accent-card":"rgba(255,255,255,.14)","--ds-accent-line":"rgba(255,255,255,.28)",
+     "--ds-elev":"0 1px 3px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.3)","--ds-inkelev":"0 8px 24px rgba(0,0,0,.4)"
+   }
+ },
+];
+/* famiglie Google da caricare per i font dei sistemi */
+const DS_FONTS="Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Playfair+Display:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&family=Instrument+Serif&family=JetBrains+Mono:wght@400;500";
+function dsById(id){ return DS.find(d=>d.id===id)||DS[0]; }
+
+/* ===================================================================
    BUILD · libreria sezioni — ognuna: {id,cat,name,desc,axes,tpl(state,tokens)}
    tpl restituisce HTML che vive dentro l'iframe anteprima.
    Le varianti si applicano via attributi data-* sul nodo sezione.
@@ -1529,10 +1820,14 @@ const PAIRS={
 const ACCENTS=["#ff7950","#3b82f6","#10b981","#8b5cf6","#f43f5e","#16161a"];
 
 /* palette helper — tone attr drives bg/fg */
+/* tone(t) → superfici semantiche. Invece di colori hardcoded, ogni "tono"
+   mappa sulle variabili del DESIGN SYSTEM attivo (definite in :root da pageDoc).
+   Così uno stile profondo (Refero-like) ridefinisce canvas/surface/ink/hairline
+   e TUTTE le sezioni si adeguano automaticamente. */
 function tone(t){
-  if(t==="dark")   return {bg:"#16161a",fg:"#f4f2ee",mut:"#a3a1a8",card:"#1f1f24",line:"#2c2c33"};
-  if(t==="accent") return {bg:"var(--accent)",fg:"#fff",mut:"rgba(255,255,255,.82)",card:"rgba(255,255,255,.12)",line:"rgba(255,255,255,.24)"};
-  return {bg:"#ffffff",fg:"#16161a",mut:"#6b6a63",card:"#f4f2ee",line:"#e5e3dd"};
+  if(t==="dark") return {bg:"var(--ds-inkbg,#16161a)",fg:"var(--ds-inkfg,#f4f2ee)",mut:"var(--ds-inkmut,#a3a1a8)",card:"var(--ds-inkcard,#1f1f24)",line:"var(--ds-inkline,#2c2c33)",elev:"var(--ds-inkelev,none)"};
+  if(t==="accent") return {bg:"var(--accent)",fg:"var(--ds-onaccent,#fff)",mut:"var(--ds-onaccent-mut,rgba(255,255,255,.82))",card:"var(--ds-accent-card,rgba(255,255,255,.12))",line:"var(--ds-accent-line,rgba(255,255,255,.24))",elev:"none"};
+  return {bg:"var(--ds-canvas,#ffffff)",fg:"var(--ds-ink,#16161a)",mut:"var(--ds-muted,#6b6a63)",card:"var(--ds-surface,#f4f2ee)",line:"var(--ds-hairline,#e5e3dd)",elev:"var(--ds-elev,none)"};
 }
 /* density → padding scale */
 function dens(d,base){ return d==="tight"?base*0.62:base; }
@@ -2572,7 +2867,7 @@ function defRender(){
 /* ===================================================================
    BUILD · compositore
    =================================================================== */
-const DEFAULT_TOKENS={pair:"inter-fraunces",accent:"#ff7950",radius:8,space:1};
+const DEFAULT_TOKENS={ds:"",pair:"inter-fraunces",accent:"#ff7950",radius:8,space:1};
 let comp={v:1,tokens:{...DEFAULT_TOKENS},sections:[],imgcat:""};
 let selIdx=-1, viewport=1280;
 let hashTimer=null;
@@ -2705,8 +3000,15 @@ function trDraft(html){
 }
 function pageDoc(tokens,sections,forExport){
   if(typeof resetImg==="function") resetImg();
-  const T=PAIRS[tokens.pair]||PAIRS["inter-fraunces"];
-  const rad = tokens.radius>=999 ? "999px" : tokens.radius+"px";
+  // Sistema di design profondo (se impostato): governa font, superfici, tema, elevazione.
+  const sys = (tokens.ds && typeof dsById==="function") ? dsById(tokens.ds) : null;
+  const T = sys ? {head:sys.disp+",serif,sans-serif", body:sys.body+",sans-serif"} : (PAIRS[tokens.pair]||PAIRS["inter-fraunces"]);
+  const accent = sys ? sys.accent : tokens.accent;
+  const radNum = sys ? sys.radius : tokens.radius;
+  const rad = radNum>=999 ? "999px" : radNum+"px";
+  const radBtn = sys ? (sys.radiusBtn>=999?"999px":sys.radiusBtn+"px") : rad;
+  const spaceV = sys ? sys.space : tokens.space;
+  const trackV = sys ? sys.track : (tokens.track!=null?tokens.track:0);
   let anyFx=false;
   const body=sections.map((sec,i)=>{
     const s=SECTIONS.find(x=>x.id===sec.id); if(!s) return "";
@@ -2721,7 +3023,7 @@ function pageDoc(tokens,sections,forExport){
     }
     return html;
   }).join("");
-  const fonts='<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">';
+  const fonts='<link href="https://fonts.googleapis.com/css2?family='+((sys&&typeof DS_FONTS!=="undefined")?DS_FONTS:'Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif')+'&display=swap" rel="stylesheet">';
   const selCss=forExport?"":`
     .sec-wrap{position:relative;cursor:pointer}
     .sec-wrap::after{content:"";position:absolute;inset:0;border:2px solid transparent;pointer-events:none;transition:border-color .12s}
@@ -2750,17 +3052,28 @@ function pageDoc(tokens,sections,forExport){
     var par=els.filter(function(e){return /parallax/.test(e.getAttribute('data-fx')||'')});
     if(par.length){window.addEventListener('scroll',function(){var vh=innerHeight;par.forEach(function(e){var r=e.getBoundingClientRect();var p=(r.top+r.height/2-vh/2)/vh;var t=e.querySelector('section,nav,footer');if(t)t.style.transform='translateY('+(p*-24)+'px)';});},{passive:true});}
   })();<\/script>` : "";
-  return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${fonts}
+  const dsVars = sys ? Object.entries(sys.vars).map(([k,v])=>k+":"+v).join(";") : "";
+  const pageBG = sys ? "var(--ds-canvas)" : "#fff";
+  const pageFG = sys ? "var(--ds-body,var(--ds-ink))" : "#16161a";
+  const dispW = sys ? sys.dispW : 600;
+  const bodyW = sys ? sys.bodyW : 400;
+  return `<!doctype html><html lang="it" data-theme="${sys?sys.theme:'light'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${fonts}
     <style>
-      :root{--accent:${tokens.accent};--radius:${rad};--sp:${tokens.space};--head:${T.head};--body:${T.body};
-        --bord:${tokens.bord!=null?tokens.bord:1}px;--shadow:${tokens.shadow!=null?tokens.shadow:0};--track:${tokens.track!=null?tokens.track:0}em}
+      :root{--accent:${accent};--radius:${rad};--radius-btn:${radBtn};--sp:${spaceV};--head:${T.head};--body:${T.body};
+        --dispW:${dispW};--bodyW:${bodyW};
+        --bord:${sys?1:(tokens.bord!=null?tokens.bord:1)}px;--shadow:${sys?0:(tokens.shadow!=null?tokens.shadow:0)};--track:${trackV}em;
+        ${dsVars}}
       *{box-sizing:border-box;margin:0}
-      body{font-family:${T.body};color:#16161a;background:#fff;overflow-x:hidden}
+      body{font-family:${T.body};font-weight:var(--bodyW);color:${pageFG};background:${pageBG};overflow-x:hidden}
+      h1,h2,h3,h4{font-family:${T.head};font-weight:var(--dispW);letter-spacing:var(--track)}
       section,nav,footer{transition:background .35s ease,color .35s ease}
-      /* style tokens that morph with the A⇄B scrubber */
+      ${sys?`/* elevazione dal design system: card e superfici con radius/ombra coerenti */
+      section [style*="border-radius"]{box-shadow:var(--ds-elev,none)}
+      section a[style],section button[style]{border-radius:var(--radius-btn)!important}
+      `:`/* style tokens legacy (bozza senza system) */
       section [style*="border:1px"],nav,footer{border-width:var(--bord)!important}
-      h1,h2,h3{letter-spacing:var(--track)}
       section [style*="border-radius"]{box-shadow:0 calc(var(--shadow)*14px) calc(var(--shadow)*40px) rgba(0,0,0,calc(var(--shadow)*.18))}
+      `}
       /* --- scroll FX --- */
       [data-fx]{--fxo:1}
       [data-fx~="reveal"]{opacity:0;transform:translateY(28px);transition:opacity .7s var(--fxe,cubic-bezier(.22,.61,.36,1)),transform .7s var(--fxe,cubic-bezier(.22,.61,.36,1))}
@@ -3017,56 +3330,48 @@ function tokBaseSections(){
   return {sections:p.sections.map(s=>({id:s.id,axes:{...s.axes}})), cat:p.cat||"abstract", tokens:{...DEFAULT_TOKENS,...p.tokens}};
 }
 
-/* genera UNA proposta rielaborando la base */
-function makeProposal(base,idx,forceArch){
+/* genera UNA proposta: applica un DESIGN SYSTEM profondo alla base,
+   con leggere variazioni strutturali coerenti. */
+function makeProposal(base,idx,sys){
   const cat=base.cat||"abstract";
-  const archPool=CAT_ARCH[cat]||CAT_ARCH.abstract;
-  const arch=ARCHETYPES.find(a=>a.id===(forceArch||pick(archPool)))||pick(ARCHETYPES);
-  const style=styleFromArchetype(arch);
-  const tokens={pair:style.pair,accent:style.accent,radius:style.radius,space:style.space,bord:style.bord,shadow:style.shadow,track:style.track};
-  // struttura: parti dalle sezioni base, poi applica mutazioni
+  // struttura: parti dalle sezioni base, poi applica mutazioni leggere
   let secs=base.sections.map(s=>({id:s.id,axes:{...s.axes},fx:s.fx?{...s.fx}:undefined}));
-  const toneBias = style.shadow>0.5||["tech","bold","futuristic","brutal"].includes(arch.id) ? "dark" : (["luxury","editorial","corporate","swiss"].includes(arch.id)?"light":null);
-  // 1) sostituzione variante: per alcune sezioni, scegli un'altra dello stesso ruolo
-  secs=secs.map(sec=>{
+  // il tono delle sezioni segue il tema del sistema (dark→bande scure, light→chiare)
+  const toneBias = sys.theme==="dark" ? "dark" : "light";
+  secs=secs.map((sec,i)=>{
     const role=catOf(sec.id);
     const alts=sectionsByCat(role).filter(x=>x!==sec.id);
     let id=sec.id;
-    if(alts.length && Math.random()<0.5) id=pick(alts);        // cambia variante strutturale
-    return {id, axes:randomAxes(id,toneBias), fx:randomFx(id)};
+    if(alts.length && Math.random()<0.4) id=pick(alts);   // variante strutturale
+    // il tono: prevalentemente quello del tema, con qualche banda alternata
+    const ax=randomAxes(id,toneBias);
+    return {id, axes:ax, fx:randomFx(id)};
   });
-  // 2) riordino leggero del corpo centrale (mantiene nav in testa e footer in coda)
-  if(secs.length>3 && Math.random()<0.6){
+  // riordino leggero del corpo centrale
+  if(secs.length>3 && Math.random()<0.5){
     const head=secs[0], foot=secs[secs.length-1], mid=secs.slice(1,-1);
-    for(let i=mid.length-1;i>0;i--){ if(Math.random()<0.4){ const j=Math.floor(Math.random()*(i+1)); [mid[i],mid[j]]=[mid[j],mid[i]]; } }
+    for(let i=mid.length-1;i>0;i--){ if(Math.random()<0.35){ const j=Math.floor(Math.random()*(i+1)); [mid[i],mid[j]]=[mid[j],mid[i]]; } }
     secs=[head,...mid,foot];
   }
-  // 3) densità: a volte inserisci una sezione componente extra coerente
-  if(Math.random()<0.5){
-    const extras=["comp-scrollfx","comp-cards","comp-slider","comp-graphic","stats","testimonial","logowall"].filter(x=>SECTIONS.find(s=>s.id===x));
-    const ex=pick(extras);
-    const pos=Math.min(secs.length-1,Math.max(1,Math.floor(secs.length*0.5)));
-    secs.splice(pos,0,{id:ex,axes:randomAxes(ex,toneBias),fx:randomFx(ex)});
-  }
-  return { id:"prop-"+Date.now()+"-"+idx, name:arch.name, archId:arch.id, cat,
+  // tokens = il design system (pageDoc lo espande in variabili semantiche)
+  const tokens={ds:sys.id, accent:sys.accent, pair:"inter-inter", radius:sys.radius, space:sys.space, track:sys.track};
+  return { id:"prop-"+Date.now()+"-"+idx, name:sys.name, dsId:sys.id, cat, theme:sys.theme,
     tokens, sections:secs,
-    tags:[ tokens.radius>=16?"morbido":(tokens.radius<=2?"squadrato":"medio"),
-           tokens.space>=1.2?"arioso":(tokens.space<=0.95?"denso":"bilanciato"),
-           (PAIRS[tokens.pair]&&PAIRS[tokens.pair].label)||tokens.pair ] };
+    tags:[ sys.theme==="dark"?"scuro":"chiaro", sys.note.split("·")[0].trim().toLowerCase() ] };
 }
 
 let tokProps=[];       // proposte correnti
+let tokDsFilter="all"; // "all" | "light" | "dark"
 function generateProposals(n){
   const base=tokBaseSections();
-  const cat=base.cat||"abstract";
-  const pool=(CAT_ARCH[cat]||CAT_ARCH.abstract).slice();
+  let pool=DS.slice();
+  if(tokDsFilter!=="all") pool=pool.filter(d=>d.theme===tokDsFilter);
+  if(!pool.length) pool=DS.slice();
   const out=[];
-  // ciclo sul pool mescolato così gli archetipi non si ripetono finché il pool non finisce
   let bag=shuffle(pool.slice());
   for(let i=0;i<n;i++){
     if(!bag.length) bag=shuffle(pool.slice());
-    const archId=bag.pop();
-    out.push(makeProposal(base,i,archId));
+    out.push(makeProposal(base,i,bag.pop()));
   }
   return out;
 }
@@ -3076,6 +3381,14 @@ function tokInit(){
   const optDraft=document.createElement("option"); optDraft.value="__draft__"; optDraft.textContent="Bozza di BUILD attuale"; src.appendChild(optDraft);
   PRESETS.forEach(p=>{ const o=document.createElement("option"); o.value=p.id; o.textContent=p.name; src.appendChild(o); });
   src.addEventListener("change",()=>{ tokSourceId=src.value; });
+  const setF=(v)=>{ tokDsFilter=v;
+    $("#tokFAll").setAttribute("aria-pressed",String(v==="all"));
+    $("#tokFLight").setAttribute("aria-pressed",String(v==="light"));
+    $("#tokFDark").setAttribute("aria-pressed",String(v==="dark"));
+    tokProps=generateProposals(6); renderGallery(); showGallery(); };
+  $("#tokFAll").addEventListener("click",()=>setF("all"));
+  $("#tokFLight").addEventListener("click",()=>setF("light"));
+  $("#tokFDark").addEventListener("click",()=>setF("dark"));
   $("#tokGen").addEventListener("click",()=>{ tokProps=generateProposals(6); renderGallery(); showGallery(); });
   $("#tokMore").addEventListener("click",()=>{ tokProps=tokProps.concat(generateProposals(3)); renderGallery(); });
   $("#tokImgShuffle").addEventListener("click",()=>{ imgSeed(Math.floor(Math.random()*99999)+1); renderGallery(); if($("#tokDetail").style.display!=="none") renderDetail(_curProp); });
@@ -3110,13 +3423,14 @@ function openDetail(p){ _curProp=p; $("#tokGallery").style.display="none"; $("#t
 function renderDetail(p){
   if(!p) return;
   $("#tokDetailName").textContent=p.name;
-  $("#tokDetailMeta").textContent=p.sections.length+" sezioni · "+(p.cat||"—")+" · "+p.tags.join(" · ");
+  const sys=(typeof dsById==="function")?dsById(p.dsId):null;
+  $("#tokDetailMeta").textContent=(sys?sys.note+" · ":"")+p.sections.length+" sezioni";
   const f=$("#tokFrame"); f.srcdoc=pageDoc(p.tokens,p.sections,false);
   f.onload=()=>{ try{ f.style.height=f.contentDocument.body.scrollHeight+"px"; }catch(e){} };
 }
 function useProposal(p){
   comp.sections=p.sections.map(s=>({id:s.id,axes:{...s.axes},fx:s.fx?{...s.fx}:undefined}));
-  comp.tokens={...DEFAULT_TOKENS,...p.tokens};
+  comp.tokens={...DEFAULT_TOKENS,...p.tokens};   // include ds
   comp.imgcat=p.cat||"";
   selIdx=comp.sections.length?0:-1;
   showView("vBuild");
@@ -3231,13 +3545,13 @@ const M={
 "Navigazione":"Navigation","Hero":"Hero","Contenuto":"Content","Conversione":"Conversion","Chiusura":"Closing",
 "Componenti & FX":"Components & FX","Blocchi per settore":"Sector blocks",
 "⚡ Preset di pagina…":"⚡ Page presets…",
-"Tokens · generatore di proposte":"Tokens · proposal generator",
-"Proposte di pagina, infinite e coerenti":"Page proposals, infinite and coherent",
-"Parte dalla tua bozza di BUILD e ne genera varianti complete — struttura, ordine sezioni, layout, tipografia, stile e interazioni — sempre coerenti con la categoria. Sfoglia la galleria, apri quella che ti convince e portala in BUILD.":
- "It starts from your BUILD draft and generates complete variants — structure, section order, layout, typography, style and interactions — always coherent with the category. Browse the gallery, open the one you like and take it into BUILD.",
+"Tokens · sistemi di design":"Tokens · design systems",
+"Sistemi di design profondi, pronti da indossare":"Deep design systems, ready to wear",
+"Prende la tua bozza di BUILD e la veste con sistemi di design completi — palette semantica, coppie tipografiche, elevazione, tema chiaro/scuro — nello spirito di Refero. Sfoglia, apri quello che ti convince e portalo in BUILD.":
+ "It takes your BUILD draft and dresses it in complete design systems — semantic palette, type pairings, elevation, light/dark theme — in the spirit of Refero. Browse, open the one you like and take it into BUILD.",
+"Tutti":"All","Chiari":"Light","Scuri":"Dark","✨ Genera":"✨ Generate",
 "Sorgente":"Source","Da cosa partire":"What to start from","Bozza di BUILD attuale":"Current BUILD draft",
-"✨ Genera proposte":"✨ Generate proposals","＋ Altre":"＋ More","🔀 Immagini":"🔀 Images",
-"← Galleria":"← Gallery","✓ Usa in BUILD":"✓ Use in BUILD",
+"＋ Altre":"＋ More","🔀 Immagini":"🔀 Images","← Galleria":"← Gallery","✓ Usa in BUILD":"✓ Use in BUILD",
 "Nessuna proposta.":"No proposals.","Personalizzato":"Custom",
 "Swiss / Minimal":"Swiss / Minimal","Elegante / Luxury":"Elegant / Luxury",
 "Soft / Morbido":"Soft","Bold / Maximalist":"Bold / Maximalist","Tech / Neon":"Tech / Neon",
