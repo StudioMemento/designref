@@ -236,6 +236,8 @@
     color:var(--txt-2);padding:6px 12px;font-size:11px;cursor:pointer;
     transition:color .15s,border-color .15s,background .15s}
   .tbtn:hover{color:var(--accent);border-color:var(--accent-dim)}
+  .tbtn:disabled{opacity:.35;cursor:default;color:var(--txt-3);border-color:var(--line)}
+  .tbtn:disabled:hover{color:var(--txt-3);border-color:var(--line)}
   .tbtn.pri{border-color:var(--accent-dim);color:var(--accent)}
   .tbtn.pri:hover{background:#17130f}
   .tbtn.ghost{margin-left:auto}
@@ -513,8 +515,12 @@
             <button id="tokA" aria-pressed="true">Stile A</button>
             <button id="tokB" aria-pressed="false">Stile B</button>
           </div>
-          <button class="tbtn" id="tokDice" title="Genera uno stile casuale coerente con la categoria" style="margin-left:6px">🎲 Varia</button>
+          <button class="tbtn" id="tokDice" title="Cambia stile della direzione attiva (nuovo archetipo)" style="margin-left:6px">🎲 Varia</button>
+          <button class="tbtn" id="tokDiceBoth" title="Genera due stili diversi per A e B" style="margin-left:4px">🎲🎲 A+B</button>
+          <button class="tbtn" id="tokUndo" title="Torna allo stile precedente" style="margin-left:4px" disabled>↶</button>
+          <button class="tbtn" id="tokRedo" title="Rifai" disabled>↷</button>
           <button class="tbtn" id="tokImgShuffle" title="Rigenera le immagini" style="margin-left:4px">🔀 Img</button>
+          <span id="tokArchName" style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-left:10px"></span>
           <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
             <select class="pairsel" id="tokPairAB" style="width:auto" title="Coppia tipografica"></select>
             <div class="accent-row" id="tokAccentAB"></div>
@@ -2939,12 +2945,35 @@ function styleFromTokens(tk){
     radius:(tk.radius!=null?tk.radius:8), space:(tk.space!=null?tk.space:1),
     bord:1, shadow:0, track:0};
 }
-/* due direzioni predefinite, poi l'utente varia */
+/* due direzioni predefinite (archetipi distinti), poi l'utente varia */
 let tokState={
-  A:{pair:"inter-fraunces",accent:"#ff7950",radius:6,space:1,bord:1,shadow:0.15,track:0},
-  B:{pair:"space-inter",accent:"#3b82f6",radius:18,space:1.2,bord:2,shadow:0.9,track:0.02},
+  A:{arch:"editorial",archName:"Editorial",pair:"inter-fraunces",accent:"#ff7950",radius:4,space:1.2,bord:1,shadow:0.12,track:0.01},
+  B:{arch:"tech",archName:"Tech / Neon",pair:"space-inter",accent:"#7c5cff",radius:14,space:1,bord:0.5,shadow:0.7,track:0.01},
 };
 let tokActive="A", tokPos=0, tokBaseId="p-portfolio";
+/* --- cronologia stili A/B: undo/redo per tornare a una combinazione piaciuta --- */
+let tokHist=[], tokHistI=-1, _histLock=false;
+function snapshot(){ return JSON.stringify({A:tokState.A,B:tokState.B}); }
+function pushHistory(){
+  if(_histLock) return;
+  const snap=snapshot();
+  if(tokHist[tokHistI]===snap) return;           // niente doppioni
+  tokHist=tokHist.slice(0,tokHistI+1);           // taglia il "futuro" se avevo fatto undo
+  tokHist.push(snap); tokHistI=tokHist.length-1;
+  if(tokHist.length>60){ tokHist.shift(); tokHistI--; }  // cap
+  updateHistBtns();
+}
+function applySnapshot(snap){
+  const o=JSON.parse(snap); tokState.A={...o.A}; tokState.B={...o.B};
+  syncTokControls(); buildStyleRow(); tokRender();
+}
+function tokUndo(){ if(tokHistI>0){ tokHistI--; _histLock=true; applySnapshot(tokHist[tokHistI]); _histLock=false; updateHistBtns(); } }
+function tokRedo(){ if(tokHistI<tokHist.length-1){ tokHistI++; _histLock=true; applySnapshot(tokHist[tokHistI]); _histLock=false; updateHistBtns(); } }
+function updateHistBtns(){
+  const u=$("#tokUndo"), r=$("#tokRedo");
+  if(u) u.disabled = tokHistI<=0;
+  if(r) r.disabled = tokHistI>=tokHist.length-1;
+}
 /* le sezioni su cui si applica il morphing = quelle del preset base scelto */
 function tokSections(){
   const p=PRESETS.find(x=>x.id===tokBaseId);
@@ -2964,67 +2993,97 @@ function tokInit(){
   const base=$("#tokBase");
   PRESETS.forEach(p=>{ const o=document.createElement("option"); o.value=p.id; o.textContent=p.name; base.appendChild(o); });
   base.value=tokBaseId;
-  base.addEventListener("change",()=>{ tokBaseId=base.value; randomizeStyle("A"); randomizeStyle("B");
-    syncTokControls(); buildStyleRow(); tokRender(); });
+  base.addEventListener("change",()=>{ tokBaseId=base.value; tokRender(); });
   // font pair for active style
   const sel=$("#tokPairAB");
   TOK_FONTS.forEach(k=>{ const o=document.createElement("option"); o.value=k; o.textContent=PAIRS[k].label; sel.appendChild(o); });
-  sel.addEventListener("change",()=>{ tokState[tokActive].pair=sel.value; tokRender(); });
+  sel.addEventListener("change",()=>{ tokState[tokActive].pair=sel.value; tokState[tokActive].arch=""; tokState[tokActive].archName="Personalizzato"; pushHistory(); syncTokControls(); buildStyleRow(); tokRender(); });
   // accent for active style
   const acc=$("#tokAccentAB");
   ACCENTS.forEach(col=>{ const sw=document.createElement("button"); sw.className="swatch"; sw.style.background=col;
-    sw.addEventListener("click",()=>{ tokState[tokActive].accent=col; syncTokControls(); tokRender(); });
+    sw.addEventListener("click",()=>{ tokState[tokActive].accent=col; tokState[tokActive].arch=""; tokState[tokActive].archName="Personalizzato"; pushHistory(); syncTokControls(); tokRender(); });
     acc.appendChild(sw); });
   // A/B toggle
   $("#tokA").addEventListener("click",()=>{ tokActive="A"; setTokAB(); });
   $("#tokB").addEventListener("click",()=>{ tokActive="B"; setTokAB(); });
-  // randomize active style
+  // randomize active style — cambia archetipo
   $("#tokDice").addEventListener("click",()=>{ randomizeStyle(tokActive); syncTokControls(); buildStyleRow(); tokRender(); });
+  // randomizza ENTRAMBE le direzioni con due archetipi diversi
+  const dice2=$("#tokDiceBoth"); if(dice2) dice2.addEventListener("click",()=>{
+    _histLock=true; randomizeStyle("A"); randomizeStyle("B"); _histLock=false; pushHistory();
+    syncTokControls(); buildStyleRow(); tokRender(); });
+  // undo / redo
+  const u=$("#tokUndo"), rd=$("#tokRedo");
+  if(u) u.addEventListener("click",tokUndo);
+  if(rd) rd.addEventListener("click",tokRedo);
   const tokImg=$("#tokImgShuffle"); if(tokImg) tokImg.addEventListener("click",()=>{ imgSeed(Math.floor(Math.random()*99999)+1); tokRender(); });
   // scrubber
   $("#tokScrub").addEventListener("input",e=>{ tokPos=parseFloat(e.target.value); tokRender(); });
   buildStyleRow();
   setTokAB();
+  pushHistory();   // stato iniziale in cronologia
+  updateHistBtns();
 }
 /* DNA stilistico per categoria — vincola la casualità a restare coerente e premium.
    Ogni voce: range di radius/space/bord/shadow/track + set di font e accent adatti. */
-const CAT_DNA={
-  // hospitality: elegante, arioso, serif, ombre morbide, poco radius
-  room:      {rad:[0,2,4,6],     space:[1.1,1.35], bord:[0.5,1],   shadow:[0.1,0.4], track:[-0.01,0.01],
-              fonts:["instrument-inter","inter-fraunces"], acc:["#a88b5c","#8a9a5b","#b0784f","#16161a"]},
-  // ristorazione: caldo, deciso, contrasto, radius basso
-  food:      {rad:[0,2,6],       space:[1,1.2],    bord:[1,2],     shadow:[0.2,0.6], track:[-0.005,0.015],
-              fonts:["instrument-inter","inter-fraunces","inter-inter"], acc:["#c1543a","#d08a2c","#7a2e1e","#e0a030"]},
-  // e-commerce / product: pulito, griglie, radius medio, ombre leggere
-  product:   {rad:[6,10,14],     space:[0.9,1.05], bord:[0.5,1],   shadow:[0.1,0.4], track:[0,0.01],
-              fonts:["space-inter","inter-inter"], acc:["#3b82f6","#10b981","#7c5cff","#16161a"]},
-  // editorial / blog: sobrio, testuale, tracking curato
-  editorial: {rad:[0,4,8],       space:[1,1.25],   bord:[0.5,1],   shadow:[0,0.25], track:[-0.01,0.02],
-              fonts:["inter-fraunces","instrument-inter"], acc:["#ff7950","#16161a","#3b82f6"]},
-  // saas / tech: moderno, radius alto, accent vivi, ombre nette
-  tech:      {rad:[10,16,20,24], space:[0.95,1.1], bord:[0,1],     shadow:[0.3,0.9], track:[-0.005,0.01],
-              fonts:["space-inter","inter-inter"], acc:["#7c5cff","#3b82f6","#10b981","#ff0033"]},
-  // portfolio / agency: espressivo, contrasti, libertà maggiore
-  abstract:  {rad:[0,8,16,24],   space:[0.9,1.3],  bord:[0,1.5],   shadow:[0,0.8],   track:[-0.02,0.03],
-              fonts:["inter-fraunces","space-inter","instrument-inter","inter-inter"], acc:ACCENTS},
-  // player / media: immersivo, scuro, radius medio
-  landscape: {rad:[6,10,14],     space:[0.9,1.05], bord:[0,1],     shadow:[0.2,0.6], track:[0,0.01],
-              fonts:["inter-inter","space-inter"], acc:["#ff0033","#66c0f4","#ff7950","#7c5cff"]},
+/* ===================================================================
+   STYLE ARCHETYPES — personalità di design distinte e riconoscibili.
+   "Varia" pesca un archetipo DIVERSO ogni volta: cambia davvero stile,
+   non micro-varia lo stesso. Ogni archetipo è una combinazione completa.
+   =================================================================== */
+const ARCHETYPES=[
+  {id:"swiss",   name:"Swiss / Minimal",   radius:[0,3],   space:[1.05,1.2],  bord:[0.5,1], shadow:[0,0.1],  track:[-0.01,0.005], fonts:["inter-inter","space-inter"]},
+  {id:"editorial",name:"Editorial",        radius:[0,4],   space:[1.1,1.3],   bord:[0.5,1], shadow:[0,0.15], track:[-0.005,0.02], fonts:["inter-fraunces","instrument-inter"]},
+  {id:"luxury",  name:"Elegante / Luxury",  radius:[0,2],   space:[1.2,1.45],  bord:[0.5,1], shadow:[0.05,0.25],track:[0.01,0.05],  fonts:["instrument-inter","inter-fraunces"]},
+  {id:"soft",    name:"Soft / Morbido",     radius:[16,26], space:[1,1.2],     bord:[0,0.5], shadow:[0.4,0.8], track:[-0.01,0.01],  fonts:["inter-inter","space-inter"]},
+  {id:"bold",    name:"Bold / Maximalist",  radius:[0,6],   space:[0.85,1.05], bord:[2,3.5], shadow:[0.1,0.4], track:[-0.03,0.01],  fonts:["space-inter","inter-fraunces"]},
+  {id:"tech",    name:"Tech / Neon",        radius:[8,16],  space:[0.9,1.05],  bord:[0,1],   shadow:[0.5,1],   track:[-0.005,0.015],fonts:["space-inter","inter-inter"]},
+  {id:"playful", name:"Playful / Pop",      radius:[18,28], space:[0.95,1.15], bord:[1,2],   shadow:[0.2,0.6], track:[-0.01,0.02],  fonts:["space-inter","inter-inter"]},
+  {id:"brutal",  name:"Brutalist",          radius:[0,0],   space:[0.85,1],    bord:[2,4],   shadow:[0,0.05],  track:[-0.02,0.03],  fonts:["space-inter","inter-inter"]},
+  {id:"warm",    name:"Caldo / Artigianale",radius:[2,8],   space:[1.05,1.25], bord:[1,1.5], shadow:[0.1,0.35],track:[-0.005,0.015],fonts:["instrument-inter","inter-fraunces","inter-inter"]},
+  {id:"corporate",name:"Corporate / Clean", radius:[6,10],  space:[1,1.15],    bord:[0.5,1], shadow:[0.1,0.3], track:[-0.005,0.01], fonts:["inter-inter","space-inter"]},
+  {id:"futuristic",name:"Futuristico",      radius:[10,20], space:[0.9,1.1],   bord:[0,1.5], shadow:[0.3,0.9], track:[0,0.03],      fonts:["space-inter","inter-inter"]},
+  {id:"vintage", name:"Vintage / Retrò",    radius:[2,6],   space:[1.05,1.25], bord:[1.5,2.5],shadow:[0.1,0.3],track:[0.01,0.04],   fonts:["inter-fraunces","instrument-inter"]},
+];
+/* accent per archetipo — set ampi ma coerenti col mood */
+const ARCH_ACC={
+  swiss:["#16161a","#e0473f","#2f6fed","#111111"],
+  editorial:["#ff7950","#16161a","#3b82f6","#b0784f"],
+  luxury:["#a88b5c","#1a1a1a","#7a2e1e","#3a4a3f","#8a6d3b"],
+  soft:["#7c5cff","#f59ac0","#66c0f4","#10b981","#ff9f7a"],
+  bold:["#ff0033","#ffcc00","#16161a","#7c5cff","#00e0a0"],
+  tech:["#00e0ff","#7c5cff","#ff0055","#00ff88","#3b82f6"],
+  playful:["#ff6b6b","#ffd93d","#6bcbef","#a06bff","#ff8fab"],
+  brutal:["#000000","#ff0000","#0000ff","#ffcc00"],
+  warm:["#c1543a","#d08a2c","#7a2e1e","#e0a030","#a05a2c"],
+  corporate:["#2f6fed","#0a58ca","#16161a","#10b981","#475569"],
+  futuristic:["#00e0ff","#7c5cff","#ff2d78","#0af0c0"],
+  vintage:["#b0784f","#7a5c3a","#c1543a","#5a6c57","#8a6d3b"],
 };
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-function inRange([a,b]){ return a+Math.random()*(b-a); }
-function randomizeStyle(which){
-  const s=tokState[which];
-  const cat=tokPageCat(), dna=CAT_DNA[cat]||CAT_DNA.abstract;
-  s.radius=pick(dna.rad);
-  s.space=+inRange(dna.space).toFixed(2);
-  s.bord=pick(dna.bord);
-  s.shadow=+inRange(dna.shadow).toFixed(2);
-  s.track=+inRange(dna.track).toFixed(3);
-  s.pair=pick(dna.fonts);
-  s.accent=pick(dna.acc);
+function inRange(a){ return a[0]+Math.random()*(a[1]-a[0]); }
+function styleFromArchetype(A){
+  return {
+    arch:A.id, archName:A.name,
+    pair:pick(A.fonts),
+    accent:pick(ARCH_ACC[A.id]||ACCENTS),
+    radius:Math.round(inRange(A.radius)),
+    space:+inRange(A.space).toFixed(2),
+    bord:+inRange(A.bord).toFixed(1),
+    shadow:+inRange(A.shadow).toFixed(2),
+    track:+inRange(A.track).toFixed(3),
+  };
 }
-/* categoria immagine/DNA della pagina base scelta in TOKENS */
+/* randomizza: sceglie un archetipo DIVERSO da quello attuale della direzione */
+function randomizeStyle(which){
+  const cur=tokState[which]&&tokState[which].arch;
+  let pool=ARCHETYPES.filter(a=>a.id!==cur);
+  const A=pick(pool.length?pool:ARCHETYPES);
+  const st=styleFromArchetype(A);
+  Object.assign(tokState[which],st);
+  pushHistory();
+}
+/* categoria immagine della pagina base scelta in TOKENS (solo per le immagini) */
 function tokPageCat(){ const p=PRESETS.find(x=>x.id===tokBaseId); return (p&&p.cat)||"abstract"; }
 function buildStyleRow(){
   const row=$("#tokStyleRow"); if(!row) return;
@@ -3036,7 +3095,9 @@ function buildStyleRow(){
     lab.innerHTML=d.label+' <b>'+fmtDim(s[d.id],d)+'</b>';
     const r=document.createElement("input"); r.type="range"; r.min=d.min; r.max=d.max; r.step=d.step; r.value=s[d.id];
     r.addEventListener("input",()=>{ tokState[tokActive][d.id]=parseFloat(r.value);
+      tokState[tokActive].arch=""; tokState[tokActive].archName="Personalizzato";
       lab.querySelector("b").textContent=fmtDim(parseFloat(r.value),d); tokRender(); });
+    r.addEventListener("change",()=>{ pushHistory(); });
     wrap.appendChild(lab); wrap.appendChild(r); row.appendChild(wrap);
   });
 }
@@ -3050,6 +3111,7 @@ function syncTokControls(){
   const s=tokState[tokActive];
   $("#tokPairAB").value=s.pair;
   $$("#tokAccentAB .swatch").forEach(sw=>sw.setAttribute("aria-pressed",String(rgbToHex(sw.style.background)===s.accent)));
+  const nm=$("#tokArchName"); if(nm) nm.textContent=(tokActive+" · "+(s.archName||"Personalizzato"));
 }
 function lerp(a,b,t){ return a+(b-a)*t; }
 function hexRGB(h){ h=rgbToHex(h).replace("#",""); return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; }
@@ -3195,7 +3257,11 @@ const M={
 "Parti da un preset, gioca fino a convincerti":"Start from a preset, play until it clicks",
 "Scegli una pagina di partenza, fissa due direzioni stilistiche (A e B) e trascina lo scrubber: radius, spaziatura, bordi, ombre, spaziatura tra lettere, coppia tipografica e micro-layout si trasformano con continuità. Ti fermi dove ti convince.":
  "Pick a starting page, set two stylistic directions (A and B) and drag the scrubber: radius, spacing, borders, shadows, letter-spacing, type pairing and micro-layout transform continuously. Stop where it convinces you.",
-"Pagina":"Page","Stile A":"Style A","Stile B":"Style B","🎲 Varia":"🎲 Vary",
+"Pagina":"Page","Stile A":"Style A","Stile B":"Style B","🎲 Varia":"🎲 Vary","🎲🎲 A+B":"🎲🎲 A+B","🔀 Img":"🔀 Img","Personalizzato":"Custom",
+"Swiss / Minimal":"Swiss / Minimal","Elegante / Luxury":"Elegant / Luxury",
+"Soft / Morbido":"Soft","Bold / Maximalist":"Bold / Maximalist","Tech / Neon":"Tech / Neon",
+"Playful / Pop":"Playful / Pop","Brutalist":"Brutalist","Caldo / Artigianale":"Warm / Crafted",
+"Corporate / Clean":"Corporate / Clean","Futuristico":"Futuristic","Vintage / Retrò":"Vintage / Retro",
 "Radius":"Radius","Spaziatura":"Spacing","Bordi":"Borders","Ombre":"Shadows","Tracking":"Tracking",
 "Lo scrubber interpola tutto con continuità: numeri (radius, spaziatura, bordi, ombre, tracking) linearmente, i font con un crossfade a metà corsa. Nessuno scatto.":
  "The scrubber interpolates everything continuously: numbers (radius, spacing, borders, shadows, tracking) linearly, fonts with a mid-run crossfade. No jumps.",
